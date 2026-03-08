@@ -101,7 +101,7 @@ void addNeighbors(const std::vector<uvgutils::VectorN<double, 3>>& normals, cons
 }
 }  // anonymous namespace
 
-void orientNormals(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, std::vector<uvgutils::VectorN<double, 3>>& normals,
+void orientNormals(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<uvgutils::VectorN<double, 3>>& normals,
                    const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                    const std::vector<std::vector<size_t>>& pointsNNList) {
     uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("PATCH GENERATION",

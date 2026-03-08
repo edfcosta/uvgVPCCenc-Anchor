@@ -39,6 +39,7 @@
 #include "bitstream_util.hpp"
 #include "utils/parameters.hpp"
 #include "uvgvpcc/uvgvpcc.hpp"
+#include "frameContext.hpp"
 
 /* Atlas context is used to hold the atlas data (inside V3C_AD unit) of a single GOF */
 class atlas_context {
@@ -84,9 +85,9 @@ class atlas_context {
     atlas_frame_tile_information create_atlas_frame_tile_information() const;
     atlas_tile_header create_atlas_tile_header(size_t frameIndex, size_t tileIndex, const uvgvpcc_enc::Parameters& paramUVG) const;
     atlas_tile_data_unit create_atlas_tile_data_unit(const uvgvpcc_enc::Parameters& paramUVG,
-                                                     const std::shared_ptr<uvgvpcc_enc::Frame>& frameUVG, atlas_tile_header& ath) const;
+                                                     const std::shared_ptr<uvgvpcc_enc::FrameContext>& frameUVG, atlas_tile_header& ath) const;
     atlas_tile_layer_rbsp create_atlas_tile_layer_rbsp(size_t frameIndex, size_t tileIndex, const uvgvpcc_enc::Parameters& paramUVG,
-                                                       const std::shared_ptr<uvgvpcc_enc::Frame>& frameUVG);
+                                                       const std::shared_ptr<uvgvpcc_enc::FrameContext>& frameUVG);
 
     // -------------- Functions to write data structures to bitstream --------------
     static void write_nal_hdr(bitstream_t* stream, const uint8_t nal_type, const uint8_t nal_layer_id, const uint8_t nal_temporal_id_plus1);

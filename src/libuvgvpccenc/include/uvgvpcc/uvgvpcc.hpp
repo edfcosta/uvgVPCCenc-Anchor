@@ -44,9 +44,9 @@
 #include <string>
 #include <vector>
 
-#include "../utils/parameters.hpp"
 #include "../utils/constants.hpp"
 #include "uvgutils/utils.hpp"
+#include "uvgformat/uvgFrame.hpp"
 // #include "../utils/commonMemory.hpp"
 
 /// \file Main file of the uvgVPCCenc library that defines the main structures (GOF, frame, patch) and the API.
@@ -169,48 +169,11 @@ struct Patch {
     }
 };
 
-struct GOF;
-
-// TODO(lf): Avid using both constant sized and dynamic sized memory member within the same struct.
-struct Frame {
-    size_t frameId;      // aka relative index (0 if first encoded frame)
-    size_t gofId;
-    size_t frameNumber;  // aka number from the input frame file name (TODO(lf): correct)
-    std::weak_ptr<GOF> gof;
-    std::shared_ptr<std::counting_semaphore<UINT16_MAX>> conccurentFrameSem;
-
-    std::string pointCloudPath;
-
-    size_t pointCount;
-    std::vector<uvgutils::VectorN<typeGeometryInput, 3>> pointsGeometry;
-    std::vector<uvgutils::VectorN<uint8_t, 3>> pointsAttribute;
-
-    size_t mapHeight = 0;
-    size_t mapHeightDS = 0;
-
-    Frame(const size_t& frameId, const size_t& frameNumber, const std::string& pointCloudPath)
-        : frameId(frameId), frameNumber(frameNumber), pointCloudPath(pointCloudPath), pointCount(0), mapHeight(p_->minimumMapHeight), mapHeightDS(p_->minimumMapHeight / p_->occupancyMapDSResolution),patchList(nullptr) {}
-    ~Frame() {
-        if (conccurentFrameSem) {
-            conccurentFrameSem->release();
-        }
-    };
-    void printInfo() const;
-
-    // lf: Centralized memory handling //
-    std::vector<Patch>* patchList;
-
-    std::vector<uint8_t>* occupancyMap;    // (boolean vector)
-    std::vector<uint8_t>* occupancyMapDS;  // Down-scaled occupancy map of the frame (boolean vector)
-    std::vector<uint8_t>* geometryMapL1;  // first layer
-    std::vector<uint8_t>* geometryMapL2;  // second layer
-    std::vector<uint8_t>* attributeMapL1;  // Store the three channels continuously (all R, then all G, than all B)
-    std::vector<uint8_t>* attributeMapL2;    
-
-};
+// Forward declaration for internal encoder frame state (defined in frameContext.hpp).
+struct FrameContext;
 
 struct GOF {
-    std::vector<std::shared_ptr<Frame>> frames;
+    std::vector<std::shared_ptr<FrameContext>> frames;
     size_t nbFrames;
     size_t gofId;
 
@@ -231,7 +194,7 @@ struct GOF {
     std::array<std::vector<uint8_t>, MAX_GOF_SIZE>* frameAttributeMapsL2;
 
     GOF(const size_t& gofId);
-    void setFrameMemoryPtrs(std::shared_ptr<Frame>& frame);
+    void setFrameMemoryPtrs(std::shared_ptr<FrameContext>& frame);
     ~GOF();
 };
 
@@ -259,7 +222,7 @@ struct v3c_unit_stream {
 
 void initializeEncoder();
 void setParameter(const std::string& parameterName, const std::string& parameterValue);
-void encodeFrame(std::shared_ptr<Frame>& frame, v3c_unit_stream* output);
+void encodeFrame(std::shared_ptr<uvgformat::uvgFrame> frame, v3c_unit_stream* output);
 void emptyFrameQueue();
 void stopEncoder();
 

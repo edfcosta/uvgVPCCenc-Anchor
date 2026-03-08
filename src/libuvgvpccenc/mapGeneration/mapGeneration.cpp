@@ -118,7 +118,7 @@ void occupancyMapDownscaling(const size_t& mapHeight, std::vector<uint8_t>& occu
 }
 
 template <bool doubleLayer, bool axisSwap>
-void writePatchT(const uvgvpcc_enc::Patch& patch, const size_t& imageSize, const std::shared_ptr<uvgvpcc_enc::Frame>& frame) {
+void writePatchT(const uvgvpcc_enc::Patch& patch, const size_t& imageSize, const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame) {
     const size_t patchWidth = patch.widthInPixel_;
     const size_t patchHeight = patch.heightInPixel_;
     const size_t omX = patch.omDSPosX_ * p_->occupancyMapDSResolution;
@@ -166,7 +166,7 @@ void writePatchT(const uvgvpcc_enc::Patch& patch, const size_t& imageSize, const
     }
 }
 
-void writePatches(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, const size_t& gofMapsHeight) {
+void writePatches(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const size_t& gofMapsHeight) {
     const size_t imageSize = p_->mapWidth * gofMapsHeight;
 
     if (p_->doubleLayer) {
@@ -192,7 +192,7 @@ void writePatches(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, const size_t
     }
 }
 
-void allocateMaps(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, const size_t& gofMapsHeight) {
+void allocateMaps(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const size_t& gofMapsHeight) {
     // Notice that before this operation, the dimension of each frame occupancy map can be different. Thus, this OM resizing operation both
     // makes all GOF occupancy maps dimension uniform and convert them to YUV420. FYI, U and V images of the occupancy and geometry maps are
     // empty/not used by the decoder/do not cary any usefull information.
@@ -445,7 +445,7 @@ void RGB444toYUV420TMC2(std::vector<uint8_t>& img, const std::size_t& width, con
 
 }  // Anonymous namespace
 
-void MapGeneration::generateFrameMaps(const std::shared_ptr<uvgvpcc_enc::Frame>& frame) {
+void MapGeneration::generateFrameMaps(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame) {
     allocateMaps(frame, frame->mapHeight);
 
     // TODO(lf): occupancy map downscaling can be done after write patches (or in parallel) maybe
@@ -523,12 +523,12 @@ void MapGeneration::initGOFMapGeneration(const std::shared_ptr<uvgvpcc_enc::GOF>
         return;
     }
 
-    for (const std::shared_ptr<uvgvpcc_enc::Frame>& frame : gof->frames) {
+    for (const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame : gof->frames) {
         gof->mapHeightDSGOF = std::max(gof->mapHeightDSGOF, frame->mapHeightDS);
     }
     gof->mapHeightDSGOF = uvgutils::roundUp(gof->mapHeightDSGOF, static_cast<size_t>(8));
     gof->mapHeightGOF = gof->mapHeightDSGOF * p_->occupancyMapDSResolution;
-    for (const std::shared_ptr<uvgvpcc_enc::Frame>& frame : gof->frames) {
+    for (const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame : gof->frames) {
         frame->mapHeight = gof->mapHeightGOF;
     }
     

@@ -128,7 +128,7 @@ inline bool findNeighborSeed(const uvgutils::VectorN<typeGeometryInput, 3>& ptSe
 }
 
 template <typename keyType>
-inline void createConnectedComponent(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, const size_t& seedIndex,
+inline void createConnectedComponent(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const size_t& seedIndex,
                                      std::vector<bool>& pointIsInAPatch, ConnectedComponent& cc,
                                      robin_hood::unordered_map<keyType, size_t>& mapLocation1D,
                                      const uvgutils::VectorN<typeGeometryInput, 3>& ptSeed,
@@ -221,7 +221,7 @@ constexpr bool getPatchProjectionMode() {
 
 template <size_t NormalAxis, size_t TangentAxis, size_t BitangentAxis, bool ProjectionMode>
 inline void setInitialPatchL1(Patch& patch, const ConnectedComponent& cc, std::vector<typeGeometryInput>& peakPerBlock,
-                              const std::shared_ptr<uvgvpcc_enc::Frame>& frame) {
+                              const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame) {
     const size_t widthInPixel = patch.widthInPixel_;
     const size_t widthInOccBlk = patch.widthInOccBlk_;
     const size_t occRes = p_->occupancyMapDSResolution;  // TODO(lf) create an associated log parameter for occupancyMapDSResolution
@@ -322,9 +322,11 @@ inline void setPatchL1(Patch& patch, const int& minD, const std::vector<typeGeom
 }
 
 template <typename keyType, size_t Ppi, bool DoubleLayer>
-inline void finalizePatch(const ConnectedComponent& cc, const std::shared_ptr<uvgvpcc_enc::Frame>& frame, Patch& patch,
+inline void finalizePatch(const ConnectedComponent& cc, const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, Patch& patch,
                           robin_hood::unordered_map<keyType, size_t>& mapLocation1D, std::vector<bool>& pointIsInAPatch,
                           const typeGeometryInput& minD, robin_hood::unordered_set<keyType>& resamplePointSetLocation1D) {
+                          robin_hood::unordered_map<size_t, size_t>& mapLocation1D, std::vector<bool>& pointIsInAPatch,
+                          const typeGeometryInput& minD, robin_hood::unordered_set<size_t>& resamplePointSetLocation1D) {
     constexpr size_t normalAxis = getPatchNormalAxis<Ppi>();
     constexpr size_t tangentAxis = getPatchTangentAxis<Ppi>();
     constexpr size_t bitangentAxis = getPatchBitangentAxis<Ppi>();
@@ -408,7 +410,7 @@ inline void finalizePatch(const ConnectedComponent& cc, const std::shared_ptr<uv
 }
 
 template <typename keyType,size_t Ppi>
-inline void createPatch(Patch& patch, const ConnectedComponent& cc, const std::shared_ptr<uvgvpcc_enc::Frame>& frame,
+inline void createPatch(Patch& patch, const ConnectedComponent& cc, const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,
                         std::vector<bool>& pointIsInAPatch, robin_hood::unordered_map<keyType, size_t>& mapLocation1D,
                         robin_hood::unordered_set<keyType>& resamplePointSetLocation1D,
                         std::vector<typeGeometryInput>& sharedPeakPerBlock) {
@@ -461,7 +463,7 @@ inline void createPatch(Patch& patch, const ConnectedComponent& cc, const std::s
 
 template <typename keyType, bool FirstIteration>
 inline void createConnectedComponents(std::vector<bool>& pointIsInAPatch, std::vector<bool>& pointCanBeASeed,
-                                      const std::shared_ptr<uvgvpcc_enc::Frame>& frame,
+                                      const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,
                                       const robin_hood::unordered_set<keyType>& resamplePointSetLocation1D,
                                       const std::vector<size_t>& pointsPPIs,
                                       std::array<robin_hood::unordered_map<keyType, size_t>, 6>& mapList,
@@ -494,7 +496,7 @@ inline void createConnectedComponents(std::vector<bool>& pointIsInAPatch, std::v
 }  // Anonymous namespace
 
 template<typename keyType>
-void PatchSegmentation::patchSegmentation(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, const std::vector<size_t>& pointsPPIs) {
+void PatchSegmentation::patchSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const std::vector<size_t>& pointsPPIs) {
     uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("PATCH GENERATION",
                                                      "Patch segmentation of frame " + std::to_string(frame->frameId) + "\n");
 
@@ -624,17 +626,17 @@ void PatchSegmentation::patchSegmentation(const std::shared_ptr<uvgvpcc_enc::Fra
 }
 
 template void PatchSegmentation::patchSegmentation<uint64_t>(
-    const std::shared_ptr<uvgvpcc_enc::Frame>&,
+    const std::shared_ptr<uvgvpcc_enc::FrameContext>&,
     const std::vector<size_t>&
 );
 
 
 template void PatchSegmentation::patchSegmentation<uint32_t>(
-    const std::shared_ptr<uvgvpcc_enc::Frame>&,
+    const std::shared_ptr<uvgvpcc_enc::FrameContext>&,
     const std::vector<size_t>&
 );
 
 template void PatchSegmentation::patchSegmentation<uint16_t>(
-    const std::shared_ptr<uvgvpcc_enc::Frame>&,
+    const std::shared_ptr<uvgvpcc_enc::FrameContext>&,
     const std::vector<size_t>&
 );

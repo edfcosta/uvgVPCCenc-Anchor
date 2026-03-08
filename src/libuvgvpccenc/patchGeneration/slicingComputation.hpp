@@ -35,6 +35,7 @@
 #pragma once
 
 #include "uvgvpcc/uvgvpcc.hpp"
+#include "frameContext.hpp"
 
 using namespace uvgvpcc_enc;
 using namespace std;
@@ -42,7 +43,8 @@ using namespace std;
 namespace slicingComputation {
 /* Global function of the slicing algorithm */
 template<typename indexType>
-void ppiAssignationSlicing(const std::shared_ptr<uvgvpcc_enc::Frame>& frame,
+void ppiAssignationSlicing(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,
+
                            const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry, std::vector<size_t>& pointPPIs);
 
 }  // namespace slicingComputation

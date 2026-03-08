@@ -40,6 +40,7 @@
 #include "utils/constants.hpp"
 #include "uvgutils/utils.hpp"
 #include "uvgvpcc/uvgvpcc.hpp"
+#include "frameContext.hpp"
 
 using namespace uvgvpcc_enc;
 
@@ -70,8 +71,8 @@ class PPISegmenter {
     PPISegmenter(const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                  const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals);
 
-    void initialSegmentation(const std::shared_ptr<uvgvpcc_enc::Frame>& frame,std::vector<size_t>& pointsPPIs, const size_t& frameId);
-    void refineSegmentation(const std::shared_ptr<uvgvpcc_enc::Frame>& frame,std::vector<size_t>& pointsPPIs, const size_t& frameId);
+    void initialSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,std::vector<size_t>& pointsPPIs, const size_t& frameId);
+    void refineSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,std::vector<size_t>& pointsPPIs, const size_t& frameId);
 
    private:
     static void voxelizationWithBitArray(const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& inputPointsGeometry,

@@ -719,7 +719,7 @@ void createSlices(const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& po
 }
 
 template <const std::array<size_t, 2>& axis>
-void createTempPointCloudForSlicingExportation(const std::shared_ptr<Frame>& frame,
+void createTempPointCloudForSlicingExportation(const std::shared_ptr<FrameContext>& frame,
                                                const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry) {
     std::vector<uvgutils::VectorN<uint8_t, 3>> attributes(pointsGeometry.size());
     typeGeometryInput currentAxisLevel = {};
@@ -875,7 +875,7 @@ inline size_t getUndefinedParentPpi(const std::vector<size_t>& pointPPIs, const 
 
 // TODO(lf): in the end handle all memory swap etc...
 template<typename indexType>
-void finalPPIAttributionFastPreset(const std::shared_ptr<uvgvpcc_enc::Frame>& frame,
+void finalPPIAttributionFastPreset(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,
                                    const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                    const std::vector<PPI>& pointPPIsX, const std::vector<PPI>& pointPPIsY, const std::vector<PPI>& pointPPIsZ,
                                    const robin_hood::unordered_map<indexType, size_t>& childToParentX,
@@ -989,7 +989,7 @@ void finalPPIAttributionFastPreset(const std::shared_ptr<uvgvpcc_enc::Frame>& fr
 }
 
 template<typename indexType>
-void finalPPIAttributionSlowPreset(const std::shared_ptr<uvgvpcc_enc::Frame>& frame,
+void finalPPIAttributionSlowPreset(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,
                                    const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                    const std::vector<PPI>& pointPPIsX, const std::vector<PPI>& pointPPIsY, const std::vector<PPI>& pointPPIsZ,
                                    const robin_hood::unordered_map<indexType, size_t>& childToParentX,
@@ -1070,7 +1070,7 @@ void finalPPIAttributionSlowPreset(const std::shared_ptr<uvgvpcc_enc::Frame>& fr
 }  // anonymous namespace
 
 template<typename indexType>
-void ppiAssignationSlicing(const std::shared_ptr<uvgvpcc_enc::Frame>& frame,
+void ppiAssignationSlicing(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,
                            const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry, std::vector<size_t>& pointPPIs) {
     // Create the 2D slices for each axis.
     const size_t nbMaxSlices = (1U << p_->geoBitDepthVoxelized);
@@ -1113,8 +1113,8 @@ void ppiAssignationSlicing(const std::shared_ptr<uvgvpcc_enc::Frame>& frame,
     }
 }
 
-template void ppiAssignationSlicing<uint16_t>(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry, std::vector<size_t>& pointPPIs);
-template void ppiAssignationSlicing<uint32_t>(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry, std::vector<size_t>& pointPPIs);
-template void ppiAssignationSlicing<uint64_t>(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry, std::vector<size_t>& pointPPIs);
+template void ppiAssignationSlicing<uint16_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry, std::vector<size_t>& pointPPIs);
+template void ppiAssignationSlicing<uint32_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry, std::vector<size_t>& pointPPIs);
+template void ppiAssignationSlicing<uint64_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry, std::vector<size_t>& pointPPIs);
 
 }  // namespace slicingComputation

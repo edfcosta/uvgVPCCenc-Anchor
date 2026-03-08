@@ -55,9 +55,8 @@
 #include <utility>
 #include <vector>
 
-#include "../utils/constants.hpp"
 #include "cli.hpp"
-#include "extras/miniply.h"
+#include "uvgformat/plyLoader.hpp"
 #include "uvgutils/log.hpp"
 #include "uvgutils/utils.hpp"
 #include "uvgvpcc/uvgvpcc.hpp"
@@ -86,10 +85,10 @@ struct input_handler_args {
     const cli::opts_t& opts;
 
     // Picture and thread status passed from input thread to main thread.
-    std::shared_ptr<uvgvpcc_enc::Frame> frame_in;
+    std::shared_ptr<uvgformat::uvgFrame> frame_in;
 
     Retval retval;
-    input_handler_args(const cli::opts_t& opts, std::shared_ptr<uvgvpcc_enc::Frame> frame, Retval retval)
+    input_handler_args(const cli::opts_t& opts, std::shared_ptr<uvgformat::uvgFrame> frame, Retval retval)
         : opts(opts), frame_in(std::move(frame)), retval(retval) {}
 };
 
@@ -108,90 +107,6 @@ void create_bytes(uint64_t value, char* dst, size_t len) {
     }
 }
 
-/// @brief Simple wrapper for the miniply library for parsing a .ply file.
-/// @param frame
-void loadFrameFromPlyFile(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, const size_t& geoBitDepthInput) {
-    // uvgVPCCenc currently support only geometry of type unsigned int
-    uvgutils::Logger::log<uvgutils::LogLevel::TRACE>(
-        "APPLICATION", "Loading frame " + std::to_string(frame->frameId) + " from " + frame->pointCloudPath + "\n");
-
-    if (!std::filesystem::is_regular_file(frame->pointCloudPath)) {
-        throw std::runtime_error("\nThis path does not exist: " + frame->pointCloudPath);
-    }
-
-    miniply::PLYReader reader(frame->pointCloudPath.c_str());
-    if (!reader.valid()) {
-        throw std::runtime_error("\nThe miniply reader failed to open " + frame->pointCloudPath);
-    }
-
-    // In a PLY file, an 'element' is a section of the file (it can be 'vertex' which list all the vertices, 'face' when dealing with
-    // polygones etc.)
-    bool vertexElementFound = false;
-    while (reader.has_element()) {
-        if (reader.element_is(miniply::kPLYVertexElement)) {
-            vertexElementFound = true;
-            break;  // Ensure that the current element is the vertex element for what follow
-        }
-        reader.next_element();
-    }
-
-    if (!vertexElementFound) {
-        throw std::runtime_error("miniply : No vertex element (miniply::kPLYVertexElement) was found in this file : " +
-                                 frame->pointCloudPath);
-    }
-
-    if (!reader.load_element()) {
-        throw std::runtime_error("miniply : Vertex element did not load correctly (file: " + frame->pointCloudPath + ")");
-    }
-
-    std::array<uint32_t, 3> indicesPos{};  // Indices of position properties in the vertex line
-    if (!reader.find_pos(indicesPos.data())) {
-        throw std::runtime_error(
-            "miniply : Position properties (x,y,z) were not located in the vertex element (file: " + frame->pointCloudPath + ")");
-    }
-
-    std::array<uint32_t, 3> indicesCol{};  // Indices of color properties in the vertex line
-    if (!reader.find_color(indicesCol.data())) {
-        throw std::runtime_error("miniply : Color properties (r,g,b or red,green,blue) were not located in the vertex element (file: " +
-                                 frame->pointCloudPath + ")");
-    }
-
-    const size_t vertexCount = reader.element()->count;
-    frame->pointsGeometry.resize(vertexCount);
-    frame->pointsAttribute.resize(vertexCount);
-
-    reader.extract_properties(indicesPos.data(), 3, miniply::PLYPropertyType::UShort, frame->pointsGeometry.data());
-    reader.extract_properties(indicesCol.data(), 3, miniply::PLYPropertyType::UChar, frame->pointsAttribute.data());
-    frame->printInfo();
-
-    // Check if the point coordinates respect the voxel size
-    const bool isCompliant = !std::any_of(
-        frame->pointsGeometry.begin(), frame->pointsGeometry.end(), [geoBitDepthInput](const uvgutils::VectorN<uvgvpcc_enc::typeGeometryInput, 3>& point) {
-            return (point[0] >> geoBitDepthInput) | (point[1] >> geoBitDepthInput) | (point[2] >> geoBitDepthInput);
-        });
-
-    if (!isCompliant) {
-        uvgutils::Logger::log<uvgutils::LogLevel::ERROR>(
-            "APPLICATION",
-            "Frame " + std::to_string(frame->frameId) + " from " + frame->pointCloudPath +
-                " contains at least one point which does not respect the input voxel size (uvgvpcc_enc::p_->geoBitDepthInput = " +
-                std::to_string(geoBitDepthInput) + "). Maximum value is 2^" + std::to_string(geoBitDepthInput) +
-                "-1. All faulty points will not be processed.\n");
-        std::vector<uvgutils::VectorN<uvgvpcc_enc::typeGeometryInput, 3>> pointsGeometryTmp;
-        std::vector<uvgutils::VectorN<uint8_t, 3>> pointsAttributeTmp;
-        pointsGeometryTmp.reserve(frame->pointsGeometry.size());
-        pointsAttributeTmp.reserve(frame->pointsGeometry.size());
-
-        for (size_t pointIndex = 0; pointIndex < frame->pointsGeometry.size(); ++pointIndex) {
-            const auto& point = frame->pointsGeometry[pointIndex];
-            if ((point[0] >> geoBitDepthInput) | (point[1] >> geoBitDepthInput) | (point[2] >> geoBitDepthInput)) continue;
-            pointsGeometryTmp.emplace_back(point);
-            pointsAttributeTmp.emplace_back(frame->pointsAttribute[pointIndex]);
-        }
-        frame->pointsGeometry.swap(pointsGeometryTmp);
-        frame->pointsAttribute.swap(pointsAttributeTmp);
-    }
-}
 
 /// @brief Application thread reading the input .ply files.
 /// @param args
@@ -227,14 +142,14 @@ void inputReadThread(const std::shared_ptr<input_handler_args>& args) {
                                                              "Error occurred while formatting string storing the point cloud path.\n");
             returnValue = Retval::Failure;
         }
-        auto frame = std::make_shared<uvgvpcc_enc::Frame>(frameId, appParameters.startFrame + frameId,
-                                                          std::string(pointCloudPath.begin(), pointCloudPath.end()));
+        std::shared_ptr<uvgformat::uvgFrame> frame;
         try {
-            loadFrameFromPlyFile(frame, args->opts.inputGeoPrecision);
+            frame = uvgformat::loadPly(std::string(pointCloudPath.begin(), pointCloudPath.end()),
+                                       appParameters.startFrame + (frameId % appParameters.nbFrames),
+                                       args->opts.inputGeoPrecision);
         } catch (const std::runtime_error& e) {
             uvgutils::Logger::log<uvgutils::LogLevel::FATAL>("APPLICATION", "Caught exception while loading frame " +
-                                                                                std::to_string(frameId) + " from " + frame->pointCloudPath +
-                                                                                ": " + std::string(e.what()) + "\n");
+                                                                                std::to_string(frameId) + ": " + std::string(e.what()) + "\n");
             returnValue = Retval::Failure;
         }
 
@@ -635,7 +550,7 @@ int main(const int argc, const char* const argv[]) {
     const std::shared_ptr<input_handler_args> in_args = std::make_shared<input_handler_args>(appParameters, nullptr, Retval::Running);
     std::thread inputTh(&inputReadThread, in_args);  // TODO(gg): in_args is read and modified by two threads at the same time
     size_t frameRead = 0;
-    std::shared_ptr<uvgvpcc_enc::Frame> currFrame = nullptr;
+    std::shared_ptr<uvgformat::uvgFrame> currFrame = nullptr;
     available_input_slot.release();
 
     uvgvpcc_enc::API::v3c_unit_stream output;  // Each v3c chunk gets appended to the V3C unit stream as they are encoded

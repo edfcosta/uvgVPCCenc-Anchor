@@ -3,10 +3,6 @@ message(DEBUG "./src/app/cmake")
 # Take care of external dependencies (e.g. uvgV3CRTP)
 include(dependencies/FindDependencies.cmake)
 
-add_library(miniplyLibrary STATIC
-    extras/miniply.cpp
-)
-
 add_library(getoptLibrary STATIC
     extras/getopt.c
 )
@@ -19,11 +15,11 @@ add_executable(uvgVPCCenc
     cli.cpp
 )
 
-target_compile_options(miniplyLibrary PRIVATE -fPIC)
 target_compile_options(getoptLibrary PRIVATE -fPIC)
 
 target_link_libraries(uvgVPCCenc PRIVATE uvgutils)
 target_link_libraries(uvgVPCCenc PRIVATE uvgvpccenc)
+target_link_libraries(uvgVPCCenc PRIVATE uvgformat)
 
 # Add uvgV3CRTP to link targets if enabled
 if(ENABLE_V3CRTP)

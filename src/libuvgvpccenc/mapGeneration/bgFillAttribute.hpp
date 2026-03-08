@@ -33,7 +33,8 @@
 /// \file Functions related to the background filling of the attribute maps
 
 #include "uvgvpcc/uvgvpcc.hpp"
+#include "frameContext.hpp"
 
 using namespace uvgvpcc_enc;
 
-void bgFillAttribute(uvgvpcc_enc::Frame& frame, std::vector<uint8_t>& attributeMap);
+void bgFillAttribute(uvgvpcc_enc::FrameContext& frame, std::vector<uint8_t>& attributeMap);

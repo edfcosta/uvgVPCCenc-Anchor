@@ -83,7 +83,7 @@ VoxelAttribute::VoxelAttribute(const size_t projectionPlaneCount_)
 
 // TODO(lf): check if the initial segmentation can be done inside the precomputation of the refineSegmentation
 // TODO(lf): use auto& : ... everywhere instead of for loop (and try avoiding using pointCount or size())
-void PPISegmenter::initialSegmentation(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, std::vector<size_t>& pointsPPIs,
+void PPISegmenter::initialSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
                                        const size_t& frameId) {
     uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("PATCH GENERATION", "Initial segmentation of frame " + std::to_string(frameId) + "\n");
     for (size_t ptIndex = 0; ptIndex < pointsPPIs.size(); ++ptIndex) {
@@ -289,7 +289,7 @@ in a voxel. The former is usually isolated points, and the latter indicates the 
 // TODO(lf): in the whole refine segmentation, be consistent between talking about grid cell or voxel
 // TODO(lf): use two flags, compute one time the flag for S or M instead of checking it like the other classification
 // TODO(lf): the refine segmentation voxelization (voxel dim etc..) should depend on geometry bit, not on the max range
-void PPISegmenter::refineSegmentation(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, std::vector<size_t>& pointsPPIs,
+void PPISegmenter::refineSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
                                       const size_t& frameId) {
     uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("PATCH GENERATION", "Refine segmentation of frame " + std::to_string(frameId) + "\n");
     const size_t gbdrs = p_->geoBitDepthRefineSegmentation;

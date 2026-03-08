@@ -196,7 +196,7 @@ bool PatchPacking::findPatchLocation(const size_t& mapHeight, size_t& maxPatchHe
 // TODO(lf): First test swap patch rotation mode if this minimize hypothetic resulting map height
 
 // Patch placement and indirect occupancy map generation //
-void PatchPacking::frameIntraPatchPacking(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, std::span<uvgvpcc_enc::Patch>* patchListSpan) {
+void PatchPacking::frameIntraPatchPacking(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::span<uvgvpcc_enc::Patch>* patchListSpan) {
     if (!p_->interPatchPacking) {
         uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("PATCH PACKING",
                                                          "Intra pack patches of frame " + std::to_string(frame->frameId) + ".\n");
@@ -275,7 +275,7 @@ void PatchPacking::frameIntraPatchPacking(const std::shared_ptr<uvgvpcc_enc::Fra
 
 // Patch placement and indirect occupancy map generation using union patch information for the matched patch //
 void PatchPacking::frameInterPatchPacking(const std::vector<uvgvpcc_enc::Patch>& unionPatches,
-                                          const std::shared_ptr<uvgvpcc_enc::Frame>& frame, std::span<uvgvpcc_enc::Patch>* matchedPatchList) {
+                                          const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::span<uvgvpcc_enc::Patch>* matchedPatchList) {
     uvgutils::Logger::log<uvgutils::LogLevel::TRACE>(
         "GLOBAL PATCH PACKING", "Inter patch packing of the matched patches of frame " + std::to_string(frame->frameId) + ".\n");
 
@@ -355,8 +355,8 @@ float PatchPacking::computeIoU(const uvgvpcc_enc::Patch& currentPatch, const uvg
     return iou;
 }
 
-void PatchPacking::patchMatchingBetweenTwoFrames(const std::shared_ptr<uvgvpcc_enc::Frame>& currentFrame,
-                                                 const std::shared_ptr<uvgvpcc_enc::Frame>& previousFrame) {
+void PatchPacking::patchMatchingBetweenTwoFrames(const std::shared_ptr<uvgvpcc_enc::FrameContext>& currentFrame,
+                                                 const std::shared_ptr<uvgvpcc_enc::FrameContext>& previousFrame) {
     int id = 0;
 
     // main loop.

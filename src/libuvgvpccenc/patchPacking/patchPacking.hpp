@@ -38,6 +38,7 @@
 #include <span>
 
 #include "uvgvpcc/uvgvpcc.hpp"
+#include "frameContext.hpp"
 
 enum PCCaxisSwap {
     PATCH_ORIENTATION_DEFAULT = 0,  // 0: default
@@ -63,8 +64,8 @@ const std::vector<int> g_orientationVertical = {
 class PatchPacking {
    public:
     PatchPacking();
-    static void frameIntraPatchPacking(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, std::span<uvgvpcc_enc::Patch>* patchListSpan);
-    static void frameInterPatchPacking(const std::vector<uvgvpcc_enc::Patch>& unionPatches, const std::shared_ptr<uvgvpcc_enc::Frame>& frame,
+    static void frameIntraPatchPacking(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::span<uvgvpcc_enc::Patch>* patchListSpan);
+    static void frameInterPatchPacking(const std::vector<uvgvpcc_enc::Patch>& unionPatches, const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,
                                        std::span<uvgvpcc_enc::Patch>* matchedPatchList);
 
     static void gofPatchPacking(const std::shared_ptr<uvgvpcc_enc::GOF>& gof);
@@ -80,7 +81,7 @@ class PatchPacking {
     static bool checkFitPatch(const size_t& patchPosX, const size_t& patchPosY, const size_t& patchWidth,
                               const size_t& patchHeight, const size_t& mapHeight, const std::vector<uint8_t>& frameOccupancyMap);
 
-    static void patchMatchingBetweenTwoFrames(const std::shared_ptr<uvgvpcc_enc::Frame>& currentFrame,
-                                              const std::shared_ptr<uvgvpcc_enc::Frame>& previousFrame);
+    static void patchMatchingBetweenTwoFrames(const std::shared_ptr<uvgvpcc_enc::FrameContext>& currentFrame,
+                                              const std::shared_ptr<uvgvpcc_enc::FrameContext>& previousFrame);
     static float computeIoU(const uvgvpcc_enc::Patch& currentPatch, const uvgvpcc_enc::Patch& previousPatch);
 };

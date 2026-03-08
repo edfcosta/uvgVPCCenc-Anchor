@@ -223,7 +223,7 @@ void computeNormal(uvgutils::VectorN<double, 3>& normal, const std::vector<uvgut
 
 namespace NormalComputation {
 
-void computeNormals(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, std::vector<uvgutils::VectorN<double, 3>>& normals,
+void computeNormals(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<uvgutils::VectorN<double, 3>>& normals,
                     const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                     const std::vector<std::vector<size_t>>& pointsNNList) {
     uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("PATCH GENERATION", "Compute normals of frame " + std::to_string(frame->frameId) + "\n");

@@ -35,10 +35,11 @@
 #pragma once
 
 #include "uvgvpcc/uvgvpcc.hpp"
+#include "frameContext.hpp"
 
 class PatchGeneration {
    public:
-    static void generateFramePatches(std::shared_ptr<uvgvpcc_enc::Frame> frame);
+    static void generateFramePatches(std::shared_ptr<uvgvpcc_enc::FrameContext> frame);
 
    private:
     

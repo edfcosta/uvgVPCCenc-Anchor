@@ -1,6 +1,6 @@
 message(DEBUG "./src/lib/cmake")
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/src/libuvgformat/include)
 
 if(UVG_LOG_LEVEL_PRESET)
   add_compile_definitions(UVG_LOG_LEVEL=LogLevel::${UVG_LOG_LEVEL_PRESET})
@@ -35,7 +35,7 @@ target_link_libraries(uvgvpccenc
     mapGenerationLibrary
     utilsLibrary
     kdLibrary
-    miniplyLibrary
+    uvgformat
     uvgutils
 )
 

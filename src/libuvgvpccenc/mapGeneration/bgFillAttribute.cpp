@@ -434,7 +434,7 @@ void bgFillAttributePatchExtension(const std::vector<uint8_t>& occupancyMapDS, c
 }
 // NOLINTEND(cppcoreguidelines-pro-bounds-pointer-arithmetic,google-readability-casting,bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions,readability-qualified-auto)
 
-void attributeBgFillBBPE(uvgvpcc_enc::Frame& frame, std::vector<uint8_t>& attributeMap) {
+void attributeBgFillBBPE(uvgvpcc_enc::FrameContext& frame, std::vector<uint8_t>& attributeMap) {
     const size_t BBPEOccupancyWidth = p_->mapWidth / p_->blockSizeBBPE;
     const size_t BBPEOccupancyHeight = frame.mapHeight / p_->blockSizeBBPE;
     const size_t blockSizeBBPEInDSBlk = p_->blockSizeBBPE / p_->occupancyMapDSResolution;
@@ -571,7 +571,7 @@ void attributeBgFillBBPE(uvgvpcc_enc::Frame& frame, std::vector<uint8_t>& attrib
 
 }  // anonymous namespace
 
-void bgFillAttribute(uvgvpcc_enc::Frame& frame, std::vector<uint8_t>& attributeMap) {
+void bgFillAttribute(uvgvpcc_enc::FrameContext& frame, std::vector<uint8_t>& attributeMap) {
     // TODO(lf): make an enum and use a switch
     if (p_->attributeBgFill == "patchExtension") {
         bgFillAttributePatchExtension(*frame.occupancyMapDS, frame.mapHeight, attributeMap);

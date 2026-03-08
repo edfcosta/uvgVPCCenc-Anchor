@@ -35,6 +35,7 @@
 #pragma once
 
 #include "uvgvpcc/uvgvpcc.hpp"
+#include "frameContext.hpp"
 
 using namespace uvgvpcc_enc;
 
@@ -42,5 +43,5 @@ using namespace uvgvpcc_enc;
 class PatchSegmentation {
    public:
     template<typename keyType>
-    static void patchSegmentation(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, const std::vector<size_t>& pointsPPIs);
+    static void patchSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const std::vector<size_t>& pointsPPIs);
 };

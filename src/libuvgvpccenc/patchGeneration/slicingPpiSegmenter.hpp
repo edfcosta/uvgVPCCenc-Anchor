@@ -78,7 +78,7 @@ class PPISegmenter_NewRS {
                  const std::vector<bool>& normalExists);
 
     template<typename keyType>
-    void refineSegmentation_NewRS(const std::shared_ptr<uvgvpcc_enc::Frame>& frame,std::vector<size_t>& pointsPPIs, const size_t& frameId);
+    void refineSegmentation_NewRS(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,std::vector<size_t>& pointsPPIs, const size_t& frameId);
 
    private:
    

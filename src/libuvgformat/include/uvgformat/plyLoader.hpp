@@ -3,21 +3,21 @@
  *
  * Copyright (c) 2024-present, Tampere University, ITU/ISO/IEC, project contributors
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  *   list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright notice, this
  *   list of conditions and the following disclaimer in the documentation and/or
  *   other materials provided with the distribution.
- * 
+ *
  * * Neither the name of the Tampere University or ITU/ISO/IEC nor the names of its
  *   contributors may be used to endorse or promote products derived from
  *   this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,20 +30,29 @@
  * INCLUDING NEGLIGENCE OR OTHERWISE ARISING IN ANY WAY OUT OF THE USE OF THIS
  ****************************************************************************/
 
-/// \file Entry point for orienting the normals of a point cloud frame.
+/// \file PLY file loader for uvgformat.
 
 #pragma once
 
-#include "uvgvpcc/uvgvpcc.hpp"
-#include "frameContext.hpp"
+#include <cstddef>
+#include <memory>
+#include <string>
 
-using namespace uvgvpcc_enc;
+#include "uvgFrame.hpp"
 
+namespace uvgformat {
 
-namespace NormalOrientation {
+/// @brief Load a point cloud frame from a PLY file.
+///
+/// Reads the vertex geometry (x, y, z as uint16_t) and, if present, the RGB
+/// color attribute (r, g, b as uint8_t). Points whose coordinates exceed
+/// 2^geoBitDepthInput-1 are filtered out and a warning is logged.
+///
+/// @param filePath       Absolute or relative path to the .ply file.
+/// @param frameNumber    Sequence number stored in the returned uvgFrame.
+/// @param geoBitDepthInput  Bit depth of input geometry coordinates (e.g. 10 for vox10).
+/// @return               Shared pointer to the populated uvgFrame.
+/// @throws std::runtime_error if the file cannot be opened or is malformed.
+std::shared_ptr<uvgFrame> loadPly(const std::string& filePath, size_t frameNumber, size_t geoBitDepthInput);
 
-void orientNormals(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<uvgutils::VectorN<double, 3>>& normals,
-                   const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
-                   const std::vector<std::vector<size_t>>& pointsNNList);
-
-}  // namespace NormalOrientation
+}  // namespace uvgformat

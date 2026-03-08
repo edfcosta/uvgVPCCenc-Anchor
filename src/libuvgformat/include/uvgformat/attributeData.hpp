@@ -3,21 +3,21 @@
  *
  * Copyright (c) 2024-present, Tampere University, ITU/ISO/IEC, project contributors
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright notice, this
  *   list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright notice, this
  *   list of conditions and the following disclaimer in the documentation and/or
  *   other materials provided with the distribution.
- * 
+ *
  * * Neither the name of the Tampere University or ITU/ISO/IEC nor the names of its
  *   contributors may be used to endorse or promote products derived from
  *   this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -30,20 +30,46 @@
  * INCLUDING NEGLIGENCE OR OTHERWISE ARISING IN ANY WAY OUT OF THE USE OF THIS
  ****************************************************************************/
 
-/// \file Entry point for orienting the normals of a point cloud frame.
+/// \file Point cloud attribute payload types and the AttributeData variant.
 
 #pragma once
 
-#include "uvgvpcc/uvgvpcc.hpp"
-#include "frameContext.hpp"
+#include <cstdint>
+#include <stdexcept>
+#include <variant>
+#include <vector>
 
-using namespace uvgvpcc_enc;
+#include "uvgutils/utils.hpp"
 
+namespace uvgformat {
 
-namespace NormalOrientation {
+/// Geometry-only point cloud (no color or normals).
+struct GeometryOnly {
+    std::vector<uvgutils::VectorN<uint16_t, 3>> geometry;
+};
 
-void orientNormals(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<uvgutils::VectorN<double, 3>>& normals,
-                   const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
-                   const std::vector<std::vector<size_t>>& pointsNNList);
+/// Point cloud with geometry (XYZ) and RGB color attribute.
+/// This is the format required by the uvgVPCCenc encoder.
+struct GeometryRgb {
+    std::vector<uvgutils::VectorN<uint16_t, 3>> geometry;
+    std::vector<uvgutils::VectorN<uint8_t, 3>> attribute;
+};
 
-}  // namespace NormalOrientation
+/// Point cloud with geometry, RGB color and pre-computed normals (reserved for future use).
+struct GeometryRgbNormals {
+    std::vector<uvgutils::VectorN<uint16_t, 3>> geometry;
+    std::vector<uvgutils::VectorN<uint8_t, 3>> attribute;
+    std::vector<uvgutils::VectorN<float, 3>> normals;
+};
+
+/// Variant holding the active combination of point cloud attributes.
+using AttributeData = std::variant<GeometryOnly, GeometryRgb, GeometryRgbNormals>;
+
+/// @brief Access the GeometryRgb alternative of an AttributeData variant.
+/// @throws std::bad_variant_access if the active alternative is not GeometryRgb.
+inline GeometryRgb& getGeometryRgb(AttributeData& data) { return std::get<GeometryRgb>(data); }
+
+/// @brief Const overload.
+inline const GeometryRgb& getGeometryRgb(const AttributeData& data) { return std::get<GeometryRgb>(data); }
+
+}  // namespace uvgformat

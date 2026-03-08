@@ -269,7 +269,7 @@ in a voxel. The former is usually isolated points, and the latter indicates the 
 // TODO(lf): use two flags, compute one time the flag for S or M instead of checking it like the other classification
 // TODO(lf): the refine segmentation voxelization (voxel dim etc..) should depend on geometry bit, not on the max range
 template<typename keyType>
-void PPISegmenter_NewRS::refineSegmentation_NewRS(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, std::vector<size_t>& pointsPPIs,
+void PPISegmenter_NewRS::refineSegmentation_NewRS(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
                                       const size_t& frameId) {
     uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("PATCH GENERATION", "Refine segmentation of frame " + std::to_string(frameId) + "\n");
     const size_t gbdrs = p_->geoBitDepthRefineSegmentation;
@@ -453,9 +453,9 @@ template void PPISegmenter_NewRS::voxelizationWithBitArray_NewRS<uint64_t>(const
                                             std::vector<uint64_t>& filledVoxels, std::vector<std::vector<size_t>>& pointListInVoxels);                                                                                        
 
 
-template void PPISegmenter_NewRS::refineSegmentation_NewRS<uint16_t>(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, std::vector<size_t>& pointsPPIs,
+template void PPISegmenter_NewRS::refineSegmentation_NewRS<uint16_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
                                     const size_t& frameId);
-template void PPISegmenter_NewRS::refineSegmentation_NewRS<uint32_t>(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, std::vector<size_t>& pointsPPIs,
+template void PPISegmenter_NewRS::refineSegmentation_NewRS<uint32_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
                                     const size_t& frameId);
-template void PPISegmenter_NewRS::refineSegmentation_NewRS<uint64_t>(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, std::vector<size_t>& pointsPPIs,
+template void PPISegmenter_NewRS::refineSegmentation_NewRS<uint64_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
                                     const size_t& frameId);

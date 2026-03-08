@@ -108,7 +108,7 @@ atlas_tile_header atlas_context::create_atlas_tile_header(size_t frameIndex, siz
 }
 
 atlas_tile_data_unit atlas_context::create_atlas_tile_data_unit(const uvgvpcc_enc::Parameters& paramUVG,
-                                                                const std::shared_ptr<uvgvpcc_enc::Frame>& frameUVG,
+                                                                const std::shared_ptr<uvgvpcc_enc::FrameContext>& frameUVG,
                                                                 atlas_tile_header& ath) const {
     (void)paramUVG;
 
@@ -167,7 +167,7 @@ atlas_tile_data_unit atlas_context::create_atlas_tile_data_unit(const uvgvpcc_en
 
 atlas_tile_layer_rbsp atlas_context::create_atlas_tile_layer_rbsp(size_t frameIndex, size_t tileIndex,
                                                                   const uvgvpcc_enc::Parameters& paramUVG,
-                                                                  const std::shared_ptr<uvgvpcc_enc::Frame>& frameUVG) {
+                                                                  const std::shared_ptr<uvgvpcc_enc::FrameContext>& frameUVG) {
     atlas_tile_layer_rbsp rbsp;
 
     // This should be enough for now

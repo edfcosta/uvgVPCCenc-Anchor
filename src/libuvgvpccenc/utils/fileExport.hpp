@@ -40,6 +40,7 @@
 #include "utils/constants.hpp"
 #include "uvgutils/utils.hpp"
 #include "uvgvpcc/uvgvpcc.hpp"
+#include "frameContext.hpp"
 
 using namespace uvgvpcc_enc;
 
@@ -61,30 +62,30 @@ const std::array<uvgutils::VectorN<uint8_t, 3>, 10> ppiColors = {{
 void cleanIntermediateFiles();
 
 // Patch generation
-void exportPointCloudNormalComputation(const std::shared_ptr<Frame>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
+void exportPointCloudNormalComputation(const std::shared_ptr<FrameContext>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                        std::vector<uvgutils::VectorN<double, 3>>& normals);
-void exportPointCloudNormalOrientation(const std::shared_ptr<Frame>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
+void exportPointCloudNormalOrientation(const std::shared_ptr<FrameContext>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                        std::vector<uvgutils::VectorN<double, 3>>& normals);
-void exportPointCloudInitialSegmentation(const std::shared_ptr<Frame>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
+void exportPointCloudInitialSegmentation(const std::shared_ptr<FrameContext>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                          const std::vector<size_t>& pointsPPIs);
-void exportPointCloudSubslices(const std::shared_ptr<Frame>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,const std::vector<uvgutils::VectorN<uint8_t, 3>>& attributes,
+void exportPointCloudSubslices(const std::shared_ptr<FrameContext>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,const std::vector<uvgutils::VectorN<uint8_t, 3>>& attributes,
                                        const std::string& axisStr);
-void exportPointCloudPPIAttributionSlicing(const std::shared_ptr<Frame>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
+void exportPointCloudPPIAttributionSlicing(const std::shared_ptr<FrameContext>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                         const std::vector<size_t>& pointsPPIs);
-void exportPointCloudRefineSegmentation(const std::shared_ptr<Frame>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
+void exportPointCloudRefineSegmentation(const std::shared_ptr<FrameContext>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                         const std::vector<size_t>& pointsPPIs);
-void exportPointCloudPatchSegmentationColor(const std::shared_ptr<Frame>& frame);
-void exportPointCloudPatchSegmentationBorder(const std::shared_ptr<Frame>& frame);
-void exportPointCloudPatchSegmentationBorderBlank(const std::shared_ptr<Frame>& frame);
+void exportPointCloudPatchSegmentationColor(const std::shared_ptr<FrameContext>& frame);
+void exportPointCloudPatchSegmentationBorder(const std::shared_ptr<FrameContext>& frame);
+void exportPointCloudPatchSegmentationBorderBlank(const std::shared_ptr<FrameContext>& frame);
 
 // Map generation
-void exportImageOccupancy(const std::shared_ptr<Frame>& frame);
-void exportImageOccupancyDS(const std::shared_ptr<Frame>& frame);
-void exportImageAttribute(const std::shared_ptr<Frame>& frame);
-void exportImageGeometry(const std::shared_ptr<Frame>& frame);
-void exportImageAttributeBgFill(const std::shared_ptr<Frame>& frame);
-void exportImageGeometryBgFill(const std::shared_ptr<Frame>& frame);
-void exportImageAttributeYUV(const std::shared_ptr<Frame>& frame);
+void exportImageOccupancy(const std::shared_ptr<FrameContext>& frame);
+void exportImageOccupancyDS(const std::shared_ptr<FrameContext>& frame);
+void exportImageAttribute(const std::shared_ptr<FrameContext>& frame);
+void exportImageGeometry(const std::shared_ptr<FrameContext>& frame);
+void exportImageAttributeBgFill(const std::shared_ptr<FrameContext>& frame);
+void exportImageGeometryBgFill(const std::shared_ptr<FrameContext>& frame);
+void exportImageAttributeYUV(const std::shared_ptr<FrameContext>& frame);
 
 // Map encoding
 void exportOccupancyBitstream(const std::shared_ptr<uvgvpcc_enc::GOF>& gof, const std::vector<uint8_t>& bitstream,

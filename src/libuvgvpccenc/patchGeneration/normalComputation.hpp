@@ -35,13 +35,14 @@
 #pragma once
 
 #include "uvgvpcc/uvgvpcc.hpp"
+#include "frameContext.hpp"
 
 using namespace uvgvpcc_enc;
 
 
 namespace NormalComputation {
 
-void computeNormals(const std::shared_ptr<uvgvpcc_enc::Frame>& frame, std::vector<uvgutils::VectorN<double, 3>>& normals,
+void computeNormals(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<uvgutils::VectorN<double, 3>>& normals,
                     const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                     const std::vector<std::vector<size_t>>& pointsNNList);
 

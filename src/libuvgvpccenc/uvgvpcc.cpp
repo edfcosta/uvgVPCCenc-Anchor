@@ -33,6 +33,7 @@
 /// \file Main file of the uvgVPCCenc library that defines the main structures (GOF, frame, patch) and the API.
 
 #include "uvgvpcc/uvgvpcc.hpp"
+#include "frameContext.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -521,13 +522,11 @@ static void initializeContext() {
 
 const Parameters* p_ = &param;
 
-void Frame::printInfo() const {
-    // lf: I removed all information accessed through pointers to avoid issues when the pointers are not initialized.
+void FrameContext::printInfo() const {
     uvgutils::Logger::log<uvgutils::LogLevel::DEBUG>(
-        "FRAME-INFO", "Frame " + std::to_string(frameId) + " :\n" + "\tPath: " + pointCloudPath + "\n" + "\tFrame Number: " +
+        "FRAME-INFO", "Frame " + std::to_string(frameId) + " :\n" + "\tPath: " + uvgframe->sourcePath + "\n" + "\tFrame Number: " +
                             std::to_string(frameNumber) + "\n" + "\tpointsGeometry size: " + std::to_string(pointsGeometry.size()) + "\n" +
-                            "\tpointsAttribute size: " + std::to_string(pointsAttribute.size()) + "\n");        
-
+                            "\tpointsAttribute size: " + std::to_string(pointsAttribute.size()) + "\n");
 }
 
 GOF::GOF(const size_t& id) : gofId(id) {
@@ -541,7 +540,7 @@ GOF::GOF(const size_t& id) : gofId(id) {
     frameAttributeMapsL2 = cm.getOrCreateFrameAttributeMapsL2(gofId);
 }
 
-void GOF::setFrameMemoryPtrs(std::shared_ptr<Frame>& frame) {
+void GOF::setFrameMemoryPtrs(std::shared_ptr<FrameContext>& frame) {
     const size_t framePos = frame->frameId % p_->sizeGOF;
     frame->patchList = &(*framePatches)[framePos];
 
@@ -595,22 +594,33 @@ void API::setParameter(const std::string& parameterName, const std::string& para
     apiInputParameters.emplace(parameterName, parameterValue);
 }
 
-/// @brief Entry point of the uvgVPCCenc library. Take as input a frame. Create all the jobs for processing this frame. This function also
-/// handles the GOF processing.
-/// @param frame uvgvpcc_enc::Frame
+/// @brief Entry point of the uvgVPCCenc library. Take as input a uvgFrame. Create all the jobs for processing this frame. This function
+/// also handles the GOF processing.
+/// @param uvgframe User-supplied point cloud frame (uvgformat::uvgFrame).
 /// @param output GOF bitstream
-void API::encodeFrame(std::shared_ptr<Frame>& frame, v3c_unit_stream* output) {
+void API::encodeFrame(std::shared_ptr<uvgformat::uvgFrame> uvgframe, v3c_unit_stream* output) {
+    static size_t nextFrameId = 0;
     static std::shared_ptr<std::counting_semaphore<UINT16_MAX>> conccurentFrameSem =
         std::make_shared<std::counting_semaphore<UINT16_MAX>>(std::min(p_->maxConcurrentFrames, size_t(UINT16_MAX)));
 
-    conccurentFrameSem->acquire();
-    frame->conccurentFrameSem = conccurentFrameSem;
-
-    uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("API", "Encoding frame " + std::to_string(frame->frameId) + "\n");
-    if (frame == nullptr) {
+    if (uvgframe == nullptr) {
         uvgutils::Logger::log<uvgutils::LogLevel::ERROR>("API", "The frame is null.\n");
         if (p_->errorsAreFatal) throw std::runtime_error("");
     }
+
+    conccurentFrameSem->acquire();
+
+    if (!std::holds_alternative<uvgformat::GeometryRgb>(uvgframe->attributes)) {
+        conccurentFrameSem->release();
+        throw std::runtime_error(
+            "uvgVPCCenc: encodeFrame() requires a GeometryRgb frame (point cloud with color attributes). GeometryOnly frames are not "
+            "supported by the encoder.");
+    }
+
+    auto frame = std::make_shared<FrameContext>(nextFrameId++, std::move(uvgframe));
+    frame->conccurentFrameSem = conccurentFrameSem;
+
+    uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("API", "Encoding frame " + std::to_string(frame->frameId) + "\n");
     std::shared_ptr<uvgutils::Job> initGOFMG = nullptr;
     std::shared_ptr<uvgutils::Job> encodeGOF = nullptr;
 
