@@ -35,10 +35,10 @@
 #pragma once
 
 #include <cstddef>
-#include <stdexcept>
 #include <string>
 #include <vector>
 
+#include "uvgutils/parameterManager.hpp"
 #include "uvgutils/utils.hpp"
 
 
@@ -194,89 +194,6 @@ struct Parameters {
     // 2D encoder in the futur.
 };
 
-
-
-enum ParameterType { BOOL, INT, UINT, STRING, FLOAT, DOUBLE };
-
-struct ParameterInfo {
-    ParameterType type;
-    std::string possibleValues;
-    void* parameterPtr;
-    bool inPreset = false;
-
-    ParameterInfo(const ParameterType& type, const std::string& possibleValues, bool* parameterPtr)
-        : type(type), possibleValues(possibleValues), parameterPtr((void*)parameterPtr) {
-        if (type != BOOL) {
-            throw std::runtime_error(
-                "During the initialization of the library parameter maps, a type mismatch has been found. Apparently, the given "
-                "parameterType is: '" +
-                std::to_string(type) +
-                "' while the type of the parameter variable is BOOL (0). The corresponding variable name is not known, but here are its "
-                "possible values :'" +
-                possibleValues + "'. If you recently added a new parameter in the parameter map, the given type is probably wrong.");
-        }
-    }
-    ParameterInfo(const ParameterType& type, const std::string& possibleValues, int* parameterPtr)
-        : type(type), possibleValues(possibleValues), parameterPtr((void*)parameterPtr) {
-        if (type != INT) {
-            throw std::runtime_error(
-                "During the initialization of the library parameter maps, a type mismatch has been found. Apparently, the given "
-                "parameterType is: '" +
-                std::to_string(type) +
-                "' while the type of the parameter variable is INT (1). The corresponding variable name is not known, but here are its "
-                "possible values :'" +
-                possibleValues + "'. If you recently added a new parameter in the parameter map, the given type is probably wrong.");
-        }
-    }
-    ParameterInfo(const ParameterType& type, const std::string& possibleValues, size_t* parameterPtr)
-        : type(type), possibleValues(possibleValues), parameterPtr((void*)parameterPtr) {
-        if (type != UINT) {
-            throw std::runtime_error(
-                "During the initialization of the library parameter maps, a type mismatch has been found. Apparently, the given "
-                "parameterType is: '" +
-                std::to_string(type) +
-                "' while the type of the parameter variable is UINT (2). The corresponding variable name is not known, but here are its "
-                "possible values :'" +
-                possibleValues + "'. If you recently added a new parameter in the parameter map, the given type is probably wrong.");
-        }
-    }
-    ParameterInfo(const ParameterType& type, const std::string& possibleValues, std::string* parameterPtr)
-        : type(type), possibleValues(possibleValues), parameterPtr((void*)parameterPtr) {
-        if (type != STRING) {
-            throw std::runtime_error(
-                "During the initialization of the library parameter maps, a type mismatch has been found. Apparently, the given "
-                "parameterType is: '" +
-                std::to_string(type) +
-                "' while the type of the parameter variable is STRING (3). The corresponding variable name is not known, but here are its "
-                "possible values :'" +
-                possibleValues + "'. If you recently added a new parameter in the parameter map, the given type is probably wrong.");
-        }
-    }
-    ParameterInfo(const ParameterType& type, const std::string& possibleValues, float* parameterPtr)
-        : type(type), possibleValues(possibleValues), parameterPtr((void*)parameterPtr) {
-        if (type != FLOAT) {
-            throw std::runtime_error(
-                "During the initialization of the library parameter maps, a type mismatch has been found. Apparently, the given "
-                "parameterType is: '" +
-                std::to_string(type) +
-                "' while the type of the parameter variable is FLOAT (4). The corresponding variable name is not known, but here are its "
-                "possible values :'" +
-                possibleValues + "'. If you recently added a new parameter in the parameter map, the given type is probably wrong.");
-        }
-    }
-    ParameterInfo(const ParameterType& type, const std::string& possibleValues, double* parameterPtr)
-        : type(type), possibleValues(possibleValues), parameterPtr((void*)parameterPtr) {
-        if (type != DOUBLE) {
-            throw std::runtime_error(
-                "During the initialization of the library parameter maps, a type mismatch has been found. Apparently, the given "
-                "parameterType is: '" +
-                std::to_string(type) +
-                "' while the type of the parameter variable is DOUBLE (5). The corresponding variable name is not known, but here are its "
-                "possible values :'" +
-                possibleValues + "'. If you recently added a new parameter in the parameter map, the given type is probably wrong.");
-        }
-    }
-};
 
 extern const Parameters* p_;  // Const pointer to a non-const Parameter struct instance in parameters.cpp
 

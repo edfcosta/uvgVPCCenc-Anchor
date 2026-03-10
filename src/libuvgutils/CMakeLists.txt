@@ -12,6 +12,7 @@ set(LIB_SOURCES
     version.cpp
     jobManagement.cpp
     log.cpp
+    parameterManager.cpp
     threadqueue.cpp
 )
 
