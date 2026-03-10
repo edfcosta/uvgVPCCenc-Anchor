@@ -35,7 +35,7 @@
 #pragma once
 
 #include "uvgvpcc/uvgvpcc.hpp"
-#include "frameContext.hpp"
+#include "utils/frameContext.hpp"
 
 using namespace uvgvpcc_enc;
 using namespace std;
