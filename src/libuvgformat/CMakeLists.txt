@@ -7,13 +7,15 @@ if(UVG_LOG_LEVEL_PRESET)
 endif()
 
 add_library(miniplyLibrary STATIC
-    extras/miniply.cpp
+    io/miniply.cpp
 )
 
 target_compile_options(miniplyLibrary PRIVATE -fPIC)
 
 set(LIB_SOURCES
-    plyLoader.cpp
+    uvgformat.cpp
+    io/plyLoader.cpp
+    utils/parameters.cpp
 )
 
 if(BUILD_SHARED_LIBS)

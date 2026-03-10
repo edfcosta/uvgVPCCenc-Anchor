@@ -53,7 +53,7 @@ namespace {
 
 // NOLINTNEXTLINE(cert-err58-cpp,bugprone-throwing-static-initialization)
 const std::string short_options = "i:g:l:n:o:s:t:b:d:";
-const std::array<struct option, 15> long_options{{{"input", required_argument, nullptr, 'i'},
+const std::array<struct option, 16> long_options{{{"input", required_argument, nullptr, 'i'},
                                                   {"output", required_argument, nullptr, 'o'},
                                                   {"frames", required_argument, nullptr, 'n'},
                                                   {"start-frame", required_argument, nullptr, 's'},
@@ -67,7 +67,8 @@ const std::array<struct option, 15> long_options{{{"input", required_argument, n
                                                   {"dst-address", required_argument, nullptr, 0},
                                                   {"dst-port", required_argument, nullptr, 0},
                                                   {"sdp-outdir", required_argument, nullptr, 0},
-                                                  {"input-fps-limiter", required_argument, nullptr, 0}}};
+                                                  {"input-fps-limiter", required_argument, nullptr, 0},
+                                                  {"uvgformat", required_argument, nullptr, 0}}};
 
 /**
  * \brief Try to detect voxel size from file name automatically
@@ -225,6 +226,8 @@ bool opts_parse(cli::opts_t& opts, const int& argc, const std::span<const char* 
             opts.sdpOutdir = optarg;
         } else if (name == "input-fps-limiter") {
             opts.inputFramePerSecondLimiter = stringToInt(optarg);
+        } else if (name == "uvgformat") {
+            opts.uvgformatParametersString = optarg;
         } else {
             // TODO(lf): throw error ?
         }
@@ -319,6 +322,7 @@ void print_help(void) {
     std::cout << "  -l, --loop-input <number>    Number of input loop\n";
     std::cout << "  -d, --dummy-run <number>     Vverify config without encoding\n";
     std::cout << "      --uvgvpcc <params>       Encoder configuration parameters\n";
+    std::cout << "      --uvgformat <params>     Format library configuration parameters\n";
     std::cout << "      --help                   Show this help message\n";
     std::cout << "      --version                Show version information\n";
 #ifdef ENABLE_V3CRTP

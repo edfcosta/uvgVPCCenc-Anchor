@@ -34,6 +34,7 @@
 #include <array>
 #include <cassert>
 #include <chrono>
+#include <functional>
 #include <csignal>
 #include <cstddef>
 #include <cstdint>
@@ -56,7 +57,8 @@
 #include <vector>
 
 #include "cli.hpp"
-#include "uvgformat/plyLoader.hpp"
+#include "uvgformat/uvgformat.hpp"
+#include "uvgformat/uvgFrame.hpp"
 #include "uvgutils/log.hpp"
 #include "uvgutils/utils.hpp"
 #include "uvgvpcc/uvgvpcc.hpp"
@@ -144,9 +146,8 @@ void inputReadThread(const std::shared_ptr<input_handler_args>& args) {
         }
         std::shared_ptr<uvgformat::uvgFrame> frame;
         try {
-            frame = uvgformat::loadPly(std::string(pointCloudPath.begin(), pointCloudPath.end()),
-                                       appParameters.startFrame + (frameId % appParameters.nbFrames),
-                                       args->opts.inputGeoPrecision);
+            frame = uvgformat::API::loadPly(std::string(pointCloudPath.begin(), pointCloudPath.end()),
+                                       appParameters.startFrame + (frameId % appParameters.nbFrames));
         } catch (const std::runtime_error& e) {
             uvgutils::Logger::log<uvgutils::LogLevel::FATAL>("APPLICATION", "Caught exception while loading frame " +
                                                                                 std::to_string(frameId) + ": " + std::string(e.what()) + "\n");
@@ -456,29 +457,24 @@ void v3c_sender(uvgvpcc_enc::API::v3c_unit_stream* chunks, const std::string& ds
 #endif
 }
 
-/// @brief Simple application wrapper taking a command string as input to set multiple encoder parameters.
-/// @param parametersCommand
-void setParameters(const std::string& parametersCommand) {
-    // Iterate over each substring separated by commas
+/// @brief Parse a comma-separated "key=value" string and call setter for each pair.
+/// @param parametersCommand  Comma-separated list of "key=value" pairs.
+/// @param setter             Called with (name, value) for each pair.
+void setParameters(const std::string& parametersCommand,
+                          const std::function<void(const std::string&, const std::string&)>& setter) {
     std::string segment;
     std::stringstream ss(parametersCommand);
     while (std::getline(ss, segment, ',')) {
         if (segment.empty()) {
             continue;
-        }  // Skip empty segments (e.g., trailing comma)
-
-        // Check if the segment matches the "parameterName=parameterValue" pair pattern
+        }
         std::smatch match;
         if (std::regex_match(segment, match, std::regex(R"((\w+)=([^,]*))"))) {
-            uvgvpcc_enc::API::setParameter(match[1], match[2]);
+            setter(match[1], match[2]);
         } else {
-            // If the regex does not match, the format is incorrect
-            std::string errorMessage = "Invalid format detected here: '";
-            errorMessage += segment;
-            errorMessage += "'. Here is the expected format: 'parameterName=parameterValue'.\nThe full parameters command: ";
-            errorMessage += parametersCommand;
-            errorMessage += "\n";
-            throw std::runtime_error(errorMessage);
+            throw std::runtime_error("Invalid format detected here: '" + segment +
+                                     "'. Here is the expected format: 'parameterName=parameterValue'.\nThe full parameters command: " +
+                                     parametersCommand + "\n");
         }
     }
 }
@@ -521,12 +517,16 @@ int main(const int argc, const char* const argv[]) {
 
     // The only way for the application to change the encoder parameters is through the uvgvpcc_enc::API::setParameter(...) function. //
     try {
-        setParameters(appParameters.uvgvpccParametersString);
+        setParameters(appParameters.uvgvpccParametersString, uvgvpcc_enc::API::setParameter);
         uvgvpcc_enc::API::setParameter("geoBitDepthInput", std::to_string(appParameters.inputGeoPrecision));
         uvgvpcc_enc::API::setParameter("nbThreadPCPart", std::to_string(appParameters.threads));
         uvgvpcc_enc::API::setParameter("occupancyEncodingNbThread", std::to_string(appParameters.threads));
         uvgvpcc_enc::API::setParameter("geometryEncodingNbThread", std::to_string(appParameters.threads));
         uvgvpcc_enc::API::setParameter("attributeEncodingNbThread", std::to_string(appParameters.threads));
+
+        setParameters(appParameters.uvgformatParametersString, uvgformat::API::setParameter);
+        uvgformat::API::setParameter("geoPrecisionInput", std::to_string(appParameters.inputGeoPrecision));
+        uvgformat::API::initializeFormat();
     } catch (const std::exception& e) {
         uvgutils::Logger::log<uvgutils::LogLevel::FATAL>("LIBRARY", "An exception was caught when setting parameters in the application.\n");
         return EXIT_FAILURE;

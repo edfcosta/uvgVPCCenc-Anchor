@@ -30,7 +30,7 @@
  * INCLUDING NEGLIGENCE OR OTHERWISE ARISING IN ANY WAY OUT OF THE USE OF THIS
  ****************************************************************************/
 
-/// \file PLY file loader for uvgformat.
+/// \file Single public API entry point for libuvgformat.
 
 #pragma once
 
@@ -38,21 +38,33 @@
 #include <memory>
 #include <string>
 
-#include "uvgFrame.hpp"
+#include "uvgformat/attributeData.hpp"
+#include "uvgformat/uvgFrame.hpp"
 
 namespace uvgformat {
+
+namespace API {
+/// @brief Stage a parameter value. Must be called before initializeFormat().
+void setParameter(const std::string& name, const std::string& value);
+
+/// @brief Finalize the parameter map and apply all staged values.
+///        Must be called once before loadPly().
+void initializeFormat();
 
 /// @brief Load a point cloud frame from a PLY file.
 ///
 /// Reads the vertex geometry (x, y, z as uint16_t) and, if present, the RGB
 /// color attribute (r, g, b as uint8_t). Points whose coordinates exceed
-/// 2^geoBitDepthInput-1 are filtered out and a warning is logged.
+/// 2^geoPrecisionInput-1 are filtered out and a warning is logged.
+///
+/// @note initializeFormat() must be called before loadPly().
 ///
 /// @param filePath       Absolute or relative path to the .ply file.
 /// @param frameNumber    Sequence number stored in the returned uvgFrame.
-/// @param geoBitDepthInput  Bit depth of input geometry coordinates (e.g. 10 for vox10).
 /// @return               Shared pointer to the populated uvgFrame.
 /// @throws std::runtime_error if the file cannot be opened or is malformed.
-std::shared_ptr<uvgFrame> loadPly(const std::string& filePath, size_t frameNumber, size_t geoBitDepthInput);
+std::shared_ptr<uvgFrame> loadPly(const std::string& filePath, size_t frameNumber);
+
+}  // namespace API
 
 }  // namespace uvgformat

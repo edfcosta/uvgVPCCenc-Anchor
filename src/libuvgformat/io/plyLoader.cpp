@@ -30,7 +30,7 @@
  * INCLUDING NEGLIGENCE OR OTHERWISE ARISING IN ANY WAY OUT OF THE USE OF THIS
  ****************************************************************************/
 
-#include "uvgformat/plyLoader.hpp"
+#include "uvgformat/uvgformat.hpp"
 
 #include <algorithm>
 #include <array>
@@ -42,15 +42,20 @@
 #include <string>
 #include <vector>
 
-#include "extras/miniply.h"
+#include "io/miniply.h"
 #include "uvgformat/attributeData.hpp"
 #include "uvgformat/uvgFrame.hpp"
 #include "uvgutils/log.hpp"
 #include "uvgutils/utils.hpp"
+#include "utils/parameters.hpp"
 
 namespace uvgformat {
 
-std::shared_ptr<uvgFrame> loadPly(const std::string& filePath, const size_t frameNumber, const size_t geoBitDepthInput) {
+std::shared_ptr<uvgFrame> API::loadPly(const std::string& filePath, const size_t frameNumber) {
+    if (p_ == nullptr) {
+        throw std::runtime_error("uvgformat::loadPly called before uvgformat::initializeFormat()");
+    }
+    const size_t geoPrecisionInput = p_->geoPrecisionInput;
     uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("UVGFORMAT",
                                                      "Loading frame " + std::to_string(frameNumber) + " from " + filePath + "\n");
 
@@ -117,16 +122,16 @@ std::shared_ptr<uvgFrame> loadPly(const std::string& filePath, const size_t fram
                          std::to_string(geo.size()) + (hasColor ? ("\n\tpointsAttribute size: " + std::to_string(geo.size())) : "") + "\n");
 
     // Filter points that violate the bit-depth constraint.
-    const bool isCompliant = !std::any_of(geo.begin(), geo.end(), [geoBitDepthInput](const uvgutils::VectorN<uint16_t, 3>& point) {
-        return (point[0] >> geoBitDepthInput) | (point[1] >> geoBitDepthInput) | (point[2] >> geoBitDepthInput);
+    const bool isCompliant = !std::any_of(geo.begin(), geo.end(), [geoPrecisionInput](const uvgutils::VectorN<uint16_t, 3>& point) {
+        return (point[0] >> geoPrecisionInput) | (point[1] >> geoPrecisionInput) | (point[2] >> geoPrecisionInput);
     });
 
     if (!isCompliant) {
         uvgutils::Logger::log<uvgutils::LogLevel::ERROR>(
             "UVGFORMAT",
             "Frame " + std::to_string(frameNumber) + " from " + filePath +
-                " contains at least one point which does not respect the input voxel size (geoBitDepthInput = " +
-                std::to_string(geoBitDepthInput) + "). Maximum value is 2^" + std::to_string(geoBitDepthInput) +
+                " contains at least one point which does not respect the input voxel size (geoPrecisionInput = " +
+                std::to_string(geoPrecisionInput) + "). Maximum value is 2^" + std::to_string(geoPrecisionInput) +
                 "-1. All faulty points will not be processed.\n");
 
         if (hasColor) {
@@ -137,7 +142,7 @@ std::shared_ptr<uvgFrame> loadPly(const std::string& filePath, const size_t fram
             attrTmp.reserve(rgbPayload.geometry.size());
             for (size_t i = 0; i < rgbPayload.geometry.size(); ++i) {
                 const auto& pt = rgbPayload.geometry[i];
-                if ((pt[0] >> geoBitDepthInput) | (pt[1] >> geoBitDepthInput) | (pt[2] >> geoBitDepthInput)) continue;
+                if ((pt[0] >> geoPrecisionInput) | (pt[1] >> geoPrecisionInput) | (pt[2] >> geoPrecisionInput)) continue;
                 geoTmp.emplace_back(pt);
                 attrTmp.emplace_back(rgbPayload.attribute[i]);
             }
@@ -148,7 +153,7 @@ std::shared_ptr<uvgFrame> loadPly(const std::string& filePath, const size_t fram
             std::vector<uvgutils::VectorN<uint16_t, 3>> geoTmp;
             geoTmp.reserve(geoPayload.geometry.size());
             for (const auto& pt : geoPayload.geometry) {
-                if ((pt[0] >> geoBitDepthInput) | (pt[1] >> geoBitDepthInput) | (pt[2] >> geoBitDepthInput)) continue;
+                if ((pt[0] >> geoPrecisionInput) | (pt[1] >> geoPrecisionInput) | (pt[2] >> geoPrecisionInput)) continue;
                 geoTmp.emplace_back(pt);
             }
             geoPayload.geometry.swap(geoTmp);
