@@ -43,7 +43,7 @@
 #include <vector>
 
 #include "io/miniply.h"
-#include "uvgformat/attributeData.hpp"
+#include "uvgformat/uvgFramePayload.hpp"
 #include "uvgformat/uvgFrame.hpp"
 #include "uvgutils/log.hpp"
 #include "uvgutils/utils.hpp"
@@ -106,16 +106,16 @@ std::shared_ptr<uvgFrame> API::loadPly(const std::string& filePath, const size_t
         payload.attribute.resize(vertexCount);
         reader.extract_properties(indicesPos.data(), 3, miniply::PLYPropertyType::UShort, payload.geometry.data());
         reader.extract_properties(indicesCol.data(), 3, miniply::PLYPropertyType::UChar, payload.attribute.data());
-        result->attributes = std::move(payload);
+        result->payload = std::move(payload);
     } else {
         GeometryOnly payload;
         payload.geometry.resize(vertexCount);
         reader.extract_properties(indicesPos.data(), 3, miniply::PLYPropertyType::UShort, payload.geometry.data());
-        result->attributes = std::move(payload);
+        result->payload = std::move(payload);
     }
 
     // Get reference to geometry for the compliance check (works for any variant alternative).
-    auto& geo = std::visit([](auto& p) -> std::vector<uvgutils::VectorN<uint16_t, 3>>& { return p.geometry; }, result->attributes);
+    auto& geo = std::visit([](auto& p) -> std::vector<uvgutils::VectorN<uint16_t, 3>>& { return p.geometry; }, result->payload);
 
     uvgutils::Logger::log<uvgutils::LogLevel::DEBUG>(
         "UVGFORMAT", "Frame " + std::to_string(frameNumber) + " : path: " + filePath + "\n\tpointsGeometry size: " +
@@ -135,7 +135,7 @@ std::shared_ptr<uvgFrame> API::loadPly(const std::string& filePath, const size_t
                 "-1. All faulty points will not be processed.\n");
 
         if (hasColor) {
-            auto& rgbPayload = std::get<GeometryRgb>(result->attributes);
+            auto& rgbPayload = std::get<GeometryRgb>(result->payload);
             std::vector<uvgutils::VectorN<uint16_t, 3>> geoTmp;
             std::vector<uvgutils::VectorN<uint8_t, 3>> attrTmp;
             geoTmp.reserve(rgbPayload.geometry.size());
@@ -149,7 +149,7 @@ std::shared_ptr<uvgFrame> API::loadPly(const std::string& filePath, const size_t
             rgbPayload.geometry.swap(geoTmp);
             rgbPayload.attribute.swap(attrTmp);
         } else {
-            auto& geoPayload = std::get<GeometryOnly>(result->attributes);
+            auto& geoPayload = std::get<GeometryOnly>(result->payload);
             std::vector<uvgutils::VectorN<uint16_t, 3>> geoTmp;
             geoTmp.reserve(geoPayload.geometry.size());
             for (const auto& pt : geoPayload.geometry) {

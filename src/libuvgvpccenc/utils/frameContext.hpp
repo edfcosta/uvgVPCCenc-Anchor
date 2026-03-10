@@ -41,7 +41,7 @@
 #include <semaphore>
 #include <vector>
 
-#include "uvgformat/attributeData.hpp"
+#include "uvgformat/uvgFramePayload.hpp"
 #include "uvgformat/uvgFrame.hpp"
 #include "uvgvpcc/uvgvpcc.hpp"
 #include "utils/parameters.hpp"
@@ -89,8 +89,8 @@ struct FrameContext {
 
     FrameContext(const size_t frameId, std::shared_ptr<uvgformat::uvgFrame> frame)
         : uvgframe(std::move(frame))
-        , pointsGeometry(uvgformat::getGeometryRgb(uvgframe->attributes).geometry)
-        , pointsAttribute(uvgformat::getGeometryRgb(uvgframe->attributes).attribute)
+        , pointsGeometry(uvgformat::getGeometryRgb(uvgframe->payload).geometry)
+        , pointsAttribute(uvgformat::getGeometryRgb(uvgframe->payload).attribute)
         , frameId(frameId)
         , gofId(0)
         , frameNumber(uvgframe->frameNumber)

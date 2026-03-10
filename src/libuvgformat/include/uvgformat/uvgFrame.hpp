@@ -37,7 +37,7 @@
 #include <cstddef>
 #include <string>
 
-#include "attributeData.hpp"
+#include "uvgFramePayload.hpp"
 
 namespace uvgformat {
 
@@ -58,7 +58,7 @@ struct uvgFrame {
     std::string sourcePath;
 
     /// The active point cloud payload (geometry + optional attributes).
-    AttributeData attributes;
+    uvgFramePayload payload;
 };
 
 }  // namespace uvgformat

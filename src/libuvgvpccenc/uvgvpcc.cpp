@@ -610,7 +610,7 @@ void API::encodeFrame(std::shared_ptr<uvgformat::uvgFrame> uvgframe, v3c_unit_st
 
     conccurentFrameSem->acquire();
 
-    if (!std::holds_alternative<uvgformat::GeometryRgb>(uvgframe->attributes)) {
+    if (!std::holds_alternative<uvgformat::GeometryRgb>(uvgframe->payload)) {
         conccurentFrameSem->release();
         throw std::runtime_error(
             "uvgVPCCenc: encodeFrame() requires a GeometryRgb frame (point cloud with color attributes). GeometryOnly frames are not "

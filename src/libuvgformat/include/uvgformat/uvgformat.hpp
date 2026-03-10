@@ -38,7 +38,7 @@
 #include <memory>
 #include <string>
 
-#include "uvgformat/attributeData.hpp"
+#include "uvgformat/uvgFramePayload.hpp"
 #include "uvgformat/uvgFrame.hpp"
 
 namespace uvgformat {

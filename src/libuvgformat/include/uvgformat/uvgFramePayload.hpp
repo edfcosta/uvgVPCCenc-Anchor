@@ -63,13 +63,13 @@ struct GeometryRgbNormals {
 };
 
 /// Variant holding the active combination of point cloud attributes.
-using AttributeData = std::variant<GeometryOnly, GeometryRgb, GeometryRgbNormals>;
+using uvgFramePayload = std::variant<GeometryOnly, GeometryRgb, GeometryRgbNormals>;
 
-/// @brief Access the GeometryRgb alternative of an AttributeData variant.
+/// @brief Access the GeometryRgb alternative of an uvgFramePayload variant.
 /// @throws std::bad_variant_access if the active alternative is not GeometryRgb.
-inline GeometryRgb& getGeometryRgb(AttributeData& data) { return std::get<GeometryRgb>(data); }
+inline GeometryRgb& getGeometryRgb(uvgFramePayload& data) { return std::get<GeometryRgb>(data); }
 
 /// @brief Const overload.
-inline const GeometryRgb& getGeometryRgb(const AttributeData& data) { return std::get<GeometryRgb>(data); }
+inline const GeometryRgb& getGeometryRgb(const uvgFramePayload& data) { return std::get<GeometryRgb>(data); }
 
 }  // namespace uvgformat
