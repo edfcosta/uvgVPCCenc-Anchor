@@ -55,6 +55,9 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 endif()
 
+# Build dependencies
+add_subdirectory(dependencies)
+
 # Run subdirectory make files
 add_subdirectory(src/libuvgutils)
 add_subdirectory(src/libuvgformat)
