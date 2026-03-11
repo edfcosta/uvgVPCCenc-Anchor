@@ -34,6 +34,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
@@ -42,6 +43,7 @@
 #include <string>
 #include <vector>
 
+#include "adaptation/voxelization.hpp"
 #include "io/miniply.h"
 #include "uvgformat/uvgFramePayload.hpp"
 #include "uvgformat/uvgFrame.hpp"
@@ -55,7 +57,6 @@ std::shared_ptr<uvgFrame> API::loadPly(const std::string& filePath, const size_t
     if (p_ == nullptr) {
         throw std::runtime_error("uvgformat::loadPly called before uvgformat::initializeFormat()");
     }
-    const size_t geoPrecisionInput = p_->geoPrecisionInput;
     uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("UVGFORMAT",
                                                      "Loading frame " + std::to_string(frameNumber) + " from " + filePath + "\n");
 
@@ -100,28 +101,57 @@ std::shared_ptr<uvgFrame> API::loadPly(const std::string& filePath, const size_t
     result->frameNumber = frameNumber;
     result->sourcePath = filePath;
 
+    // Read geometry as double so any coordinate type stored in the PLY is handled
+    // uniformly. The adaptation step (voxelization) or the direct cast below will
+    // convert to uint16_t.
+    std::vector<std::array<double, 3>> rawGeo(vertexCount);
+    reader.extract_properties(indicesPos.data(), 3, miniply::PLYPropertyType::Double, rawGeo.data());
+
+    std::vector<uvgutils::VectorN<uint8_t, 3>> rawAttr;
+    if (hasColor) {
+        rawAttr.resize(vertexCount);
+        reader.extract_properties(indicesCol.data(), 3, miniply::PLYPropertyType::UChar, rawAttr.data());
+    }
+
+    uvgutils::Logger::log<uvgutils::LogLevel::DEBUG>(
+        "UVGFORMAT", "Frame " + std::to_string(frameNumber) + " : path: " + filePath + "\n\tpointsGeometry size: " +
+                         std::to_string(vertexCount) + (hasColor ? ("\n\tpointsAttribute size: " + std::to_string(vertexCount)) : "") +
+                         "\n");
+
+    if (p_->enableVoxelization) {
+        result->payload = voxelize(rawGeo, hasColor ? &rawAttr : nullptr);
+        return result;
+    }
+
+    // --- Non-voxelized path: direct double -> uint16_t cast ---
+    // Round to nearest integer; rely on the existing compliance filter below to
+    // remove any point that exceeds the geoPrecisionInput bit-depth constraint.
+    const size_t geoPrecisionInput = p_->geoPrecisionInput;
+
     if (hasColor) {
         GeometryRgb payload;
         payload.geometry.resize(vertexCount);
-        payload.attribute.resize(vertexCount);
-        reader.extract_properties(indicesPos.data(), 3, miniply::PLYPropertyType::UShort, payload.geometry.data());
-        reader.extract_properties(indicesCol.data(), 3, miniply::PLYPropertyType::UChar, payload.attribute.data());
+        payload.attribute = std::move(rawAttr);
+        for (size_t i = 0; i < vertexCount; ++i) {
+            payload.geometry[i][0] = static_cast<uint16_t>(std::lround(rawGeo[i][0]));
+            payload.geometry[i][1] = static_cast<uint16_t>(std::lround(rawGeo[i][1]));
+            payload.geometry[i][2] = static_cast<uint16_t>(std::lround(rawGeo[i][2]));
+        }
         result->payload = std::move(payload);
     } else {
         GeometryOnly payload;
         payload.geometry.resize(vertexCount);
-        reader.extract_properties(indicesPos.data(), 3, miniply::PLYPropertyType::UShort, payload.geometry.data());
+        for (size_t i = 0; i < vertexCount; ++i) {
+            payload.geometry[i][0] = static_cast<uint16_t>(std::lround(rawGeo[i][0]));
+            payload.geometry[i][1] = static_cast<uint16_t>(std::lround(rawGeo[i][1]));
+            payload.geometry[i][2] = static_cast<uint16_t>(std::lround(rawGeo[i][2]));
+        }
         result->payload = std::move(payload);
     }
 
-    // Get reference to geometry for the compliance check (works for any variant alternative).
+    // Filter points that violate the bit-depth constraint.
     auto& geo = std::visit([](auto& p) -> std::vector<uvgutils::VectorN<uint16_t, 3>>& { return p.geometry; }, result->payload);
 
-    uvgutils::Logger::log<uvgutils::LogLevel::DEBUG>(
-        "UVGFORMAT", "Frame " + std::to_string(frameNumber) + " : path: " + filePath + "\n\tpointsGeometry size: " +
-                         std::to_string(geo.size()) + (hasColor ? ("\n\tpointsAttribute size: " + std::to_string(geo.size())) : "") + "\n");
-
-    // Filter points that violate the bit-depth constraint.
     const bool isCompliant = !std::any_of(geo.begin(), geo.end(), [geoPrecisionInput](const uvgutils::VectorN<uint16_t, 3>& point) {
         return (point[0] >> geoPrecisionInput) | (point[1] >> geoPrecisionInput) | (point[2] >> geoPrecisionInput);
     });

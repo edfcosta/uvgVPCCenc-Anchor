@@ -50,19 +50,43 @@ namespace {
 }  // anonymous namespace
 
 void initializeParameterMap(Parameters& param) {
+    using uvgutils::BOOL;
     using uvgutils::UINT;
     using uvgutils::STRING;
+    using uvgutils::DOUBLE;
+    const std::string logLevelPossibleValues =
+        std::accumulate(std::next(std::begin(uvgutils::LogLevelStr)), std::end(uvgutils::LogLevelStr), uvgutils::LogLevelStr[0],
+                        [](const std::string& a, const std::string& b) { return a + "," + b; });
     parameterMap = {
         {"geoPrecisionInput", {UINT,   "", &param.geoPrecisionInput}},
-        {"logLevel",
-         {STRING,
-          std::accumulate(std::next(std::begin(uvgutils::LogLevelStr)), std::end(uvgutils::LogLevelStr), uvgutils::LogLevelStr[0],
-                          [](const std::string& a, const std::string& b) { return a + "," + b; }),
-          &param.logLevel}},
+        {"logLevel",          {STRING, logLevelPossibleValues, &param.logLevel}},
+        {"enableVoxelization", {BOOL,   "", &param.enableVoxelization}},
+        {"keepGeoRatio",       {BOOL,   "", &param.keepGeoRatio}},
+        {"voxelMin",           {DOUBLE, "", &param.voxelMin}},
+        {"voxelMinX",          {DOUBLE, "", &param.voxelMinX}},
+        {"voxelMinY",          {DOUBLE, "", &param.voxelMinY}},
+        {"voxelMinZ",          {DOUBLE, "", &param.voxelMinZ}},
+        {"voxelMax",           {DOUBLE, "", &param.voxelMax}},
+        {"voxelMaxX",          {DOUBLE, "", &param.voxelMaxX}},
+        {"voxelMaxY",          {DOUBLE, "", &param.voxelMaxY}},
+        {"voxelMaxZ",          {DOUBLE, "", &param.voxelMaxZ}},
     };
 }
 
 void setParameterValue(const std::string& parameterName, const std::string& parameterValue, const bool& fromPreset) {
+    // Handle uniform shorthand parameters (set all three axes at once)
+    if (parameterName == "voxelMin") {
+        uvgutils::setParameterValue(parameterMap, "voxelMinX", parameterValue, fromPreset);
+        uvgutils::setParameterValue(parameterMap, "voxelMinY", parameterValue, fromPreset);
+        uvgutils::setParameterValue(parameterMap, "voxelMinZ", parameterValue, fromPreset);
+        return;
+    }
+    if (parameterName == "voxelMax") {
+        uvgutils::setParameterValue(parameterMap, "voxelMaxX", parameterValue, fromPreset);
+        uvgutils::setParameterValue(parameterMap, "voxelMaxY", parameterValue, fromPreset);
+        uvgutils::setParameterValue(parameterMap, "voxelMaxZ", parameterValue, fromPreset);
+        return;
+    }
     uvgutils::setParameterValue(parameterMap, parameterName, parameterValue, fromPreset);
 }
 

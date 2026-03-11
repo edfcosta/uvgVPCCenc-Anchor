@@ -1,7 +1,7 @@
 /*****************************************************************************
  * This file is part of uvgVPCCenc V-PCC encoder.
  *
- * Copyright (c) 2024, Tampere University, ITU/ISO/IEC, project contributors
+ * Copyright (c) 2024-present, Tampere University, ITU/ISO/IEC, project contributors
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -30,41 +30,33 @@
  * INCLUDING NEGLIGENCE OR OTHERWISE ARISING IN ANY WAY OUT OF THE USE OF THIS
  ****************************************************************************/
 
-/// \file Library parameters related operations.
+/// \file Voxelization adaptation: float-to-integer quantization with deduplication
+/// and attribute averaging for overlapping points.
 
 #pragma once
 
-#include <cstddef>
-#include <limits>
-#include <string>
+#include <array>
+#include <cstdint>
 #include <vector>
 
-#include "uvgutils/parameterManager.hpp"
+#include "uvgformat/uvgFramePayload.hpp"
 #include "uvgutils/utils.hpp"
 
 namespace uvgformat {
 
-struct Parameters {
-    size_t geoPrecisionInput = 0;  // Must be set before initializeFormat().
-    std::string logLevel = "INFO";
-
-    // Voxelization adaptation
-    bool enableVoxelization = false;
-    bool keepGeoRatio = false;  // Use a single scale (largest range) so aspect ratio is kept.
-    double voxelMin = std::numeric_limits<double>::quiet_NaN();  // NaN = compute from data, overrides per-axis if set
-    double voxelMinX = std::numeric_limits<double>::quiet_NaN();  // NaN = compute from data
-    double voxelMinY = std::numeric_limits<double>::quiet_NaN();
-    double voxelMinZ = std::numeric_limits<double>::quiet_NaN();
-    double voxelMax = std::numeric_limits<double>::quiet_NaN();  // NaN = compute from data, overrides per-axis if set
-    double voxelMaxX = std::numeric_limits<double>::quiet_NaN();  // NaN = compute from data
-    double voxelMaxY = std::numeric_limits<double>::quiet_NaN();
-    double voxelMaxZ = std::numeric_limits<double>::quiet_NaN();
-};
-
-/// @brief Read-only view of the active parameters. nullptr until initializeFormat() is called.
-extern const Parameters* p_; 
-
-void initializeParameterMap(Parameters& param);
-void setParameterValue(const std::string& parameterName, const std::string& parameterValue, const bool& fromPreset);
+/// @brief Voxelize a raw point cloud using the active library parameters (p_).
+///
+/// Reads voxelMinX/Y/Z, voxelMaxX/Y/Z (NaN = compute bounding box from data),
+/// voxelOffsetX/Y/Z, and geoPrecisionInput from p_. Maps each input point into
+/// the [0, 2^geoPrecisionInput - 1]^3 integer grid, deduplicates, and for colored
+/// clouds averages the attributes of points that fall into the same voxel.
+/// Points that fall outside the grid after offset are discarded with a WARNING log.
+/// Insertion order is preserved for deterministic output.
+///
+/// @param rawGeo   Input geometry in original floating-point coordinates.
+/// @param rawAttr  Per-point RGB attribute, or nullptr for geometry-only output.
+/// @return GeometryOnly or GeometryRgb payload with integer voxel coordinates.
+uvgFramePayload voxelize(const std::vector<std::array<double, 3>>& rawGeo,
+                         const std::vector<uvgutils::VectorN<uint8_t, 3>>* rawAttr);
 
 }  // namespace uvgformat

@@ -16,6 +16,7 @@ set(LIB_SOURCES
     uvgformat.cpp
     io/plyLoader.cpp
     utils/parameters.cpp
+    adaptation/voxelization.cpp
 )
 
 if(BUILD_SHARED_LIBS)
