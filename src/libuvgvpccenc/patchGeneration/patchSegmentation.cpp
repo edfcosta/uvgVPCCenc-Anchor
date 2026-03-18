@@ -325,8 +325,6 @@ template <typename keyType, size_t Ppi, bool DoubleLayer>
 inline void finalizePatch(const ConnectedComponent& cc, const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, Patch& patch,
                           robin_hood::unordered_map<keyType, size_t>& mapLocation1D, std::vector<bool>& pointIsInAPatch,
                           const typeGeometryInput& minD, robin_hood::unordered_set<keyType>& resamplePointSetLocation1D) {
-                          robin_hood::unordered_map<size_t, size_t>& mapLocation1D, std::vector<bool>& pointIsInAPatch,
-                          const typeGeometryInput& minD, robin_hood::unordered_set<size_t>& resamplePointSetLocation1D) {
     constexpr size_t normalAxis = getPatchNormalAxis<Ppi>();
     constexpr size_t tangentAxis = getPatchTangentAxis<Ppi>();
     constexpr size_t bitangentAxis = getPatchBitangentAxis<Ppi>();
