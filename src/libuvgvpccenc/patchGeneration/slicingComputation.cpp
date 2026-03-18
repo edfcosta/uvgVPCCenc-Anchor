@@ -648,38 +648,26 @@ template<typename indexType>
 void childPPIAttribution(const robin_hood::unordered_map<indexType, size_t>& childToParentX,
                          const robin_hood::unordered_map<indexType, size_t>& childToParentY,
                          const robin_hood::unordered_map<indexType, size_t>& childToParentZ, std::vector<size_t>& pointPPIs) {
-    for (size_t ptIndexPG = 0; ptIndexPG < pointPPIs.size(); ++ptIndexPG) {
-        if (pointPPIs[ptIndexPG] < 6) continue;  // Already has a PPI
+    const size_t n = pointPPIs.size();
 
-        auto itY = childToParentY.find(ptIndexPG);
-        if (itY != childToParentY.end()) {
-            const size_t ppiParentY = pointPPIs[itY->second];
-            if (ppiParentY < 6) {
-                pointPPIs[ptIndexPG] = ppiParentY;
-                continue;
-            }
+    for (indexType i = 0; i < n; ++i) {
+        size_t& ppi = pointPPIs[i];
+
+        if (ppi < 6) continue;
+
+        const size_t y = pointPPIs[childToParentY.at(i)];
+        const size_t x = pointPPIs[childToParentX.at(i)];
+        const size_t z = pointPPIs[childToParentZ.at(i)];
+
+        assert(x < 6 && y < 6 && z < 6);
+
+        if(x == y || x == z) {
+            ppi = x;
+        } else {
+            ppi = y;
         }
-
-        auto itX = childToParentX.find(ptIndexPG);
-        if (itX != childToParentX.end()) {
-            const size_t ppiParentX = pointPPIs[itY->second];
-            if (ppiParentX < 6) {
-                pointPPIs[ptIndexPG] = ppiParentX;
-                continue;
-            }
-        }
-
-        auto itZ = childToParentZ.find(ptIndexPG);
-        if (itZ != childToParentZ.end()) {
-            const size_t ppiParentZ = pointPPIs[itY->second];
-            if (ppiParentZ < 6) {
-                pointPPIs[ptIndexPG] = ppiParentZ;
-                continue;
-            }
-        }
-
-        assert(false);  // No valid parent found (impossible)
     }
+
 }
 
 void createSlices(const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
@@ -1045,7 +1033,7 @@ void finalPPIAttributionSlowPreset(const std::shared_ptr<uvgvpcc_enc::FrameConte
     // Slow preset pipeline:
     // 1) First propagate PPI from parents to children
     // 2) Then refine segmentation on all points
-    childPPIAttribution(childToParentX, childToParentY, childToParentZ, pointPPIs);
+    childPPIAttribution<indexType>(childToParentX, childToParentY, childToParentZ, pointPPIs);
     PPISegmenter_NewRS ppiSegmenter_NewRS(pointsGeometry, normalBool);
 
 
