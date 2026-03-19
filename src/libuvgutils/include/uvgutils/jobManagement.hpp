@@ -34,9 +34,9 @@
 #include <functional>
 #include <memory>
 #include <optional>
-#include <unordered_map>
 
 #include "threadqueue.hpp"
+#include "uvgutils/robin_hood.h"
 #include "uvgutils/log.hpp"
 
 #define JOBF(gofId, frameId, priority, func, ...) \
@@ -79,10 +79,10 @@ namespace uvgutils {
 
 struct JobManager {
     static std::unique_ptr<ThreadQueue> threadQueue;
-    static std::unique_ptr<std::unordered_map<jobKey, std::shared_ptr<Job>>> previousGOFJobMap;
-    static std::unique_ptr<std::unordered_map<jobKey, std::shared_ptr<Job>>> previousFrameJobMap;
-    static std::unique_ptr<std::unordered_map<jobKey, std::shared_ptr<Job>>> currentGOFJobMap;
-    static std::unique_ptr<std::unordered_map<jobKey, std::shared_ptr<Job>>> currentFrameJobMap;
+    static std::unique_ptr<robin_hood::unordered_map<jobKey, std::shared_ptr<Job>>> previousGOFJobMap;
+    static std::unique_ptr<robin_hood::unordered_map<jobKey, std::shared_ptr<Job>>> previousFrameJobMap;
+    static std::unique_ptr<robin_hood::unordered_map<jobKey, std::shared_ptr<Job>>> currentGOFJobMap;
+    static std::unique_ptr<robin_hood::unordered_map<jobKey, std::shared_ptr<Job>>> currentFrameJobMap;
 
     template <typename Func, typename... Args>
     static std::shared_ptr<Job> make_job(const size_t& gofId, const size_t& frameId, std::size_t priority, std::string funcName, Func&& func,

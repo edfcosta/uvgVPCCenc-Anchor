@@ -38,8 +38,9 @@
 #include <memory>
 #include <optional>
 #include <string>
-#include <unordered_map>
 #include <utility>
+
+#include "uvgutils/robin_hood.h"
 
 #include "uvgutils/log.hpp"
 #include "uvgutils/threadqueue.hpp"
@@ -93,10 +94,10 @@ namespace uvgutils {
 
 // Static member definitions
 std::unique_ptr<ThreadQueue> JobManager::threadQueue = nullptr;
-std::unique_ptr<std::unordered_map<jobKey, std::shared_ptr<Job>>> JobManager::previousGOFJobMap = nullptr;
-std::unique_ptr<std::unordered_map<jobKey, std::shared_ptr<Job>>> JobManager::previousFrameJobMap = nullptr;
-std::unique_ptr<std::unordered_map<jobKey, std::shared_ptr<Job>>> JobManager::currentGOFJobMap = nullptr;
-std::unique_ptr<std::unordered_map<jobKey, std::shared_ptr<Job>>> JobManager::currentFrameJobMap = nullptr;
+std::unique_ptr<robin_hood::unordered_map<jobKey, std::shared_ptr<Job>>> JobManager::previousGOFJobMap = nullptr;
+std::unique_ptr<robin_hood::unordered_map<jobKey, std::shared_ptr<Job>>> JobManager::previousFrameJobMap = nullptr;
+std::unique_ptr<robin_hood::unordered_map<jobKey, std::shared_ptr<Job>>> JobManager::currentGOFJobMap = nullptr;
+std::unique_ptr<robin_hood::unordered_map<jobKey, std::shared_ptr<Job>>> JobManager::currentFrameJobMap = nullptr;
 
 // jobKey constructors
 jobKey::jobKey(const size_t& gofId, const size_t& frameId, const std::string& funcName)
@@ -137,8 +138,8 @@ std::shared_ptr<Job> JobManager::getJob(size_t gofId, const std::string& funcNam
 void JobManager::initThreadQueue(uint16_t numThreads) {
     threadQueue = std::make_unique<ThreadQueue>();
     threadQueue->initThreadQueue(numThreads);
-    currentGOFJobMap = std::make_unique<std::unordered_map<jobKey, std::shared_ptr<Job>>>();
-    currentFrameJobMap = std::make_unique<std::unordered_map<jobKey, std::shared_ptr<Job>>>();
+    currentGOFJobMap = std::make_unique<robin_hood::unordered_map<jobKey, std::shared_ptr<Job>>>();
+    currentFrameJobMap = std::make_unique<robin_hood::unordered_map<jobKey, std::shared_ptr<Job>>>();
 }
 
 void JobManager::submitCurrentFrameJobs() {
@@ -148,7 +149,7 @@ void JobManager::submitCurrentFrameJobs() {
         }
     }
     previousFrameJobMap = std::move(currentFrameJobMap);
-    currentFrameJobMap = std::make_unique<std::unordered_map<jobKey, std::shared_ptr<Job>>>();
+    currentFrameJobMap = std::make_unique<robin_hood::unordered_map<jobKey, std::shared_ptr<Job>>>();
 }
 
 void JobManager::submitCurrentGOFJobs() {
@@ -158,7 +159,7 @@ void JobManager::submitCurrentGOFJobs() {
         }
     }
     previousGOFJobMap = std::move(currentGOFJobMap);
-    currentGOFJobMap = std::make_unique<std::unordered_map<jobKey, std::shared_ptr<Job>>>();
+    currentGOFJobMap = std::make_unique<robin_hood::unordered_map<jobKey, std::shared_ptr<Job>>>();
 }
 
 }  // namespace uvgutils

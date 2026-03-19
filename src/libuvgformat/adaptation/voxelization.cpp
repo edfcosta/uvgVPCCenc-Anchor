@@ -36,8 +36,7 @@
 #include <cmath>
 #include <cstdint>
 #include <string>
-#include <unordered_map>
-#include <unordered_set>
+#include "uvgutils/robin_hood.h"
 
 #include "uvgutils/log.hpp"
 #include "utils/parameters.hpp"
@@ -142,7 +141,7 @@ uvgFramePayload voxelize(const std::vector<std::array<double, 3>>& rawGeo,
 
     if (rawAttr != nullptr) {
         // GeometryRgb: accumulate attribute values per voxel, average at the end.
-        std::unordered_map<uint64_t, AttrAccum> accumMap;
+        robin_hood::unordered_map<uint64_t, AttrAccum> accumMap;
         accumMap.reserve(n);
         std::vector<uint64_t> insertionOrder;
         insertionOrder.reserve(n);
@@ -192,7 +191,7 @@ uvgFramePayload voxelize(const std::vector<std::array<double, 3>>& rawGeo,
 
     } else {
         // GeometryOnly: deduplication only, first occurrence wins.
-        std::unordered_set<uint64_t> seenKeys;
+        robin_hood::unordered_set<uint64_t> seenKeys;
         seenKeys.reserve(n);
         std::vector<uint64_t> insertionOrder;
         insertionOrder.reserve(n);

@@ -36,7 +36,7 @@
 
 #include <cstdint>
 #include <vector>
-#include "patchGeneration/robin_hood.h"
+#include "uvgutils/robin_hood.h"
 #include "utils/constants.hpp"
 #include "uvgutils/utils.hpp"
 #include "utils/types.hpp"
