@@ -35,7 +35,7 @@
 #include <vector>
 
 #include "atlas_context.hpp"
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 #include "video_sub_bitstream.hpp"
 #include "vps.hpp"
 

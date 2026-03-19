@@ -32,7 +32,7 @@
 
 /// \file Functions related to the background filling of the geometry maps
 
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 using namespace uvgvpcc_enc;
 
 void bgFillGeometry(const std::vector<uint8_t>& occupancyMapDS,const size_t gofMapsHeight,std::vector<uint8_t>& geometryMap); //TODO(lf): bgFillAttribute use frame as argument

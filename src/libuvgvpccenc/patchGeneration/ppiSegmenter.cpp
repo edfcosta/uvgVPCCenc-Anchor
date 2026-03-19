@@ -49,7 +49,7 @@
 #include "uvgutils/utils.hpp"
 #include "utilsPatchGeneration.hpp"
 #include "uvgutils/log.hpp"
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 #include "utils/statsCollector.hpp"
 
 using namespace uvgvpcc_enc;

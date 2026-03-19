@@ -32,7 +32,7 @@
 
 /// \file Functions related to the background filling of the attribute maps
 
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 #include "utils/frameContext.hpp"
 
 using namespace uvgvpcc_enc;

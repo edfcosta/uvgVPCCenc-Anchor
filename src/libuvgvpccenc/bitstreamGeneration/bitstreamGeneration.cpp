@@ -48,7 +48,7 @@
 #include "gof.hpp"
 #include "utils/parameters.hpp"
 #include "uvgutils/log.hpp"
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 #include "video_sub_bitstream.hpp"
 #include "vps.hpp"
 #include "../utils/statsCollector.hpp"

@@ -37,7 +37,7 @@
 
 #include <kvazaar.h>
 
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 #include "abstract2DMapEncoder.hpp"
 
 using namespace uvgvpcc_enc;

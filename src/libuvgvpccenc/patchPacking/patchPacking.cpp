@@ -48,7 +48,7 @@
 #include "utils/constants.hpp"
 #include "uvgutils/utils.hpp"
 #include "uvgutils/log.hpp"
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 
 using namespace uvgvpcc_enc;
 

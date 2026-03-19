@@ -32,7 +32,7 @@
 
 /// \file Main file of the uvgVPCCenc library that defines the main structures (GOF, frame, patch) and the API.
 
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 #include "utils/frameContext.hpp"
 
 #include <algorithm>

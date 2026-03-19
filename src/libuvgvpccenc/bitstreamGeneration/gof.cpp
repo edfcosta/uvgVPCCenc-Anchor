@@ -43,7 +43,7 @@
 #include "bitstream_common.hpp"
 #include "bitstream_util.hpp"
 #include "uvgutils/log.hpp"
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 #include "video_sub_bitstream.hpp"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast,cppcoreguidelines-owning-memory,cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays)

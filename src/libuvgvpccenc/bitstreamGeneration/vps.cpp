@@ -39,7 +39,7 @@
 #include <stdexcept>
 
 #include "bitstream_util.hpp"
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 
 vps::vps(const uvgvpcc_enc::Parameters& paramUVG, const std::shared_ptr<uvgvpcc_enc::GOF>& gofUVG) {
     if (paramUVG.occupancyEncoderName=="Kvazaar" && paramUVG.geometryEncoderName=="Kvazaar" && paramUVG.attributeEncoderName=="Kvazaar" /*|| paramUVG.useEncoderCommand*/) {

@@ -39,7 +39,7 @@
 
 #include "utils/constants.hpp"
 #include "uvgutils/utils.hpp"
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 #include "frameContext.hpp"
 
 using namespace uvgvpcc_enc;

@@ -35,7 +35,7 @@
 #include <cmath>
 
 #include "bitstream_common.hpp"
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 
 struct ref_list_struct {
     uint8_t num_ref_entries = 0;

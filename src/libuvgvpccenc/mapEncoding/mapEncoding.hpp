@@ -32,7 +32,7 @@
 
 /// \file Entry point for the map encoding process.
 
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 
 namespace MapEncoding {
 void initializeStaticParameters();

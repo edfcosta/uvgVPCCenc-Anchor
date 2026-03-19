@@ -34,7 +34,7 @@
 
 /// \file Abstract class defining the behaviour of any 2D encoder to be used within the uvgVPCCenc library. 
 
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 
 enum ENCODER_TYPE {OCCUPANCY, GEOMETRY, ATTRIBUTE};
 

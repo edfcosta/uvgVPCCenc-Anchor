@@ -17,7 +17,7 @@ add_subdirectory(mapGeneration)
 
 set(LIB_SOURCES
     version.cpp
-    uvgvpcc.cpp
+    uvgvpccenc.cpp
 )
 
 if(BUILD_SHARED_LIBS)

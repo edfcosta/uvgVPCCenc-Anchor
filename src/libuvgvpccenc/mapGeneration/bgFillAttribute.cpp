@@ -44,7 +44,7 @@
 #include <vector>
 
 #include "utils/parameters.hpp"
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 
 using namespace uvgvpcc_enc;
 

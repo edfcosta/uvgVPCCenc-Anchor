@@ -43,7 +43,7 @@
 
 #include "uvgformat/uvgFramePayload.hpp"
 #include "uvgformat/uvgFrame.hpp"
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 #include "utils/parameters.hpp"
 
 namespace uvgvpcc_enc {

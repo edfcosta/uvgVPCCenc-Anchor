@@ -45,7 +45,7 @@
 
 #include "extras/getopt.h"
 #include "uvgutils/log.hpp"
-#include "uvgvpcc/version.hpp"
+#include "uvgvpccenc/version.hpp"
 
 namespace cli {
 

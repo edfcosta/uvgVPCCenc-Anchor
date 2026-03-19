@@ -47,7 +47,7 @@
 #include "utilsPatchGeneration.hpp"
 #include "uvgutils/log.hpp"
 #include "uvgutils/utils.hpp"
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 
 using namespace uvgvpcc_enc;
 

@@ -56,7 +56,7 @@
 #include "utils/parameters.hpp"
 #include "utils/constants.hpp"
 #include "uvgutils/utils.hpp"
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 
 using namespace uvgvpcc_enc;
 using namespace std;

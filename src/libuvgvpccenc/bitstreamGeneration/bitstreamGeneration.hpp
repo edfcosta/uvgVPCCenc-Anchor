@@ -35,7 +35,7 @@
 /// \file Entry point for the whole bitstream generation process.
 
 #include "utils/parameters.hpp"
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 
 class BitstreamGeneration {
    public:

@@ -48,7 +48,7 @@
 #include "utils/fileExport.hpp"
 #include "utils/parameters.hpp"
 #include "uvgutils/log.hpp"
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 
 extern "C" {
 #include <libavcodec/avcodec.h>

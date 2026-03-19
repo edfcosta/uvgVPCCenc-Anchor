@@ -36,7 +36,7 @@
 
 #include <cassert>
 #include "../patchGeneration/robin_hood.h"
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 #include "constants.hpp"
 
 namespace uvgvpcc_enc {

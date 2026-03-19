@@ -61,7 +61,7 @@
 #include "uvgformat/uvgFrame.hpp"
 #include "uvgutils/log.hpp"
 #include "uvgutils/utils.hpp"
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 #include "../libuvgvpccenc/utils/statsCollector.hpp"
 #include "../libuvgvpccenc/utils/parameters.hpp"
 

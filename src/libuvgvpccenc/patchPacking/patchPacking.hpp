@@ -37,7 +37,7 @@
 
 #include <span>
 
-#include "uvgvpcc/uvgvpcc.hpp"
+#include "uvgvpccenc/uvgvpccenc.hpp"
 #include "utils/frameContext.hpp"
 
 enum PCCaxisSwap {
