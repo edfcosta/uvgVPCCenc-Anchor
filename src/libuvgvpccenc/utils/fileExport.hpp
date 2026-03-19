@@ -39,8 +39,8 @@
 
 #include "utils/constants.hpp"
 #include "uvgutils/utils.hpp"
-#include "uvgvpccenc/uvgvpccenc.hpp"
-#include "frameContext.hpp"
+#include "utils/types.hpp"
+#include "types.hpp"
 
 using namespace uvgvpcc_enc;
 

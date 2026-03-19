@@ -39,7 +39,7 @@
 #include "patchGeneration/robin_hood.h"
 #include "utils/constants.hpp"
 #include "uvgutils/utils.hpp"
-#include "uvgvpccenc/uvgvpccenc.hpp"
+#include "utils/types.hpp"
 
 using namespace uvgvpcc_enc;
 

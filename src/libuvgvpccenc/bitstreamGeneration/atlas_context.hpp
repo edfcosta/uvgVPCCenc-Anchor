@@ -38,8 +38,8 @@
 #include "bitstream_common.hpp"
 #include "bitstream_util.hpp"
 #include "utils/parameters.hpp"
-#include "uvgvpccenc/uvgvpccenc.hpp"
-#include "utils/frameContext.hpp"
+#include "utils/types.hpp"
+#include "utils/types.hpp"
 
 /* Atlas context is used to hold the atlas data (inside V3C_AD unit) of a single GOF */
 class atlas_context {

@@ -39,7 +39,7 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 }
 
-#include "uvgvpccenc/uvgvpccenc.hpp"
+#include "utils/types.hpp"
 #include "abstract2DMapEncoder.hpp"
 
 #include <map>

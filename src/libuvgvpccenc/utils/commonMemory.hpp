@@ -36,12 +36,10 @@
 
 #include <cassert>
 #include "../patchGeneration/robin_hood.h"
-#include "uvgvpccenc/uvgvpccenc.hpp"
+#include "utils/types.hpp"
 #include "constants.hpp"
 
 namespace uvgvpcc_enc {
-
-struct Patch;
 
 class CommonMemory {
     

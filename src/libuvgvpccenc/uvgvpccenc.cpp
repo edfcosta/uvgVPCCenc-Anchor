@@ -30,10 +30,10 @@
  * INCLUDING NEGLIGENCE OR OTHERWISE ARISING IN ANY WAY OUT OF THE USE OF THIS
  ****************************************************************************/
 
-/// \file Main file of the uvgVPCCenc library that defines the main structures (GOF, frame, patch) and the API.
+/// \file Main file of the uvgVPCCenc library. Implements the public API.
 
+#include "utils/types.hpp"
 #include "uvgvpccenc/uvgvpccenc.hpp"
-#include "utils/frameContext.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -521,41 +521,6 @@ static void initializeContext() {
 }  // anonymous namespace
 
 const Parameters* p_ = &param;
-
-void FrameContext::printInfo() const {
-    uvgutils::Logger::log<uvgutils::LogLevel::DEBUG>(
-        "FRAME-INFO", "Frame " + std::to_string(frameId) + " :\n" + "\tPath: " + uvgframe->sourcePath + "\n" + "\tFrame Number: " +
-                            std::to_string(frameNumber) + "\n" + "\tpointsGeometry size: " + std::to_string(pointsGeometry.size()) + "\n" +
-                            "\tpointsAttribute size: " + std::to_string(pointsAttribute.size()) + "\n");
-}
-
-GOF::GOF(const size_t& id) : gofId(id) {
-    auto& cm = CommonMemory::get();
-    framePatches         = cm.getOrCreateFramePatches        (gofId);
-    frameOccupancyMaps   = cm.getOrCreateFrameOccupancyMaps  (gofId);
-    frameOccupancyMapsDS = cm.getOrCreateFrameOccupancyMapsDS(gofId);
-    frameGeometryMapsL1  = cm.getOrCreateFrameGeometryMapsL1 (gofId);
-    frameGeometryMapsL2  = cm.getOrCreateFrameGeometryMapsL2 (gofId);
-    frameAttributeMapsL1 = cm.getOrCreateFrameAttributeMapsL1(gofId);
-    frameAttributeMapsL2 = cm.getOrCreateFrameAttributeMapsL2(gofId);
-}
-
-void GOF::setFrameMemoryPtrs(std::shared_ptr<FrameContext>& frame) {
-    const size_t framePos = frame->frameId % p_->sizeGOF;
-    frame->patchList = &(*framePatches)[framePos];
-
-    frame->occupancyMap = &(*frameOccupancyMaps)[framePos];
-    frame->occupancyMap = &(*frameOccupancyMaps)[framePos];
-    frame->occupancyMapDS = &(*frameOccupancyMapsDS)[framePos];
-    frame->geometryMapL1 = &(*frameGeometryMapsL1)[framePos];
-    frame->geometryMapL2 = &(*frameGeometryMapsL2)[framePos];
-    frame->attributeMapL1 = &(*frameAttributeMapsL1)[framePos];
-    frame->attributeMapL2 = &(*frameAttributeMapsL2)[framePos];
-}
-
-GOF::~GOF() {
-    CommonMemory::get().clearGofMaps(gofId);
-}
 
 /// @brief Create the context of the uvgVPCCenc encoder. Parse the input parameters and verify if the given configuration is valid. Initialize
 /// static parameters and function pointers.

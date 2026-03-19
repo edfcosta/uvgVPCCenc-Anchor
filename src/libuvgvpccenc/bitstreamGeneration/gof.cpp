@@ -43,6 +43,7 @@
 #include "bitstream_common.hpp"
 #include "bitstream_util.hpp"
 #include "uvgutils/log.hpp"
+#include "utils/types.hpp"
 #include "uvgvpccenc/uvgvpccenc.hpp"
 #include "video_sub_bitstream.hpp"
 

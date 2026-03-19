@@ -30,173 +30,21 @@
  * INCLUDING NEGLIGENCE OR OTHERWISE ARISING IN ANY WAY OUT OF THE USE OF THIS
  ****************************************************************************/
 
+/// \file Main file of the uvgVPCCenc library. Defines the public API.
+
 #pragma once
 
-#include <array>
-#include <cassert>
 #include <cstddef>
-#include <cstdint>
-#include <iostream>
 #include <memory>
+#include <mutex>
 #include <queue>
 #include <semaphore>
-#include <sstream>
 #include <string>
 #include <vector>
 
-#include "../utils/constants.hpp"
-#include "uvgutils/utils.hpp"
 #include "uvgformat/uvgFrame.hpp"
-// #include "../utils/commonMemory.hpp"
-
-/// \file Main file of the uvgVPCCenc library that defines the main structures (GOF, frame, patch) and the API.
-
-// TODO(lf): why in include/uvgvpcc/ ? What about the related .cpp Why not "include/" only ?
 
 namespace uvgvpcc_enc {
-
-// A patch is a 3D object. Though, the word 'patch' can refer to the "2D version" of this patch
-struct Patch {
-    size_t patchIndex_;
-    size_t patchPpi_;  // viewId
-
-    size_t normalAxis_;     // x
-    size_t tangentAxis_;    // y
-    size_t bitangentAxis_;  // z
-
-    size_t posU_;  // u1_ minU_       // tangential shift
-    size_t posV_;  // v1_ minV_       // bitangential shift
-    size_t posD_;  // d1_ minD_       // depth shift
-
-    bool projectionMode_;  // 0: related to the min depth value; 1: related to the max value
-
-    size_t sizeD_;  // while posD_ is the minimum 'depth', sizeD_ store the maximum depth. TODO(lf): check if it is usefull
-
-    std::vector<uint8_t> patchOccupancyMap_;  // patch occupancy map (boolean vector)
-
-    size_t widthInPixel_ = 0;   // size for U  // width of the patch occupancy map (in pixels)
-    size_t heightInPixel_ = 0;  // size for V  // height of the patch occupancy map (in pixels)
-
-    size_t widthInOccBlk_;  // sizeU0_     // width of the patch occupancy map within the down-scaled frame occupancy map (in DS occupancy map
-                            // blocks).
-    size_t heightInOccBlk_;  // sizeV0_     // height of the patch occupancy map within the down-scaled frame occupancy map (in DS occupancy
-                             // map blocks).
-
-    size_t omDSPosX_;  // u0_         // location in down-scaled occupancy map  // lf  posBlkU
-    size_t omDSPosY_;  // v0_         // location in down-scaled occupancy map
-
-    bool axisSwap_;  // patch orientation    // in canvas atlas  (false default, true axis swap)
-
-    std::vector<typeGeometryInput> depthL1_;  // depth value First layer // TODO(lf): Using the geo type here might lead to issue?
-    std::vector<typeGeometryInput> depthL2_;  // depth value Second layer
-
-    // Index of the point in the PC for attribute retrieving during attribute map generation TODO(lf): use for Surface separation?
-    std::vector<size_t> depthPCidxL1_;
-    std::vector<size_t> depthPCidxL2_;
-
-    // inter packing //
-    size_t area_ = 0;
-
-    size_t referencePatchId_ = g_infinitenumber;
-    // Store the id of the best reference patch in the previous frame. Notice that even if the current patch is not
-    // matched, a reference patch id is still found. Then, this reference id will be used to check if the iou treshold
-    // is respected or not, then indicating if this patch is matched or not.
-
-    size_t bestMatchIdx = INVALID_PATCH_INDEX;
-    // Store not the id but the position in the list of patch of the best reference patch in the previous frame. Notice that even if
-    // the current patch is not matched, a reference patch id is still found. Then, this reference id will be used to check if the
-    // iou treshold is respected or not, then indicating if this patch is matched or not.
-    bool isLinkToAMegaPatch = false;
-    size_t unionPatchReferenceIdx = INVALID_PATCH_INDEX;
-
-    bool isDiscarded = false; // If dynamicMapHeight=false et minimumMapHeight=??? is too small, then some patch can't be packed. There are then discarded (they will not be encoded).
-
-    void setAxis(size_t normalAxis, size_t tangentAxis, size_t bitangentAxis, bool projectionMode) {
-        normalAxis_ = normalAxis;
-        tangentAxis_ = tangentAxis;
-        bitangentAxis_ = bitangentAxis;
-        projectionMode_ = projectionMode;  // TODO(lf): projection mode optimization per patch
-    }
-
-    inline void setPatchPpiAndAxis(size_t patchPpi) {
-        patchPpi_ = patchPpi;
-        // now set the other variables according to the viewId
-        switch (patchPpi_) {
-            case 0:
-                setAxis(0, 2, 1, 0);
-                break;
-            case 1:
-                setAxis(1, 2, 0, 0);
-                break;
-            case 2:
-                setAxis(2, 0, 1, 0);
-                break;
-            case 3:
-                setAxis(0, 2, 1, 1);
-                break;
-            case 4:
-                setAxis(1, 2, 0, 1);
-                break;
-            case 5:
-                setAxis(2, 0, 1, 1);
-                break;
-            default:
-                throw std::runtime_error("ViewId (" + std::to_string(patchPpi) + ") not allowed... exiting");
-                break;
-        }
-    }
-
-    std::string toString() const {
-        std::stringstream str;
-        str << "patchIndex=" << patchIndex_;
-        str << ", patchPpi=" << patchPpi_;
-        str << ", normalAxis=" << normalAxis_;
-        str << ", tangentAxis=" << tangentAxis_;
-        str << ", bitangentAxis=" << bitangentAxis_;
-        str << ", projectionMode=" << projectionMode_;
-        str << ", minU=" << posU_;
-        str << ", minV=" << posV_;
-        str << ", minD=" << posD_;
-        str << ", sizeD=" << sizeD_;
-        str << ", sizeU=" << widthInPixel_;
-        str << ", sizeV=" << heightInPixel_;
-        str << ", sizeUom=" << widthInOccBlk_;
-        str << ", sizeVom=" << heightInOccBlk_;
-        str << ", omDSPosX_=" << omDSPosX_;
-        str << ", omDSPosY_=" << omDSPosY_;
-        str << ", axisSwap=" << axisSwap_;
-        return str.str();
-    }
-};
-
-// Forward declaration for internal encoder frame state (defined in frameContext.hpp).
-struct FrameContext;
-
-struct GOF {
-    std::vector<std::shared_ptr<FrameContext>> frames;
-    size_t nbFrames;
-    size_t gofId;
-
-    size_t mapHeightGOF;
-    size_t mapHeightDSGOF;
-
-    std::vector<uint8_t> bitstreamOccupancy;
-    std::vector<uint8_t> bitstreamGeometry;
-    std::vector<uint8_t> bitstreamAttribute;
-
-    // lf: centralized memory handling //
-    std::array<std::vector<Patch>, MAX_GOF_SIZE>* framePatches;
-    std::array<std::vector<uint8_t>, MAX_GOF_SIZE>* frameOccupancyMaps;
-    std::array<std::vector<uint8_t>, MAX_GOF_SIZE>* frameOccupancyMapsDS;
-    std::array<std::vector<uint8_t>, MAX_GOF_SIZE>* frameGeometryMapsL1;
-    std::array<std::vector<uint8_t>, MAX_GOF_SIZE>* frameGeometryMapsL2;
-    std::array<std::vector<uint8_t>, MAX_GOF_SIZE>* frameAttributeMapsL1;
-    std::array<std::vector<uint8_t>, MAX_GOF_SIZE>* frameAttributeMapsL2;
-
-    GOF(const size_t& gofId);
-    void setFrameMemoryPtrs(std::shared_ptr<FrameContext>& frame);
-    ~GOF();
-};
 
 /// @brief API of the uvgVPCCenc library
 namespace API {

@@ -32,8 +32,8 @@
 
 /// \file Entry point for the map generation process. Use the 2D location of the patch obtained during patch packing to create the occupancy, geometry and attribute 2D maps.
 
-#include "uvgvpccenc/uvgvpccenc.hpp"
-#include "utils/frameContext.hpp"
+#include "utils/types.hpp"
+#include "utils/types.hpp"
 
 using namespace uvgvpcc_enc;
 

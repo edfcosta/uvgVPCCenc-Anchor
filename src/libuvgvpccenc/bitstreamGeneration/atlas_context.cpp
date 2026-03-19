@@ -45,7 +45,7 @@
 #include "bitstream_common.hpp"
 #include "bitstream_util.hpp"
 #include "utils/parameters.hpp"
-#include "uvgvpccenc/uvgvpccenc.hpp"
+#include "utils/types.hpp"
 
 atlas_tile_header atlas_context::create_atlas_tile_header(size_t frameIndex, size_t tileIndex,
                                                           const uvgvpcc_enc::Parameters& paramUVG) const {

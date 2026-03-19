@@ -4,6 +4,7 @@ set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_DEFAULT}")
 
 # Define the library
 add_library(utilsLibrary STATIC
+    types.cpp
     preset.cpp
     parameters.cpp
     fileExport.cpp

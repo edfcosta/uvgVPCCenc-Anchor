@@ -37,8 +37,8 @@
 
 #include <span>
 
-#include "uvgvpccenc/uvgvpccenc.hpp"
-#include "utils/frameContext.hpp"
+#include "utils/types.hpp"
+#include "utils/types.hpp"
 
 enum PCCaxisSwap {
     PATCH_ORIENTATION_DEFAULT = 0,  // 0: default

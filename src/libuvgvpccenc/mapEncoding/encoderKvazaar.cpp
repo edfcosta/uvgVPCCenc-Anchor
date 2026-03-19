@@ -51,7 +51,7 @@
 #include "catchLibLog.hpp"
 #include "utils/fileExport.hpp"
 #include "utils/parameters.hpp"
-#include "uvgvpccenc/uvgvpccenc.hpp"
+#include "utils/types.hpp"
 
 using namespace uvgvpcc_enc;
 

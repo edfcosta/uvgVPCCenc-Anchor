@@ -36,7 +36,7 @@
 
 #include "bitstream_util.hpp"
 #include "utils/parameters.hpp"
-#include "uvgvpccenc/uvgvpccenc.hpp"
+#include "utils/types.hpp"
 
 struct profile_toolset_constraints_information {
     bool ptc_one_v3c_frame_only_flag = false;
