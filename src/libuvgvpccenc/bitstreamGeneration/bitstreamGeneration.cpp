@@ -52,7 +52,7 @@
 #include "uvgvpccenc/uvgvpccenc.hpp"
 #include "video_sub_bitstream.hpp"
 #include "vps.hpp"
-#include "../utils/statsCollector.hpp"
+#include "utils/statsCollector.hpp"
 
 /// \file Entry point for the whole bitstream generation process.
 

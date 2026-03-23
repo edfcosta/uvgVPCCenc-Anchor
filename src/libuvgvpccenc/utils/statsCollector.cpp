@@ -36,24 +36,37 @@
 
 using namespace uvgvpcc_enc;
 
-void StatsCollector::init(std::size_t nbFrames) {
-    // Init the stats_ container number to the number of frames (take under consideration de loops ?)
-    stats_.resize(nbFrames);
+void StatsCollector::init(std::size_t frameID) {
+    // Init the stats_ container number to the frameID.
+    // Check if there is memory allocation for the new data
+        // Size should be = max(frameID)
+        // if stats_=[s1, s2, s3] and frame 5 comes :
+            // 1- frame 4 exists
+            // 2- resize to stats_=[s1, s2, s3, _, _]
+            // 3- fill with the new data : stats_=[s1, s2, s3, _, s5]
+    if(stats_.size() <= frameID) {
+        stats_.resize(frameID+1);
+    }
+
 
     // Resize the vectors to the number of iterations
     size_t refineIterations = p_->refineSegmentationIterationCount;
     for(auto& statContainer : stats_){
-        statContainer.skippedVoxels.resize(refineIterations);
-        statContainer.ppiChange.resize(refineIterations);
-        statContainer.NoEdge.resize(refineIterations);
-        statContainer.IndirectEdge.resize(refineIterations);
-        statContainer.SingleEdge.resize(refineIterations);
-        statContainer.MultiEdge.resize(refineIterations);
-        statContainer.scoreComputations.resize(refineIterations);
-        statContainer.NoEdge_R.resize(refineIterations);
-        statContainer.IndirectEdge_R.resize(refineIterations);
-        statContainer.SingleEdge_R.resize(refineIterations);
-        statContainer.MultiEdge_R.resize(refineIterations);
+        if(statContainer.hasBeenInitialized == false){
+            statContainer.skippedVoxels.resize(refineIterations);
+            statContainer.ppiChange.resize(refineIterations);
+            statContainer.NoEdge.resize(refineIterations);
+            statContainer.IndirectEdge.resize(refineIterations);
+            statContainer.SingleEdge.resize(refineIterations);
+            statContainer.MultiEdge.resize(refineIterations);
+            statContainer.scoreComputations.resize(refineIterations);
+            statContainer.NoEdge_R.resize(refineIterations);
+            statContainer.IndirectEdge_R.resize(refineIterations);
+            statContainer.SingleEdge_R.resize(refineIterations);
+            statContainer.MultiEdge_R.resize(refineIterations);
+            
+            statContainer.hasBeenInitialized = true;
+        }
     }
 }
 

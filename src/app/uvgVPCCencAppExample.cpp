@@ -62,8 +62,6 @@
 #include "uvgutils/log.hpp"
 #include "uvgutils/utils.hpp"
 #include "uvgvpccenc/uvgvpccenc.hpp"
-#include "../libuvgvpccenc/utils/statsCollector.hpp"
-#include "../libuvgvpccenc/utils/parameters.hpp"
 
 #ifdef ENABLE_V3CRTP
 #include <uvgv3crtp/v3c_api.h>
@@ -561,9 +559,6 @@ int main(const int argc, const char* const argv[]) {
     if (!appParameters.dstAddress.empty())
         v3c_sender_thread = std::thread(v3c_sender, &output, appParameters.dstAddress, appParameters.dstPort, appParameters.sdpOutdir);
 
-    if(uvgvpcc_enc::p_->exportStatistics){
-        stats.init(appParameters.nbFrames);
-    }
 
     // Main loop of the application, feeding one frame to the encoder at each iteration
     for (;;) {

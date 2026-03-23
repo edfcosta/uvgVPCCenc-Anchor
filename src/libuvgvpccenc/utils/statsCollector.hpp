@@ -58,6 +58,7 @@ enum class DataId {
 };
 
 struct uvgVPCCencStats {
+    bool hasBeenInitialized = false;
         /*--------- General ---------*/
             // Number of points of the point cloud
     size_t NumberOfPoints;

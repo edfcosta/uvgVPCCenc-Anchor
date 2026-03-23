@@ -95,6 +95,8 @@ void PatchGeneration::generateFramePatches(std::shared_ptr<uvgvpcc_enc::FrameCon
     
     // todo(mf): add the condition for export intermediates files
     if(p_->exportStatistics){
+        // First occurence of the StatCollector for each frame
+        stats.init(frame->frameId);
         stats.collectData(frame->frameId, DataId::NumberOfPoints, frame->pointsGeometry.size());
     }
 
