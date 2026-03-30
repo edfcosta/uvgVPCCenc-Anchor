@@ -66,7 +66,7 @@ void Job::addDependency(const std::shared_ptr<Job>& dependency) {
         return;
     }
     Logger::log<LogLevel::DEBUG>("JOB", getName() + "Adding " + dependency->getName() + " as dependency\n");
-    dependency->mtx_.lock();
+    const std::lock_guard dependencyLock(dependency->mtx_);
     Logger::log<LogLevel::DEBUG>("JOB", getName() + "Dependency locked\n");
     if (dependency->completed_) {
         return;
@@ -80,7 +80,6 @@ void Job::addDependency(const std::shared_ptr<Job>& dependency) {
     dependency->reverseDependencies_.emplace_back(this->shared_from_this());
     Logger::log<LogLevel::DEBUG>("JOB", getName() + dependency->getName() +
                                             " Reverse dependencies: " + std::to_string(dependency->reverseDependencies_.size()) + "\n");
-    dependency->mtx_.unlock();
 }
 
 bool Job::isReady() const { return dependencies_.load() == 0; }
@@ -212,7 +211,7 @@ void ThreadQueue::workerThread() {
                 pushJob(*dep);
                 readyJobs++;
             }
-            job->reverseDependencies_.erase(dep);
+            dep = job->reverseDependencies_.erase(dep);
         }
         for (int i = 0; i < readyJobs - 1; ++i) {
             jobAvailable_.notify_one();
