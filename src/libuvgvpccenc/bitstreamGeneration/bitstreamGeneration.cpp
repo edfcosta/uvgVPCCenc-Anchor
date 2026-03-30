@@ -45,13 +45,12 @@
 #include <vector>
 
 #include "atlas_context.hpp"
-#include "bitstream_common.hpp"
-#include "gof.hpp"
 #include "utils/parameters.hpp"
 #include "uvgutils/log.hpp"
 #include "utils/types.hpp"
 #include "uvgvpccenc/uvgvpccenc.hpp"
 #include "video_sub_bitstream.hpp"
+#include "v3cbitstream.hpp"
 #include "vps.hpp"
 #include "utils/statsCollector.hpp"
 
@@ -59,20 +58,16 @@
 
 using namespace uvgvpcc_enc;
 
-void BitstreamGeneration::createV3CGOFBitstream(const std::shared_ptr<uvgvpcc_enc::GOF>& gofUVG, const uvgvpcc_enc::Parameters& paramUVG,
-                                                uvgvpcc_enc::API::v3c_unit_stream* output) {
+void BitstreamGeneration::createV3CGOFBitstream(const std::shared_ptr<uvgvpcc_enc::GOF>& gofUVG, uvgvpcc_enc::API::v3c_unit_stream* output) {
     uvgutils::Logger::log<uvgutils::LogLevel::INFO>("BITSTREAM GENERATION",
                                                     "GOF " + std::to_string(gofUVG->gofId) + " : Create V3C GOF bitstream using uvgVPCC.\n");
 
-    v3c_gof gof(gofUVG->gofId);
-    gof.set_n_frames(gofUVG->nbFrames);
-
     // --------------- Generate VPS ---------------
-    auto v3c_parameter_set = std::make_unique<vps>(paramUVG, gofUVG);
+    auto v3c_parameter_set = std::make_unique<vps>(gofUVG);
 
     // --------------- Generate atlas context -------------------
     auto atlas = std::make_unique<atlas_context>();
-    atlas->initialize_atlas_context(gofUVG, paramUVG);
+    atlas->initialize_atlas_context(gofUVG);
 
     for (auto& frame : gofUVG->frames) {
         frame.reset();  // Release memory
@@ -109,30 +104,14 @@ void BitstreamGeneration::createV3CGOFBitstream(const std::shared_ptr<uvgvpcc_en
     byteStreamToSampleStream(*bitstream_avd.get(), 4, avd_nals, false);
     std::vector<uint8_t>().swap(gofUVG->bitstreamAttribute);  // Release memory
 
-    // --------------- Calculate V3C unit size precision -------------------------------------------
-    size_t v3c_max_size = v3c_parameter_set.get()->get_vps_byte_len();
-    if (atlas.get()->get_atlas_sub_size() + 4 > v3c_max_size) {
-        v3c_max_size = atlas.get()->get_atlas_sub_size() + 4;
-    }
-    if (bitstream_ovd.get()->size() + 4 > v3c_max_size) {
-        v3c_max_size = bitstream_ovd.get()->size() + 4;
-    }
-    if (bitstream_gvd.get()->size() + 4 > v3c_max_size) {
-        v3c_max_size = bitstream_gvd.get()->size() + 4;
-    }
-    if (bitstream_avd.get()->size() + 4 > v3c_max_size) {
-        v3c_max_size = bitstream_avd.get()->size() + 4;
-    }
-    const uint32_t v3c_precision =
-        static_cast<uint32_t>(std::min(std::max(static_cast<int>(ceil(static_cast<double>(ceilLog2(v3c_max_size)) / 8.0)), 1), 8));
-    gof.set_v3c_unit_precision(v3c_precision);
-
-    /* Move the data pointers to V3C bitstream structure */
-    gof.add_v3c_vps(std::move(v3c_parameter_set));
-    gof.add_v3c_atlas_context(std::move(atlas));
-    gof.add_v3c_ovd_sub(std::move(bitstream_ovd));
-    gof.add_v3c_gvd_sub(std::move(bitstream_gvd));
-    gof.add_v3c_avd_sub(std::move(bitstream_avd));
+    uvgv3cbitstream::V3cGof gof;
+    gof.gof_id = gofUVG->gofId;
+    gof.n_frames = gofUVG->nbFrames;
+    gof.vps = std::move(v3c_parameter_set);
+    gof.atlas = std::move(atlas);
+    gof.ovd = std::move(bitstream_ovd);
+    gof.gvd = std::move(bitstream_gvd);
+    gof.avd = std::move(bitstream_avd);
 
     // ---------- remove intermediate files ----------
     // if (!p_->exportIntermediateMaps /*&& p_->useEncoderCommand*/) {
@@ -140,13 +119,22 @@ void BitstreamGeneration::createV3CGOFBitstream(const std::shared_ptr<uvgvpcc_en
     //     Utils::removeFile(gofUVG->baseNameGeometry + ".hevc");
     //     Utils::removeFile(gofUVG->baseNameAttribute + ".hevc");
     // }
-    if (paramUVG.lowDelayBitstream) {
-        gof.write_v3c_ld_chunk(ovd_nals, gvd_nals, avd_nals, output, paramUVG.doubleLayer);
-    } else {
-        gof.write_v3c_chunk(output);
-    }
+    const std::vector<uvgv3cbitstream::SerializedUnit> serialized_units =
+        p_->lowDelayBitstream ? uvgv3cbitstream::writeV3cLdUnits(gof, ovd_nals, gvd_nals, avd_nals, p_->doubleLayer)
+                                   : uvgv3cbitstream::writeV3cUnits(gof);
 
-    if (paramUVG.displayBitstreamGenerationFps) {
+    uvgvpcc_enc::API::v3c_unit_batch batch;
+    batch.v3c_units.reserve(serialized_units.size());
+    for (const auto& unit : serialized_units) {
+        auto data = std::make_unique<char[]>(unit.len);
+        std::copy_n(unit.data.get(), static_cast<std::ptrdiff_t>(unit.len), data.get());
+        batch.v3c_units.emplace_back(static_cast<uvgvpcc_enc::API::VUT>(unit.type), unit.len, std::move(data));
+    }
+    output->io_mutex.lock();
+    output->v3c_unit_batches.push(std::move(batch));
+    output->io_mutex.unlock();
+
+    if (p_->displayBitstreamGenerationFps) {
         static double lastStampJobCreateV3CGOFBitstream = 0.0;
         const double currentStampJobCreateV3CGOFBitstream = uvgutils::global_timer.elapsed();
         const double ms = currentStampJobCreateV3CGOFBitstream - lastStampJobCreateV3CGOFBitstream;

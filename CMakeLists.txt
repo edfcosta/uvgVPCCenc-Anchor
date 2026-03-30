@@ -71,6 +71,7 @@ add_subdirectory(dependencies)
 # Run subdirectory make files
 add_subdirectory(src/libuvgutils)
 add_subdirectory(src/libuvgformat)
+add_subdirectory(src/libuvgv3cbitstream)
 add_subdirectory(src/libuvgvpccenc)
 add_subdirectory(src/app)
 # add_subdirectory(examples)

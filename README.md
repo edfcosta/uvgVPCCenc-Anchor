@@ -80,6 +80,8 @@ The doxygen is then accessible under docs/html/index.html.
 
 To demonstrate how to use the uvgVPCCenc library, a straightforward example application is provided in src/app, with its main() function located in [uvgVPCCencAppExample.cpp](src/app/uvgVPCCencAppExample.cpp).
 
+The library emits ordered batches of complete V3C units. The application is responsible for packaging those units into a V3C sample stream for file output or transport.
+
 
 
 

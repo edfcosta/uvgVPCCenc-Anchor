@@ -41,6 +41,5 @@
 
 class BitstreamGeneration {
    public:
-    static void createV3CGOFBitstream(const std::shared_ptr<uvgvpcc_enc::GOF>& gofUVG, const uvgvpcc_enc::Parameters& param,
-                                      uvgvpcc_enc::API::v3c_unit_stream* output);
+    static void createV3CGOFBitstream(const std::shared_ptr<uvgvpcc_enc::GOF>& gofUVG, uvgvpcc_enc::API::v3c_unit_stream* output);
 };

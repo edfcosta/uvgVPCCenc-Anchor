@@ -3,39 +3,18 @@
  *
  * Copyright (c) 2024-present, Tampere University, ITU/ISO/IEC, project contributors
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- * 
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * 
- * * Redistributions in binary form must reproduce the above copyright notice, this
- *   list of conditions and the following disclaimer in the documentation and/or
- *   other materials provided with the distribution.
- * 
- * * Neither the name of the Tampere University or ITU/ISO/IEC nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * INCLUDING NEGLIGENCE OR OTHERWISE ARISING IN ANY WAY OUT OF THE USE OF THIS
  ****************************************************************************/
 
 #pragma once
 
-#include <cmath>
+#include <cstddef>
+#include <cstdint>
+#include <memory>
+#include <vector>
 
-#include "bitstream_common.hpp"
-#include "utils/types.hpp"
+#include "const_defs.h"
+
+namespace uvgv3cbitstream {
 
 struct ref_list_struct {
     uint8_t num_ref_entries = 0;
@@ -46,12 +25,11 @@ struct ref_list_struct {
 };
 
 struct atlas_tile_header {
-    // from specification
     bool ath_no_output_of_prior_atlas_frames_flag = false;
     uint16_t ath_atlas_frame_parameter_set_id = 0;
     uint16_t ath_atlas_adaptation_parameter_set_id = 0;
     uint16_t ath_id = 0;
-    ATH_TYPE ath_type;
+    ATH ath_type = I_TILE;
     bool ath_atlas_output_flag = false;
     size_t ath_atlas_frm_order_cnt_lsb = 0;
     bool ath_ref_atlas_frame_list_asps_flag = false;
@@ -69,9 +47,7 @@ struct atlas_tile_header {
 };
 
 struct plr_data {};
-
 struct patch_data_unit {
-    // from spec
     size_t pdu_2d_pos_x = 0;
     size_t pdu_2d_pos_y = 0;
     uint64_t pdu_2d_size_x_minus1 = 0;
@@ -94,10 +70,7 @@ struct raw_patch_data_unit {};
 struct eom_patch_data_unit {};
 
 struct patch_information_data {
-    // helper variable
-    uint8_t patchMode;
-
-    // From specification
+    uint8_t patchMode = 0;
     patch_data_unit patch_data_unit_;
     inter_patch_data_unit inter_patch_data_unit_;
     merge_patch_data_unit merge_patch_data_unit_;
@@ -107,7 +80,6 @@ struct patch_information_data {
 };
 
 struct atlas_tile_data_unit {
-    // from specification
     std::vector<patch_information_data> patch_information_data_;
 };
 
@@ -117,24 +89,23 @@ struct atlas_tile_layer_rbsp {
 };
 
 struct atlas_frame_tile_information {
-    bool afti_single_tile_in_atlas_frame_flag;
-    bool afti_uniform_partition_spacing_flag;
-    uint32_t afti_partition_cols_width_minus1 = 0;  // default initialization
+    bool afti_single_tile_in_atlas_frame_flag = false;
+    bool afti_uniform_partition_spacing_flag = false;
+    uint32_t afti_partition_cols_width_minus1 = 0;
     uint32_t afti_partition_rows_height_minus1 = 0;
     uint32_t afti_num_partition_columns_minus1 = 0;
     uint32_t afti_num_partition_rows_minus1 = 0;
     std::vector<uint32_t> afti_partition_column_width_minus1 = {};
     std::vector<uint32_t> afti_partition_row_height_minus1 = {};
-    bool afti_single_partition_per_tile_flag;
-    uint32_t afti_num_tiles_in_atlas_frame_minus1;
-
+    bool afti_single_partition_per_tile_flag = false;
+    uint32_t afti_num_tiles_in_atlas_frame_minus1 = 0;
     std::vector<uint32_t> afti_top_left_partition_idx;
     std::vector<uint32_t> afti_bottom_right_partition_column_offset;
     std::vector<uint32_t> afti_bottom_right_partition_row_offset;
-    uint32_t afti_auxiliary_video_tile_row_width_minus1;
+    uint32_t afti_auxiliary_video_tile_row_width_minus1 = 0;
     std::vector<uint32_t> afti_auxiliary_video_tile_row_height;
-    bool afti_signalled_tile_id_flag;
-    uint32_t afti_signalled_tile_id_length_minus1;
+    bool afti_signalled_tile_id_flag = false;
+    uint32_t afti_signalled_tile_id_length_minus1 = 0;
     std::vector<uint32_t> afti_tile_id;
 };
 
@@ -163,9 +134,7 @@ struct atlas_sequence_parameter_set {
     uint8_t asps_max_dec_atlas_frame_buffering_minus1 = 0;
     bool asps_long_term_ref_atlas_frames_flag = false;
     uint8_t asps_num_ref_atlas_frame_lists_in_asps = 0;
-
     std::vector<ref_list_struct> ref_lists;
-
     bool asps_use_eight_orientations_flag = false;
     bool asps_extended_projection_enabled_flag = false;
     size_t asps_max_number_projections_minus1 = 5;
@@ -187,7 +156,18 @@ struct atlas_sequence_parameter_set {
     bool asps_vpcc_extension_present_flag = false;
     bool asps_miv_extension_present_flag = false;
     uint8_t asps_extension_6bits = 0;
-
-    bool asps_vpcc_remove_duplicate_point_enabled_flag;
-    uint16_t asps_vpcc_surface_thickness_minus1;
+    bool asps_vpcc_remove_duplicate_point_enabled_flag = false;
+    uint16_t asps_vpcc_surface_thickness_minus1 = 0;
 };
+
+struct AtlasContext {
+    atlas_sequence_parameter_set asps_;
+    atlas_frame_parameter_set afps_;
+    std::vector<atlas_tile_layer_rbsp> atlas_data_;
+    size_t gof_id_ = 0;
+    size_t atlas_sub_size_ = 0;
+    std::vector<size_t> ad_nal_sizes_ = {};
+    size_t ad_nal_precision_ = 0;
+};
+
+}  // namespace uvgv3cbitstream

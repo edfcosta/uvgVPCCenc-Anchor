@@ -44,30 +44,17 @@
 #include <vector>
 
 #include "uvgformat/uvgFrame.hpp"
+#include "v3cbitstream.hpp"
 
 namespace uvgvpcc_enc {
 
 /// @brief API of the uvgVPCCenc library
 namespace API {
 
-/// @brief Bitstream writing miscellaneous
-struct v3c_chunk {
-    size_t len = 0;                // Length of data in buffer
-    std::unique_ptr<char[]> data;  // Actual data (char type can be used to describe a byte. No need for uint8_t or unsigned char types.)
-    std::vector<size_t> v3c_unit_sizes = {};
-
-    v3c_chunk() = default;
-    v3c_chunk(size_t len, std::unique_ptr<char[]> data) : len(len), data(std::move(data)) {}
-};
-
-// ht: A V3C unit stream is composed of only V3C units without parsing information in the bitstream itself. The parsing information is here
-// given separately.
-struct v3c_unit_stream {
-    size_t v3c_unit_size_precision_bytes = 0;
-    std::queue<v3c_chunk> v3c_chunks = {};
-    std::counting_semaphore<> available_chunks{0};
-    std::mutex io_mutex;  // Locks production and consumption in the v3c_chunks queue
-};
+using VUT = uvgv3cbitstream::VUT;
+using v3c_unit = uvgv3cbitstream::v3c_unit;
+using v3c_unit_batch = uvgv3cbitstream::v3c_unit_batch;
+using v3c_unit_stream = uvgv3cbitstream::v3c_unit_stream;
 
 void initializeEncoder();
 void setParameter(const std::string& parameterName, const std::string& parameterValue);

@@ -645,8 +645,7 @@ void API::encodeFrame(std::shared_ptr<uvgformat::uvgFrame> uvgframe, v3c_unit_st
         }
         initGOFMG = JOBG(g_threadHandler.currentGOF->gofId, 3, MapGeneration::initGOFMapGeneration, g_threadHandler.currentGOF);
         encodeGOF = JOBG(g_threadHandler.currentGOF->gofId, 5, MapEncoding::encodeGOFMaps, g_threadHandler.currentGOF);
-        auto bsJob =
-            JOBG(g_threadHandler.currentGOF->gofId, 5, BitstreamGeneration::createV3CGOFBitstream, g_threadHandler.currentGOF, *(p_), output);
+        auto bsJob = JOBG(g_threadHandler.currentGOF->gofId, 5, BitstreamGeneration::createV3CGOFBitstream, g_threadHandler.currentGOF, output);
 
         if (p_->interPatchPacking) {
             initGOFMG->addDependency(ppJob);

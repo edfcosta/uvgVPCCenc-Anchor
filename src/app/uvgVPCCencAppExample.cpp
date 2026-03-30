@@ -33,6 +33,7 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cassert>
 #include <chrono>
 #include <functional>
@@ -87,10 +88,11 @@ struct input_handler_args {
 
     // Picture and thread status passed from input thread to main thread.
     std::shared_ptr<uvgformat::uvgFrame> frame_in;
+    std::atomic<bool> stopRequested;
 
     Retval retval;
     input_handler_args(const cli::opts_t& opts, std::shared_ptr<uvgformat::uvgFrame> frame, Retval retval)
-        : opts(opts), frame_in(std::move(frame)), retval(retval) {}
+        : opts(opts), frame_in(std::move(frame)), stopRequested(false), retval(retval) {}
 };
 
 const size_t MAX_PATH_SIZE = 4096;
@@ -123,9 +125,16 @@ void inputReadThread(const std::shared_ptr<input_handler_args>& args) {
 
     // Producer thread that reads input frames.
     while (run) {
+        if (args->stopRequested.load()) {
+            break;
+        }
+
         // Signal that all input frames has been load
         if (appParameters.nbLoops != 0 && frameId == totalNbFrames) {
             available_input_slot.acquire();
+            if (args->stopRequested.load()) {
+                break;
+            }
             args->frame_in = nullptr;
             args->retval = Retval::Eof;
             filled_input_slot.release();
@@ -169,6 +178,9 @@ void inputReadThread(const std::shared_ptr<input_handler_args>& args) {
 
         // Signal that an item has been produced
         available_input_slot.acquire();
+        if (args->stopRequested.load()) {
+            break;
+        }
         args->frame_in = frame;
         if (returnValue == Retval::Failure) {
             args->retval = Retval::Failure;
@@ -183,9 +195,9 @@ void inputReadThread(const std::shared_ptr<input_handler_args>& args) {
 }
 
 /// @brief Application thread writing the final output bitstream.
-/// @param chunks
+/// @param batches
 /// @param output_path
-void file_writer(uvgvpcc_enc::API::v3c_unit_stream* chunks, const std::string& output_path) {
+void file_writer(uvgvpcc_enc::API::v3c_unit_stream* batches, const std::string& output_path) {
     std::ofstream file(output_path, std::ios::binary);
     if (!file.is_open()) {
         throw std::runtime_error("Bitstream writing : Could not open output file " + output_path);
@@ -194,45 +206,39 @@ void file_writer(uvgvpcc_enc::API::v3c_unit_stream* chunks, const std::string& o
     file.write(&v3c_sample_stream_header, 1);
 
     while (true) {
-        chunks->available_chunks.acquire();
-        chunks->io_mutex.lock();
-        const uvgvpcc_enc::API::v3c_chunk& chunk = chunks->v3c_chunks.front();
-        if (chunk.data == nullptr && chunk.len == 0) {
-            uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("APPLICATION", "All chunks written to file.\n");
+        batches->available_chunks.acquire();
+        batches->io_mutex.lock();
+        const uvgvpcc_enc::API::v3c_unit_batch& batch = batches->v3c_unit_batches.front();
+        if (batch.v3c_units.empty()) {
+            uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("APPLICATION", "All batches written to file.\n");
             file.close();
-            chunks->io_mutex.unlock();
+            batches->io_mutex.unlock();
             break;
         }
-        if (chunk.data != nullptr) {
-            std::ptrdiff_t ptr = 0;  // Keep track of ptr in the V3C unit stream
-            for (const uint64_t current_size : chunk.v3c_unit_sizes) {
-                // Create and write the V3C unit size to file
-                std::array<char, FORCED_V3C_SIZE_PRECISION> size_field{};
-                create_bytes(current_size, size_field.data(), FORCED_V3C_SIZE_PRECISION);
-                file.write(size_field.data(), static_cast<std::streamsize>(FORCED_V3C_SIZE_PRECISION));
+        for (const auto& unit : batch.v3c_units) {
+            std::array<char, FORCED_V3C_SIZE_PRECISION> size_field{};
+            create_bytes(unit.len, size_field.data(), FORCED_V3C_SIZE_PRECISION);
+            file.write(size_field.data(), static_cast<std::streamsize>(FORCED_V3C_SIZE_PRECISION));
 
-                // Write the V3C unit to file
-                // NOLINTNEXTLINE(concurrency-mt-unsafe)
-                file.write(std::next(chunk.data.get(), ptr), static_cast<std::streamsize>(current_size));
-                ptr += static_cast<std::ptrdiff_t>(current_size);
-            }
+            // NOLINTNEXTLINE(concurrency-mt-unsafe)
+            file.write(unit.data.get(), static_cast<std::streamsize>(unit.len));
         }
 
         uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("APPLICATION",
-                                                         "Wrote V3C chunk to file, size " + std::to_string(chunk.len) + " bytes.\n");
+                                                         "Wrote V3C batch to file, units " + std::to_string(batch.v3c_units.size()) + ".\n");
 
-        chunks->v3c_chunks.pop();
-        chunks->io_mutex.unlock();
+        batches->v3c_unit_batches.pop();
+        batches->io_mutex.unlock();
     }
 }
 
 /// @brief Application thread for sending output over RTP.
-/// @param chunks
+/// @param batches
 /// @param dst_address
 /// @param dst_port
 /// @param sdp_output_dir
 // NOLINTNEXTLINE(misc-unused-parameters)
-void v3c_sender(uvgvpcc_enc::API::v3c_unit_stream* chunks, const std::string& dst_address, const std::vector<uint16_t>& dst_port,
+void v3c_sender(uvgvpcc_enc::API::v3c_unit_stream* batches, const std::string& dst_address, const std::vector<uint16_t>& dst_port,
                 const std::string& sdp_output_dir) {
 #ifdef ENABLE_V3CRTP
 
@@ -286,30 +292,29 @@ void v3c_sender(uvgvpcc_enc::API::v3c_unit_stream* chunks, const std::string& ds
             re_init = false;
         }
 
-        // Get chunks and add them to state for sending
-        chunks->available_chunks.acquire();
-        chunks->io_mutex.lock();
+        // Get batches and add them to state for sending
+        batches->available_chunks.acquire();
+        batches->io_mutex.lock();
 
-        const uvgvpcc_enc::API::v3c_chunk& chunk = chunks->v3c_chunks.front();
-        if (chunk.data == nullptr && chunk.len == 0) {
-            uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("V3CRTP", "All chunks sent.\n");
-            chunks->io_mutex.unlock();
+        const uvgvpcc_enc::API::v3c_unit_batch& batch = batches->v3c_unit_batches.front();
+        if (batch.v3c_units.empty()) {
+            uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("V3CRTP", "All batches sent.\n");
+            batches->io_mutex.unlock();
 
             break;
         }
 
         // Add new data to state
-        size_t len = chunk.len;
-        std::ptrdiff_t ptr = 0;  // Keep track of ptr in the V3C unit stream
-        for (const uint64_t current_size : chunk.v3c_unit_sizes) {
+        size_t len = 0;
+        for (const auto& unit : batch.v3c_units) {
             // Add the V3C unit to existing sample stream
             // NOLINTNEXTLINE(concurrency-mt-unsafe)
-            state.append_to_sample_stream(std::next(chunk.data.get(), ptr), static_cast<size_t>(current_size));
-            ptr += static_cast<std::ptrdiff_t>(current_size);
+            state.append_to_sample_stream(unit.data.get(), unit.len);
+            len += unit.len;
         }
 
-        chunks->v3c_chunks.pop();
-        chunks->io_mutex.unlock();
+        batches->v3c_unit_batches.pop();
+        batches->io_mutex.unlock();
 
         // Write SDP files if needed
         if (write_sdp) {
@@ -409,7 +414,7 @@ void v3c_sender(uvgvpcc_enc::API::v3c_unit_stream* chunks, const std::string& ds
                               std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(elapsed_time).count()) + "ms.\n");
         }
 
-        uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("V3CRTP", "Processed V3C chunk of size " + std::to_string(len) + " bytes.\n");
+        uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("V3CRTP", "Processed V3C batch of size " + std::to_string(len) + " bytes.\n");
 
         // Check if we should clear the sample stream
         if (state.num_gofs() >= uvgV3CRTP::RECEIVE_BUFFER_SIZE) {
@@ -552,7 +557,7 @@ int main(const int argc, const char* const argv[]) {
     std::shared_ptr<uvgformat::uvgFrame> currFrame = nullptr;
     available_input_slot.release();
 
-    uvgvpcc_enc::API::v3c_unit_stream output;  // Each v3c chunk gets appended to the V3C unit stream as they are encoded
+    uvgvpcc_enc::API::v3c_unit_stream output;  // Each encoded GOF is appended as an ordered batch of V3C units
     std::thread file_writer_thread;
     std::thread v3c_sender_thread;
 
@@ -560,6 +565,29 @@ int main(const int argc, const char* const argv[]) {
     if (!appParameters.dstAddress.empty())
         v3c_sender_thread = std::thread(v3c_sender, &output, appParameters.dstAddress, appParameters.dstPort, appParameters.sdpOutdir);
 
+    bool outputClosed = false;
+    auto signalOutputEnd = [&]() {
+        if (outputClosed) {
+            return;
+        }
+        const std::lock_guard lock(output.io_mutex);
+        output.v3c_unit_batches.emplace();  // Push empty batch to signal end of data
+        outputClosed = true;
+        output.available_chunks.release();
+    };
+
+    auto stopAndJoinThreads = [&]() {
+        in_args->stopRequested = true;
+        while (available_input_slot.try_acquire()) {
+        }
+        available_input_slot.release();
+
+        signalOutputEnd();
+
+        if (inputTh.joinable()) inputTh.join();
+        if (file_writer_thread.joinable()) file_writer_thread.join();
+        if (v3c_sender_thread.joinable()) v3c_sender_thread.join();
+    };
 
     // Main loop of the application, feeding one frame to the encoder at each iteration
     for (;;) {
@@ -570,6 +598,7 @@ int main(const int argc, const char* const argv[]) {
             break;
         }
         if (in_args->retval == Retval::Failure) {
+            stopAndJoinThreads();
             return EXIT_FAILURE;
         }
         available_input_slot.release();
@@ -581,24 +610,20 @@ int main(const int argc, const char* const argv[]) {
             // Only one try and catch block. All exceptions thrown by the library are catched here.
             uvgutils::Logger::log<uvgutils::LogLevel::FATAL>(
                 "APPLICATION", "Caught exception using uvgvpcc_enc library: " + std::string(e.what()) + " failed after processing\n");
+            stopAndJoinThreads();
             return EXIT_FAILURE;
         }
         frameRead++;
     }
 
-    // After all frames are encoded, an empty v3c_chunk is pushed to output. It signals the end of data to file_writer thread.
+    // After all frames are encoded, an empty batch is pushed to output. It signals end of data to consumer threads.
     uvgvpcc_enc::API::emptyFrameQueue();
-
-    output.io_mutex.lock();
-    output.v3c_chunks.emplace();  // Push empty chunk to signal end of data
-    output.io_mutex.unlock();
-    output.available_chunks.release();
-
-    if (file_writer_thread.joinable()) file_writer_thread.join();
-    if (v3c_sender_thread.joinable()) v3c_sender_thread.join();
+    signalOutputEnd();
 
     uvgutils::Logger::log<uvgutils::LogLevel::INFO>("APPLICATION", "Encoded " + std::to_string(frameRead) + " frames.\n");
 
-    inputTh.join();
+    if (inputTh.joinable()) inputTh.join();
+    if (file_writer_thread.joinable()) file_writer_thread.join();
+    if (v3c_sender_thread.joinable()) v3c_sender_thread.join();
     return EXIT_SUCCESS;
 }

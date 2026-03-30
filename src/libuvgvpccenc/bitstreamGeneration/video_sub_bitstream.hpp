@@ -37,10 +37,9 @@
 #include <string>
 #include <vector>
 
-struct nal_info {
-    size_t location = 0;
-    size_t size = 0;
-};
+#include "v3cbitstream.hpp"
+
+using nal_info = uvgv3cbitstream::nal_info;
 
 /* Read data from file filename into vector data */
 bool read(const std::string &filename, std::vector<uint8_t> &data);
