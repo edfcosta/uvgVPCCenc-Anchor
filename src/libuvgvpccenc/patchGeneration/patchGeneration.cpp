@@ -55,7 +55,7 @@
 #include "uvgutils/log.hpp"
 #include "uvgutils/utils.hpp"
 #include "utils/types.hpp"
-#include "../utils/statsCollector.hpp"
+#include "utils/statsCollector.hpp"
 
 using namespace uvgvpcc_enc;
 

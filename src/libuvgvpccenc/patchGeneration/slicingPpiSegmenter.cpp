@@ -57,28 +57,9 @@ using namespace uvgvpcc_enc;
 PPISegmenter_NewRS::PPISegmenter_NewRS(const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                            const std::vector<bool>& pointsNormals)
     : normalExists_(pointsNormals),
-      pointsGeometry_(pointsGeometry),
-      geoMax_([&]() {
-          // lambda function to initialise the const variable geoMax_
-          typeGeometryInput geoMax = pointsGeometry_[0][0];
-          for (const uvgutils::VectorN<typeGeometryInput, 3>& point : pointsGeometry_) {
-              geoMax = std::max(geoMax, point[0]);
-              geoMax = std::max(geoMax, point[1]);
-              geoMax = std::max(geoMax, point[2]);
-          }
-          return geoMax;
-      }()),
-      geoRange_([&]() {
-          // lambda function to initialise the const variable geoRange_
-          // TODO(lf): warning, the geo range does not take care of negatie value. Is it common for point cloud to have negative value ?
-          typeGeometryInput geoRange = 1;
-          for (typeGeometryInput i = geoMax_ - 1; i != 0U; i >>= 1U, geoRange <<= 1U) {
-              ;
-          }
-          return geoRange;
-      }()) {}
+      pointsGeometry_(pointsGeometry) {}
 
-VoxelAttribute_NewRS::VoxelAttribute_NewRS(const size_t projectionPlaneCount_)
+VoxelAttribute_NewRS::VoxelAttribute_NewRS()
     : updateFlag_(false), voxClass_(VoxClass_NewRS::NO_EDGE), voxPPI_(0), voxScore_{0} {}
 
 // TODO(lf): the number of points in the voxel is usefull only for DE-V voxel no ? So why to set the value for all voxels ?
@@ -294,7 +275,7 @@ void PPISegmenter_NewRS::refineSegmentation_NewRS(const std::shared_ptr<uvgvpcc_
     }
 
     // The 1st classification is made here (+ score computation)
-    std::vector<VoxelAttribute_NewRS> voxAttributeList(voxelCount, VoxelAttribute_NewRS(p_->projectionPlaneCount));
+    std::vector<VoxelAttribute_NewRS> voxAttributeList(voxelCount, VoxelAttribute_NewRS());
     for (size_t v_idx = 0; v_idx < voxelCount; ++v_idx) {
         // Iterate through all voxels to set score, classification and voxel PPI //
         // First classification : NE-V or DE-V (SDE-V or MDE-V) //

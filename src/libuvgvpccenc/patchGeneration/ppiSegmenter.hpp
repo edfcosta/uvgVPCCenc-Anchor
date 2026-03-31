@@ -57,13 +57,12 @@ enum class VoxClass : uint8_t {
 
 struct VoxelAttribute {
     bool updateFlag_;
-    // size_t nbPoint_;  // TODO(lf): not used ?
     VoxClass voxClass_;
     size_t voxPPI_;
     std::array<size_t, 6> voxScore_;  // TODO(lf): should be an array ?
     // Voxel score is a PPI histogram : how many points inside the voxel is associated with each projection planes //
 
-    explicit VoxelAttribute(const size_t projectionPlaneCount_);
+    explicit VoxelAttribute();
 };
 
 class PPISegmenter {
@@ -95,6 +94,4 @@ class PPISegmenter {
     
     const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals_;
     const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry_;
-    const typeGeometryInput geoMax_;
-    const typeGeometryInput geoRange_;
 };

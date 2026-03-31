@@ -57,28 +57,9 @@ using namespace uvgvpcc_enc;
 PPISegmenter::PPISegmenter(const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                            const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals)
     : pointsNormals_(pointsNormals),
-      pointsGeometry_(pointsGeometry),
-      geoMax_([&]() {
-          // lambda function to initialise the const variable geoMax_
-          typeGeometryInput geoMax = pointsGeometry_[0][0];
-          for (const uvgutils::VectorN<typeGeometryInput, 3>& point : pointsGeometry_) {
-              geoMax = std::max(geoMax, point[0]);
-              geoMax = std::max(geoMax, point[1]);
-              geoMax = std::max(geoMax, point[2]);
-          }
-          return geoMax;
-      }()),
-      geoRange_([&]() {
-          // lambda function to initialise the const variable geoRange_
-          // TODO(lf): warning, the geo range does not take care of negatie value. Is it common for point cloud to have negative value ?
-          typeGeometryInput geoRange = 1;
-          for (typeGeometryInput i = geoMax_ - 1; i != 0U; i >>= 1U, geoRange <<= 1U) {
-              ;
-          }
-          return geoRange;
-      }()) {}
+      pointsGeometry_(pointsGeometry) {}
 
-VoxelAttribute::VoxelAttribute(const size_t projectionPlaneCount_)
+VoxelAttribute::VoxelAttribute()
     : updateFlag_(false), voxClass_(VoxClass::NO_EDGE), voxPPI_(0), voxScore_{0} {}
 
 // TODO(lf): check if the initial segmentation can be done inside the precomputation of the refineSegmentation
@@ -314,7 +295,7 @@ void PPISegmenter::refineSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameCo
     }
 
     // The 1st classification is made here (+ score computation)
-    std::vector<VoxelAttribute> voxAttributeList(voxelCount, VoxelAttribute(p_->projectionPlaneCount));
+    std::vector<VoxelAttribute> voxAttributeList(voxelCount, VoxelAttribute());
     for (size_t v_idx = 0; v_idx < filledVoxels.size(); ++v_idx) {
         // Iterate through all voxels to set score, classification and voxel PPI //
         // First classification : NE-V or DE-V (SDE-V or MDE-V) //

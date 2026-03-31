@@ -51,13 +51,6 @@ enum class VoxClass_NewRS : uint8_t {
     S_DIRECT_EDGE = 0x11   // single-point in a voxel, considered as a direct edge-voxel
 };
 
-// struct RefineParameters {
-//     typeGeometryInput gridMaxAxisValue_;
-//     size_t bitMask;
-//     size_t distanceSearch;
-// };
-
-
 // TODO(lf): why to distinguish M and S direct edge ?
 // TODO(lf): Are S DIRECT EGDE always considered as direct edge ? Even if they share the same PPI as their neighbor ? Does this mean each
 // iteration focus on all single  direct edge voxel ?
@@ -69,7 +62,7 @@ struct VoxelAttribute_NewRS {
     std::array<size_t,6> voxScore_;  // TODO(lf): should be an array ?
     // Voxel score is a PPI histogram : how many points inside the voxel is associated with each projection planes //
 
-    explicit VoxelAttribute_NewRS(const size_t projectionPlaneCount_);
+    explicit VoxelAttribute_NewRS();
 };
 
 class PPISegmenter_NewRS {
@@ -107,6 +100,4 @@ class PPISegmenter_NewRS {
 
     const std::vector<bool>& normalExists_;
     const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry_;
-    const typeGeometryInput geoMax_;
-    const typeGeometryInput geoRange_;
 };
