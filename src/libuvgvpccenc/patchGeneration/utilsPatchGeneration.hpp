@@ -207,6 +207,26 @@ struct vector3Hash {
     }
 };
 
+// REFINE SEGMENTATION CLASSES AND STRUCTS
+enum class VoxClass : uint8_t {
+    NO_EDGE = 0x00,        // one ppi-vaue in a voxel
+    INDIRECT_EDGE = 0x01,  // adjcent voxels of M_DIRECT_EDGE, S_DIRECT_EDGE
+    M_DIRECT_EDGE = 0x10,  // multiple points && more than two ppi-values in a voxel TODO(lf)verify if typo -> (more than one instead no ?)
+    S_DIRECT_EDGE = 0x11   // single-point in a voxel, considered as a direct edge-voxel
+};
+
+struct VoxelAttribute {
+    bool updateFlag_;
+    VoxClass voxClass_;
+    size_t voxPPI_;
+    std::array<size_t, 6> voxScore_; 
+    // Voxel score is a PPI histogram : how many points inside the voxel is associated with each projection planes //
+
+    VoxelAttribute():
+        updateFlag_(false), voxClass_(VoxClass::NO_EDGE), voxPPI_(0), voxScore_{0} {}
+};
+
+
 
 template <typename keyType>
 inline keyType location1DFromCoordinates(const int x, const int y, const int z, const size_t gdb, const size_t gdb2) {

@@ -41,57 +41,15 @@
 #include "uvgutils/utils.hpp"
 #include "utils/types.hpp"
 #include "utils/types.hpp"
+#include "utilsPatchGeneration.hpp"
 
 using namespace uvgvpcc_enc;
 
-
-enum class VoxClass : uint8_t {
-    NO_EDGE = 0x00,        // one ppi-vaue in a voxel
-    INDIRECT_EDGE = 0x01,  // adjcent voxels of M_DIRECT_EDGE, S_DIRECT_EDGE
-    M_DIRECT_EDGE = 0x10,  // multiple points && more than two ppi-values in a voxel TODO(lf)verify if typo -> (more than one instead no ?)
-    S_DIRECT_EDGE = 0x11   // single-point in a voxel, considered as a direct edge-voxel
-};
-// TODO(lf): why to distinguish M and S direct edge ?
-// TODO(lf): Are S DIRECT EGDE always considered as direct edge ? Even if they share the same PPI as their neighbor ? Does this mean each
-// iteration focus on all single  direct edge voxel ?
-
-struct VoxelAttribute {
-    bool updateFlag_;
-    VoxClass voxClass_;
-    size_t voxPPI_;
-    std::array<size_t, 6> voxScore_;  // TODO(lf): should be an array ?
-    // Voxel score is a PPI histogram : how many points inside the voxel is associated with each projection planes //
-
-    explicit VoxelAttribute();
-};
-
-class PPISegmenter {
-   public:
-    PPISegmenter(const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
-                 const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals);
-
-    void initialSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,std::vector<size_t>& pointsPPIs, const size_t& frameId);
-    void refineSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,std::vector<size_t>& pointsPPIs, const size_t& frameId);
-
-   private:
-    static void voxelizationWithBitArray(const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& inputPointsGeometry,
-                                         std::vector<bool>& occFlagArray, robin_hood::unordered_map<size_t, size_t>& voxelIdxMap,
-                                         std::vector<size_t>& filledVoxels, std::vector<std::vector<size_t>>& pointListInVoxels);                                               
-
-    static void computeExtendedScore(std::array<size_t,6>& voxExtendedScore, const std::vector<size_t>& ADJ_List,
-                                               const std::vector<VoxelAttribute>& voxAttributeList);
-
-    static void updateAdjacentVoxelsClass(std::vector<VoxelAttribute>& voxAttributeList,
-                                                    const std::array<size_t,6>& voxExtendedScore,
-                                                    const std::vector<size_t>& IDEV_List);
-    static inline bool checkNEV(const VoxClass voxClass, const size_t voxPPI,
-                                          const std::array<size_t,6>& voxExtendedScore);
-
-    inline void refinePointsPPIs(std::vector<size_t>& pointsPPIs, const std::vector<size_t>& pointsIndices,
-                                           const double weight, const std::array<size_t, 6>& voxExtendedScore) const;
-    static inline void updateVoxelAttribute(VoxelAttribute& voxAttribute, const std::vector<size_t>& voxPoints,
-                                                      const std::vector<size_t>& pointsPPIs);
+namespace PPISegmentation{
+    void initialSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,std::vector<size_t>& pointsPPIs, const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals, 
+                             const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,const size_t& frameId);
     
-    const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals_;
-    const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry_;
-};
+    template<typename keyType>
+    void refineSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,std::vector<size_t>& pointsPPIs, const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals, 
+                            const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry, const size_t& frameId);
+}

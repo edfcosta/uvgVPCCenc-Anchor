@@ -140,9 +140,17 @@ void PatchGeneration::generateFramePatches(std::shared_ptr<uvgvpcc_enc::FrameCon
         NormalOrientation::orientNormals(frame, pointsNormal, voxelizedPointsGeometry, pointsNNList);
 
         // Projection Plane Index Segmentation //
-        PPISegmenter ppiSegmenter(voxelizedPointsGeometry, pointsNormal);
-        ppiSegmenter.initialSegmentation(frame, voxelsPPIs, frame->frameId);
-        ppiSegmenter.refineSegmentation(frame, voxelsPPIs, frame->frameId);
+        PPISegmentation::initialSegmentation(frame, voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
+        const size_t gbdrs = p_->geoBitDepthRefineSegmentation;
+        if(3*gbdrs <= 16) {
+            PPISegmentation::refineSegmentation<uint16_t>(frame, voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
+        } else if (3*gbdrs <= 32) {
+            PPISegmentation::refineSegmentation<uint32_t>(frame, voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
+        } else if (3*gbdrs <= 64) {
+            PPISegmentation::refineSegmentation<uint64_t>(frame, voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
+        } else {
+            assert(false);
+        }
     }
 
     // "De-voxelization"
