@@ -1087,7 +1087,7 @@ void ppiAssignationSlicing(const std::shared_ptr<uvgvpcc_enc::FrameContext>& fra
     // Final PPI attribution
     // TODO(lf): use an enum for presetName
     if (p_->presetName == "fast") {
-        finalPPIAttributionFastPreset(frame, pointsGeometry, pointPPIsX, pointPPIsY, pointPPIsZ, childToParentX, childToParentY,
+        finalPPIAttributionFastPreset<indexType>(frame, pointsGeometry, pointPPIsX, pointPPIsY, pointPPIsZ, childToParentX, childToParentY,
                                       childToParentZ, pointPPIs);
     } else if (p_->presetName == "slow") {
         finalPPIAttributionSlowPreset<indexType>(frame, pointsGeometry, pointPPIsX, pointPPIsY, pointPPIsZ, childToParentX, childToParentY,
