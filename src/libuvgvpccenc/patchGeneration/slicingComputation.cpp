@@ -50,7 +50,7 @@
 #include <string>
 #include <vector>
 
-#include "slicingPpiSegmenter.hpp"
+#include "ppiSegmentation.hpp"
 #include "uvgutils/robin_hood.h"
 #include "utils/fileExport.hpp"
 #include "utils/parameters.hpp"
@@ -948,16 +948,14 @@ void finalPPIAttributionFastPreset(const std::shared_ptr<uvgvpcc_enc::FrameConte
     parentPointsGeometry.resize(sizeParentSublist);
     normalBool.resize(sizeParentSublist);
     parentPointsPPIs.resize(sizeParentSublist);
-
-    PPISegmenter_NewRS ppiSegmenter_NewRS(parentPointsGeometry, normalBool);
     
     const size_t gbdrs = p_->geoBitDepthRefineSegmentation;
     if(3*gbdrs <= 16) {
-        ppiSegmenter_NewRS.refineSegmentation_NewRS<uint16_t>(frame, parentPointsPPIs, frame->frameId);
+        PPISegmentation::refineSegmentation_NewRS<uint16_t>(frame, parentPointsPPIs, normalBool, parentPointsGeometry, frame->frameId);
     } else if (3*gbdrs <= 32) {
-        ppiSegmenter_NewRS.refineSegmentation_NewRS<uint32_t>(frame, parentPointsPPIs, frame->frameId);
+        PPISegmentation::refineSegmentation_NewRS<uint32_t>(frame, parentPointsPPIs, normalBool, parentPointsGeometry, frame->frameId);
     } else if (3*gbdrs <= 64) {
-        ppiSegmenter_NewRS.refineSegmentation_NewRS<uint64_t>(frame, parentPointsPPIs, frame->frameId);
+        PPISegmentation::refineSegmentation_NewRS<uint64_t>(frame, parentPointsPPIs, normalBool, parentPointsGeometry, frame->frameId);
     } else {
         assert(false);
     }
@@ -1034,17 +1032,15 @@ void finalPPIAttributionSlowPreset(const std::shared_ptr<uvgvpcc_enc::FrameConte
     // 1) First propagate PPI from parents to children
     // 2) Then refine segmentation on all points
     childPPIAttribution<indexType>(childToParentX, childToParentY, childToParentZ, pointPPIs);
-    PPISegmenter_NewRS ppiSegmenter_NewRS(pointsGeometry, normalBool);
-
 
     // keyType is for location1D, which concatenate X, Y and Z coordinates in one number.
     const size_t gbdrs3 = 3*p_->geoBitDepthRefineSegmentation;
     if(gbdrs3 <= 16) {
-        ppiSegmenter_NewRS.refineSegmentation_NewRS<uint16_t>(frame, pointPPIs, frame->frameId);
+        PPISegmentation::refineSegmentation_NewRS<uint16_t>(frame, pointPPIs, normalBool, pointsGeometry, frame->frameId);
     } else if (gbdrs3 <= 32) {
-        ppiSegmenter_NewRS.refineSegmentation_NewRS<uint32_t>(frame, pointPPIs, frame->frameId);
+        PPISegmentation::refineSegmentation_NewRS<uint32_t>(frame, pointPPIs, normalBool, pointsGeometry, frame->frameId);
     } else if (gbdrs3 <= 64) {
-        ppiSegmenter_NewRS.refineSegmentation_NewRS<uint64_t>(frame, pointPPIs, frame->frameId);
+        PPISegmentation::refineSegmentation_NewRS<uint64_t>(frame, pointPPIs, normalBool, pointsGeometry, frame->frameId);
     } else {
         assert(false);
     }

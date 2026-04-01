@@ -47,7 +47,7 @@
 #include "normalOrientation.hpp"
 #include "patchGeneration/kdTree.hpp"
 #include "patchSegmentation.hpp"
-#include "ppiSegmenter.hpp"
+#include "ppiSegmentation.hpp"
 #include "slicingComputation.hpp"
 #include "utils/constants.hpp"
 #include "utils/parameters.hpp"

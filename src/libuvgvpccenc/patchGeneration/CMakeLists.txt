@@ -16,8 +16,7 @@ add_library(patchGenerationLibrary STATIC
     patchGeneration.cpp
     normalComputation.cpp
     normalOrientation.cpp
-    ppiSegmenter.cpp
-    slicingPpiSegmenter.cpp
+    ppiSegmentation.cpp
     patchSegmentation.cpp
     slicingComputation.cpp
 )

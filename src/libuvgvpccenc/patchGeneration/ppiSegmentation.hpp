@@ -52,4 +52,10 @@ namespace PPISegmentation{
     template<typename keyType>
     void refineSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,std::vector<size_t>& pointsPPIs, const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals, 
                             const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry, const size_t& frameId);
+
+    template<typename keyType>
+    void refineSegmentation_NewRS(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+                                      const std::vector<bool>& normalExists,
+                                      const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
+                                      const size_t& frameId);
 }

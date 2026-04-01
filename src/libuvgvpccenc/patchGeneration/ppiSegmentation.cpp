@@ -32,7 +32,7 @@
 
 /// \file This file combine both the initial segmentation and the refine segmentation. Assign a PPI (projection plan index) to each point.
 
-#include "ppiSegmenter.hpp"
+#include "ppiSegmentation.hpp"
 
 #include <algorithm>
 #include <cstddef>
@@ -55,6 +55,10 @@
 using namespace uvgvpcc_enc;
 
 namespace {
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ ///////////////////////////////////////// COMMON FUNCTIONS FOR NORMAL-BASED  |  SLICE-BASED //////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // TODO(lf): the number of points in the voxel is usefull only for DE-V voxel no ? So why to set the value for all voxels ?
 // TODO(lf): use two flags, compute one time the flag for S or M instead of checking it like the other classification
@@ -140,31 +144,6 @@ inline bool checkNEV(const VoxClass voxClass, const size_t voxPPI, const std::ar
     // current iteration to finnish before to update the state of all voxels why don't we call setUpdatedFlag on this one ?
 }
 
-// TODO(lf): special algorithm trajectory for S_DIRECT_EDGE_VOXEL
-inline void refinePointsPPIs(std::vector<size_t>& pointsPPIs, const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals,
-                                           const std::vector<size_t>& pointsIndices, const double weight,
-                                           const std::array<size_t,6>& voxExtendedScore) {
-    std::array<double,6> weightedScoreSmooth{0};
-    for (size_t k = 0; k < p_->projectionPlaneCount; ++k) {
-        weightedScoreSmooth[k] = weight * static_cast<double>(voxExtendedScore[k]);
-    }
-
-    // For each point in the current voxel //
-    for (const auto& pointIndex : pointsIndices) {
-        const auto& normal = pointsNormals[pointIndex];
-        double scoreMax = weightedScoreSmooth[0] + dotProduct(normal, p_->projectionPlaneOrientations[0]);
-        size_t PPIscoreMax = 0;
-        for (size_t k = 1; k < p_->projectionPlaneCount; ++k) {
-            double const score = weightedScoreSmooth[k] + dotProduct(normal, p_->projectionPlaneOrientations[k]);
-            if (score > scoreMax) {
-                scoreMax = score;
-                PPIscoreMax = k;
-            }
-        }
-        pointsPPIs[pointIndex] = PPIscoreMax;
-    }
-}
-
 template<typename keyType>
 void voxelizationWithBitArray(const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& inputPointsGeometry,
                                             std::vector<bool>& occFlagArray, robin_hood::unordered_map<keyType, size_t>& voxelIdxMap,
@@ -206,6 +185,36 @@ void voxelizationWithBitArray(const std::vector<uvgutils::VectorN<typeGeometryIn
             const size_t filled_v_idx = voxelIdxMap.at(pos_1D);
             pointListInVoxels[filled_v_idx].push_back(point_idx);
         }
+    }
+}
+///// End of common functions
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ ///////////////////////////////////////////////////// FUNCTIONS FOR NORMAL-BASED /////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// TODO(lf): special algorithm trajectory for S_DIRECT_EDGE_VOXEL
+inline void refinePointsPPIs(std::vector<size_t>& pointsPPIs, const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals,
+                                           const std::vector<size_t>& pointsIndices, const double weight,
+                                           const std::array<size_t,6>& voxExtendedScore) {
+    std::array<double,6> weightedScoreSmooth{0};
+    for (size_t k = 0; k < p_->projectionPlaneCount; ++k) {
+        weightedScoreSmooth[k] = weight * static_cast<double>(voxExtendedScore[k]);
+    }
+
+    // For each point in the current voxel //
+    for (const auto& pointIndex : pointsIndices) {
+        const auto& normal = pointsNormals[pointIndex];
+        double scoreMax = weightedScoreSmooth[0] + dotProduct(normal, p_->projectionPlaneOrientations[0]);
+        size_t PPIscoreMax = 0;
+        for (size_t k = 1; k < p_->projectionPlaneCount; ++k) {
+            double const score = weightedScoreSmooth[k] + dotProduct(normal, p_->projectionPlaneOrientations[k]);
+            if (score > scoreMax) {
+                scoreMax = score;
+                PPIscoreMax = k;
+            }
+        }
+        pointsPPIs[pointIndex] = PPIscoreMax;
     }
 }
 
@@ -269,7 +278,103 @@ void fillNeighborAndAdjacentLists(std::vector<keyType>& filledVoxels, std::vecto
         voxWeightList[v_idx] = p_->refineSegmentationLambda / static_cast<double>(num_nn_points);  // NOLINT(clang-analyzer-core.DivideZero)
     }
 }
+///// End of Normal-based functions
 
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ ///////////////////////////////////////////////////// FUNCTIONS FOR SLICE-BASED //////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+inline void refinePointsPPIs_NewRS(std::vector<size_t>& pointsPPIs, const std::vector<size_t>& pointsPPIs_origin, const std::vector<size_t>& pointsIndices,
+                                         const std::vector<bool>& normalExists,
+                                         const std::array<size_t,6>& voxExtendedScore, const size_t nnPointCount){ // Spécifique au Slicing
+    std::array<double,6> weightedScoreSmooth{0};
+    for (size_t k = 0; k < p_->projectionPlaneCount; ++k) {
+        weightedScoreSmooth[k] = p_->refineSegmentationLambda * static_cast<double>(voxExtendedScore[k]); 
+    }
+    // For each point in the current voxel //
+    for (const auto& pointIndex : pointsIndices) {
+        const auto& dotProductList = normalsDotProducts[pointsPPIs_origin[pointIndex]];
+        const bool normalBool = normalExists[pointIndex];
+        // Here the new calculation method
+        // If normalBool = false : the right member=0
+        double scoreMax2 = weightedScoreSmooth[0] + static_cast<double>(normalBool) * static_cast<double>(dotProductList[0])  *  static_cast<double>(nnPointCount);
+        size_t PPIscoreMax = 0;
+        for (size_t k = 1; k < p_->projectionPlaneCount; ++k) {
+            const double score2 = weightedScoreSmooth[k] + static_cast<double>(normalBool) * static_cast<double>(dotProductList[k])  *  static_cast<double>(nnPointCount);
+            if (score2 > scoreMax2) {
+                scoreMax2 = score2;
+                PPIscoreMax = k;
+            }
+        }
+        pointsPPIs[pointIndex] = PPIscoreMax;
+    }
+}
+
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+template<typename keyType>
+void fillNeighborAndAdjacentLists_NewRS(std::vector<keyType>& filledVoxels, std::vector<bool>& occFlagArray,
+                                                robin_hood::unordered_map<keyType, size_t>& voxelIdxMap,
+                                                std::vector<std::vector<size_t>>& ADJ_List, std::vector<std::vector<size_t>>& IDEV_List,
+                                                std::vector<std::vector<size_t>>& pointListInVoxels, std::vector<size_t>& nnPointCountList) { //  Spécifique au slicing
+    const typeGeometryInput gridMaxAxisValue = (1U << p_->geoBitDepthRefineSegmentation) - 1;
+    // TODO(lf): verify this above minus 1 is correct and that it is done everywhere it is needed
+    for (size_t v_idx = 0; v_idx < filledVoxels.size(); ++v_idx) {
+
+        const size_t cur_pos_1D = filledVoxels[v_idx];
+        // find valid 3D search range centered on cur_pos_1D //
+        size_t num_nn_points = 0;  // The number of points within neighboring voxels
+
+        // Inverse of this operation : const size_t pos_1D = x + (y << p_->geoBitDepthRefineSegmentation) + (z <<
+        // (p_->geoBitDepthRefineSegmentation * 2)); For  p_->geoBitDepthRefineSegmentation==8, it is 00000000 00000000 00000000 00000000
+        // 00000000 00000000 00000000 11111111
+        const size_t bitMask = (1U << p_->geoBitDepthRefineSegmentation) - 1;
+        const typeGeometryInput z = cur_pos_1D >> (p_->geoBitDepthRefineSegmentation * 2);
+        const typeGeometryInput y = (cur_pos_1D >> p_->geoBitDepthRefineSegmentation) & bitMask;
+        const typeGeometryInput x = cur_pos_1D & bitMask;
+
+        const uvgutils::VectorN<typeGeometryInput, 3> currentPoint = {x, y, z};
+
+        // TODO(lf): find a way to directly add cur_pos_1D and pointAdjLocation1D, and then check if it is a valid point without extracting
+        // the x y and z values
+
+        const size_t distanceSearch = p_->refineSegmentationMaxNNVoxelDistanceLUT;
+        for (size_t dist = 0; dist < distanceSearch; ++dist) {  // dist is squared distance
+            for (const auto& shift : adjacentPointsSearch[dist]) {
+                uvgutils::VectorN<typeGeometryInput, 3> pointAdj;
+                // TODO(lf): to discuss and verify : pointAdj need to be in signed type as the shift can generate negative values.
+                // However, such negative values, in usigned type, will be higher than the max treshold (the max boundary of the
+                // grid). By using this bit overflow, we divide by two the number of check (we don't check if the shifted point is
+                // higher than 0)
+                pointAdj[0] = currentPoint[0] + shift[0];
+                pointAdj[1] = currentPoint[1] + shift[1];
+                pointAdj[2] = currentPoint[2] + shift[2];
+
+                // check if valid 3D coordinate (not outside the grid) //
+                if (pointAdj[0] > gridMaxAxisValue || pointAdj[1] > gridMaxAxisValue || pointAdj[2] > gridMaxAxisValue) {
+                    continue;
+                }
+
+                const size_t pointAdjLocation1D = pointAdj[0] + (pointAdj[1] << p_->geoBitDepthRefineSegmentation) +
+                                                  (pointAdj[2] << (p_->geoBitDepthRefineSegmentation * 2));
+
+                if (occFlagArray[pointAdjLocation1D]) {
+                    const size_t neighbor_v_idx = voxelIdxMap.at(pointAdjLocation1D);
+                    ADJ_List[v_idx].push_back(
+                        neighbor_v_idx);  // TODO(lf): do a big check everywhere because here adjacent and neighbor are inverted
+
+                    const size_t IDEV_range = p_->refineSegmentationIDEVDist;  // TODO(lf)justifiy thise value, and make it dependent on the geobitdepth
+                    if (dist <= IDEV_range) {
+                        IDEV_List[v_idx].push_back(neighbor_v_idx);
+                    }
+
+                    num_nn_points += pointListInVoxels[neighbor_v_idx].size();
+                }
+            }
+        }
+        nnPointCountList[v_idx] = num_nn_points;
+    }
+}
+///// End of Slice-based functions
 
 } // end anonymous namespace
 
@@ -349,7 +454,7 @@ void PPISegmentation::refineSegmentation(const std::shared_ptr<uvgvpcc_enc::Fram
     robin_hood::unordered_map<keyType, size_t> voxelIdxMap;  // location1D -> index in voxel list (filledVoxels)
 
     std::vector<keyType> filledVoxels;                    // list of location1D
-    std::vector<std::vector<size_t>> pointListInVoxels;  // for each voxel, the list of the index of the points inside // ⭐
+    std::vector<std::vector<size_t>> pointListInVoxels;  // for each voxel, the list of the index of the points inside
 
     voxelizationWithBitArray<keyType>(pointsGeometry, occFlagArray, voxelIdxMap, filledVoxels, pointListInVoxels);
 
@@ -360,7 +465,7 @@ void PPISegmentation::refineSegmentation(const std::shared_ptr<uvgvpcc_enc::Fram
     }
 
     // The 1st classification is made here (+ score computation)
-    std::vector<VoxelAttribute> voxAttributeList(voxelCount, VoxelAttribute()); // ⭐ 
+    std::vector<VoxelAttribute> voxAttributeList(voxelCount, VoxelAttribute());
     for (size_t v_idx = 0; v_idx < filledVoxels.size(); ++v_idx) {
         // Iterate through all voxels to set score, classification and voxel PPI //
         // First classification : NE-V or DE-V (SDE-V or MDE-V) //
@@ -372,8 +477,8 @@ void PPISegmentation::refineSegmentation(const std::shared_ptr<uvgvpcc_enc::Fram
         updateVoxelAttribute(voxAttribute, pointListInVoxels[v_idx], pointsPPIs);
     }
 
-    std::vector<std::vector<size_t>> ADJ_List(voxelCount);   // large    // This is voxNeighborsList // ⭐
-    std::vector<std::vector<size_t>> IDEV_List(voxelCount);  // small    // This is voxAdjacentsList // ⭐ IDEV or ADJ
+    std::vector<std::vector<size_t>> ADJ_List(voxelCount);   // large    // This is voxNeighborsList // 
+    std::vector<std::vector<size_t>> IDEV_List(voxelCount);  // small    // This is voxAdjacentsList //
 
     std::vector<double> voxWeightList(voxelCount);
 
@@ -483,3 +588,159 @@ template void PPISegmentation::refineSegmentation<uint64_t>(const std::shared_pt
                                       const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals,
                                       const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                       const size_t& frameId); 
+
+
+///////////////////////////////////////////
+///// REFINE SEGMENTATION FOR SLICING /////
+///////////////////////////////////////////
+
+template<typename keyType>
+void PPISegmentation::refineSegmentation_NewRS(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+                                      const std::vector<bool>& normalExists,
+                                      const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
+                                      const size_t& frameId) {
+    uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("PATCH GENERATION", "Refine segmentation of frame " + std::to_string(frameId) + "\n");
+    const size_t gbdrs = p_->geoBitDepthRefineSegmentation;
+    const size_t gbdrs2 = p_->geoBitDepthRefineSegmentation * 2;
+    const size_t gridSize = 1U << gbdrs;
+    const int maxVal = gridSize - 1;
+    
+    // One boolean for each voxel of the grid, indicating if a voxel is filled or not //
+    std::vector<bool> occFlagArray(gridSize * gridSize * gridSize, false);
+
+    robin_hood::unordered_map<keyType, size_t> voxelIdxMap;  // location1D -> index in voxel list (filledVoxels)
+
+    std::vector<keyType> filledVoxels;                    // list of location1D
+    std::vector<std::vector<size_t>> pointListInVoxels;  // for each voxel, the list of the index of the points inside
+
+    voxelizationWithBitArray<keyType>(pointsGeometry, occFlagArray, voxelIdxMap, filledVoxels, pointListInVoxels);
+
+    const size_t voxelCount = filledVoxels.size();
+
+    if(p_->exportStatistics){
+        stats.collectData(frame->frameId, DataId::NumberOfVoxelsRS, voxelCount);
+    }
+
+    // The 1st classification is made here (+ score computation)
+    std::vector<VoxelAttribute> voxAttributeList(voxelCount, VoxelAttribute()); 
+    for (size_t v_idx = 0; v_idx < voxelCount; ++v_idx) {
+        // Iterate through all voxels to set score, classification and voxel PPI
+        // First classification : NE-V or DE-V (SDE-V or MDE-V)
+        VoxelAttribute& voxAttribute = voxAttributeList[v_idx];
+        if (pointListInVoxels[v_idx].size() == 1) {
+            // Single Direct Edge Voxel : One point in the voxel
+            voxAttribute.voxClass_ = VoxClass::S_DIRECT_EDGE;
+        }
+        updateVoxelAttribute(voxAttribute, pointListInVoxels[v_idx], pointsPPIs);
+    }
+
+    const std::vector<size_t> pointsPPIs_O = pointsPPIs;
+    std::vector<std::vector<size_t>> ADJ_List(voxelCount);   // large    // This is voxNeighborsList
+    std::vector<std::vector<size_t>> IDEV_List(voxelCount);  // small    // This is voxAdjacentsList
+    std::vector<size_t> nnPointCountList(voxelCount);
+
+    // TODO(lf): find a way to break the refine segmentation iteration before reaching the number of iteration parameter (if number of updated
+    // voxel lower than something for example)
+
+    // TODO(lf): in the for loop over all voxel, we access a lot of list to get the related voxel element. Why not TODO(lf)a structure voxel
+    // with everything at the same memory location and so reduce memory call ?
+
+    std::array<size_t, 6> voxExtendedScore{0};
+    std::vector<uint8_t> hasBeenComputed(voxelCount, 0);
+
+    const size_t bitMask = (1U << gbdrs) - 1;
+    const size_t distanceSearch = p_->refineSegmentationMaxNNVoxelDistanceLUT;
+
+    fillNeighborAndAdjacentLists_NewRS<keyType>(filledVoxels, occFlagArray, voxelIdxMap, ADJ_List, IDEV_List, pointListInVoxels, nnPointCountList);
+
+    for (size_t iter = 0; iter < p_->refineSegmentationIterationCount; ++iter) {
+        for (size_t voxelIndex = 0; voxelIndex < voxelCount; ++voxelIndex) {
+            // TODO(lf): should we use a stack of voxel index instead of a for loop with a lot of if(true) ?
+            const VoxClass& voxClass = voxAttributeList[voxelIndex].voxClass_;
+            if (voxClass == VoxClass::NO_EDGE) {
+                if(p_->exportStatistics){
+                    stats.collectData(frame->frameId, DataId::SkippedVoxels, iter);
+                }
+                continue;  // This voxel has been marked as NE-V before the current iteration //
+            }
+            
+            voxExtendedScore.fill(0);
+            computeExtendedScore(voxExtendedScore, ADJ_List[voxelIndex], voxAttributeList);
+            updateAdjacentVoxelsClass(voxAttributeList, voxExtendedScore, IDEV_List[voxelIndex]);
+            if (checkNEV(voxClass, voxAttributeList[voxelIndex].voxPPI_, voxExtendedScore)) {
+                continue;  // The current iteration found that this voxel is NE-V //
+            }
+
+            // The voxel is not NE-V, so it is D-EV or IDE-V and its points PPI can be refined //
+            if(p_->exportStatistics){
+                std::vector<size_t> previousPointsPPI = pointsPPIs;
+                refinePointsPPIs_NewRS(pointsPPIs, pointsPPIs_O, pointListInVoxels[voxelIndex], normalExists, voxExtendedScore, nnPointCountList[voxelIndex]);
+                voxAttributeList[voxelIndex].updateFlag_ = true;
+                for(size_t i = 0 ; i < pointsPPIs.size() ; ++i){
+                    if(previousPointsPPI[i] != pointsPPIs[i]){
+                        stats.collectData(frame->frameId, DataId::PpiChange, iter);
+                    }
+                }
+            }
+            else{
+                refinePointsPPIs_NewRS(pointsPPIs, pointsPPIs_O, pointListInVoxels[voxelIndex], normalExists, voxExtendedScore, nnPointCountList[voxelIndex]);
+                voxAttributeList[voxelIndex].updateFlag_ = true;
+            }
+            
+            if(p_->exportStatistics){
+                for(size_t i = 0 ; i < pointListInVoxels[voxelIndex].size() ; ++i){
+                    stats.collectData(frame->frameId, DataId::ScoreComputations, iter);
+                }
+                switch (voxAttributeList[voxelIndex].voxClass_){
+                    case VoxClass::NO_EDGE:       stats.collectData(frame->frameId, DataId::NoEdge_R,       iter); break;
+                    case VoxClass::INDIRECT_EDGE: stats.collectData(frame->frameId, DataId::IndirectEdge_R, iter); break;
+                    case VoxClass::S_DIRECT_EDGE: stats.collectData(frame->frameId, DataId::SingleEdge_R,   iter); break;
+                    case VoxClass::M_DIRECT_EDGE: stats.collectData(frame->frameId, DataId::MultiEdge_R,    iter); break;
+                }
+            }
+        }
+
+        // Update voxel classification and scores if points PPI inside have changed during the iteration //
+        for (size_t voxelIndex = 0; voxelIndex < voxelCount; ++voxelIndex) {
+            // TODO(lf): it might be faster to use a stack of index instead of using a flag
+            if (!voxAttributeList[voxelIndex].updateFlag_) {
+                continue;
+            }
+            voxAttributeList[voxelIndex].updateFlag_ = false;
+            std::fill(voxAttributeList[voxelIndex].voxScore_.begin(), voxAttributeList[voxelIndex].voxScore_.end(), 0);
+            updateVoxelAttribute(voxAttributeList[voxelIndex], pointListInVoxels[voxelIndex], pointsPPIs);
+        }
+
+        // Compute de number of changes of classification
+        if(p_->exportStatistics){
+            for(auto& voxel : voxAttributeList){
+                VoxClass VC = voxel.voxClass_;
+                switch (VC) {
+                    case VoxClass::NO_EDGE:       stats.collectData(frame->frameId, DataId::NoEdge,       iter); break;
+                    case VoxClass::INDIRECT_EDGE: stats.collectData(frame->frameId, DataId::IndirectEdge, iter); break;
+                    case VoxClass::S_DIRECT_EDGE: stats.collectData(frame->frameId, DataId::SingleEdge,   iter); break;
+                    case VoxClass::M_DIRECT_EDGE: stats.collectData(frame->frameId, DataId::MultiEdge,    iter); break;
+                }
+            }
+        }
+    }
+
+    if (p_->exportIntermediateFiles) {
+        FileExport::exportPointCloudRefineSegmentation(frame, pointsGeometry, pointsPPIs);
+    }
+}
+
+template void PPISegmentation::refineSegmentation_NewRS<uint16_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+                                      const std::vector<bool>& normalExists,
+                                      const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
+                                      const size_t& frameId);
+
+template void PPISegmentation::refineSegmentation_NewRS<uint32_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+                                      const std::vector<bool>& normalExists,
+                                      const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
+                                      const size_t& frameId);
+
+template void PPISegmentation::refineSegmentation_NewRS<uint64_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+                                      const std::vector<bool>& normalExists,
+                                      const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
+                                      const size_t& frameId);
