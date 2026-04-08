@@ -206,6 +206,9 @@ void PatchPacking::frameIntraPatchPacking(const std::shared_ptr<uvgvpcc_enc::Fra
         assert(frame->mapHeight == p_->minimumMapHeight);
     }
     frame->occupancyMap->resize(p_->mapWidth * frame->mapHeight, 0);
+    if(p_->exportIntermediateFiles){
+        frame->occupancyMapColored->resize(p_->mapWidth * frame->mapHeight, 0);
+    }
     
     // If the inter patch packing mode is deactivated, the intra patch packing is done over all frame patches. Thus, the patchListSpan
     // corresponds to the frame patch list. When the inter patch packing is activated, this intra packing function will be called only for the
@@ -225,6 +228,10 @@ void PatchPacking::frameIntraPatchPacking(const std::shared_ptr<uvgvpcc_enc::Fra
             }
             mapHeightTemp *= 2;
             frame->occupancyMap->resize(p_->mapWidth * mapHeightTemp);
+            if(p_->exportIntermediateFiles){
+                frame->occupancyMapColored->resize(p_->mapWidth * mapHeightTemp);
+            }
+
         }
         
         if (!locationFound) {
@@ -248,6 +255,12 @@ void PatchPacking::frameIntraPatchPacking(const std::shared_ptr<uvgvpcc_enc::Fra
                 auto dstIt = frame->occupancyMap->begin();
                 std::copy(srcIt + static_cast<ptrdiff_t>(srcOffset), srcIt + static_cast<ptrdiff_t>(srcOffset + patch.widthInPixel_),
                           dstIt + static_cast<ptrdiff_t>(dstOffset));
+                if(p_->exportIntermediateFiles){
+                    auto srcItC = patch.patchOccupancyMapColor_.begin();
+                    auto dstItC = frame->occupancyMapColored->begin();
+                    std::copy(srcItC + static_cast<ptrdiff_t>(srcOffset), srcItC + static_cast<ptrdiff_t>(srcOffset + patch.widthInPixel_),
+                              dstItC + static_cast<ptrdiff_t>(dstOffset));
+                }
             }
 
         } else {
@@ -259,6 +272,11 @@ void PatchPacking::frameIntraPatchPacking(const std::shared_ptr<uvgvpcc_enc::Fra
                     (*frame->occupancyMap)[patch.omDSPosX_ * p_->occupancyMapDSResolution + patchY +
                                         (patchX + patch.omDSPosY_ * p_->occupancyMapDSResolution) * p_->mapWidth] =
                         patch.patchOccupancyMap_[patchX + patchY * patch.widthInPixel_];
+                    if(p_->exportIntermediateFiles) {
+                        (*frame->occupancyMapColored)[patch.omDSPosX_ * p_->occupancyMapDSResolution + patchY +
+                                        (patchX + patch.omDSPosY_ * p_->occupancyMapDSResolution) * p_->mapWidth] =
+                        patch.patchOccupancyMapColor_[patchX + patchY * patch.widthInPixel_];
+                    }
                 }
             }
         }
@@ -301,6 +319,13 @@ void PatchPacking::frameInterPatchPacking(const std::vector<uvgvpcc_enc::Patch>&
                     (*frame->occupancyMap)[patch.omDSPosX_ * p_->occupancyMapDSResolution + patchX +
                                         (patchY + patch.omDSPosY_ * p_->occupancyMapDSResolution) * p_->mapWidth] =
                         patch.patchOccupancyMap_[patchX + patchY * patch.widthInPixel_];
+                    if(p_->exportIntermediateFiles){
+                        (*frame->occupancyMapColored)[patch.omDSPosX_ * p_->occupancyMapDSResolution + patchX +
+                                            (patchY + patch.omDSPosY_ * p_->occupancyMapDSResolution) * p_->mapWidth] =
+                            patch.patchOccupancyMapColor_[patchX + patchY * patch.widthInPixel_];
+                            std::cout << +patch.patchOccupancyMapColor_[patchX + patchY * patch.widthInPixel_] << std::endl;
+                    }
+
                 }
             }
 
@@ -313,6 +338,12 @@ void PatchPacking::frameInterPatchPacking(const std::vector<uvgvpcc_enc::Patch>&
                     (*frame->occupancyMap)[patch.omDSPosX_ * p_->occupancyMapDSResolution + patchY +
                                         (patchX + patch.omDSPosY_ * p_->occupancyMapDSResolution) * p_->mapWidth] =
                         patch.patchOccupancyMap_[patchX + patchY * patch.widthInPixel_];
+                    if(p_->exportIntermediateFiles){
+                        (*frame->occupancyMapColored)[patch.omDSPosX_ * p_->occupancyMapDSResolution + patchY +
+                                        (patchX + patch.omDSPosY_ * p_->occupancyMapDSResolution) * p_->mapWidth] =
+                        patch.patchOccupancyMapColor_[patchX + patchY * patch.widthInPixel_];
+                        std::cout << +patch.patchOccupancyMapColor_[patchX + patchY * patch.widthInPixel_] << std::endl;
+                    }
                 }
             }
         }
@@ -483,6 +514,10 @@ void PatchPacking::gofPatchPacking(const std::shared_ptr<uvgvpcc_enc::GOF>& gof)
     // Not done by default in the function frameIntraPatchPacking(...) as the resize operation do not write the '0' in the non
     // resized portion of the vector.
     std::fill(firstFrame->occupancyMap->begin(), firstFrame->occupancyMap->end(), 0);
+    if(p_->exportIntermediateFiles){
+        std::fill(firstFrame->occupancyMapColored->begin(), firstFrame->occupancyMapColored->end(), 0);
+    }
+
 
     // Reorder the patches in each frame patch list so that the first ones are the matched ones (and that they respect the order of the union
     // patches). This is needed as this order is also the packing order, which is used by the decoder. TODO(lf) : verify
@@ -549,6 +584,10 @@ void PatchPacking::gofPatchPacking(const std::shared_ptr<uvgvpcc_enc::GOF>& gof)
             assert(frame->mapHeightDS == p_->minimumMapHeight / p_->occupancyMapDSResolution);
         }
         frame->occupancyMap->resize(p_->mapWidth * frame->mapHeight, 0);
+        if(p_->exportIntermediateFiles){
+            frame->occupancyMapColored->resize(p_->mapWidth * frame->mapHeight, 0);
+        }
+
             
         // Separate in two the frame patch list to distinguish the matched and non-matched patches. This symbolic or superficial, no impact on
         // memory.

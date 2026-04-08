@@ -73,6 +73,7 @@ struct Patch {
     size_t sizeD_;  // while posD_ is the minimum 'depth', sizeD_ store the maximum depth. TODO(lf): check if it is usefull
 
     std::vector<uint8_t> patchOccupancyMap_;  // patch occupancy map (boolean vector)
+    std::vector<uint8_t> patchOccupancyMapColor_; // Patch occupancy map colored per patch
 
     size_t widthInPixel_ = 0;   // size for U  // width of the patch occupancy map (in pixels)
     size_t heightInPixel_ = 0;  // size for V  // height of the patch occupancy map (in pixels)
@@ -202,6 +203,7 @@ struct FrameContext {
     // ---- Centralized memory pointers (set by GOF::setFrameMemoryPtrs) ----
     std::vector<Patch>* patchList;
     std::vector<uint8_t>* occupancyMap;
+    std::vector<uint8_t>* occupancyMapColored;
     std::vector<uint8_t>* occupancyMapDS;
     std::vector<uint8_t>* geometryMapL1;
     std::vector<uint8_t>* geometryMapL2;
@@ -249,6 +251,7 @@ struct GOF {
     // lf: centralized memory handling //
     std::array<std::vector<Patch>, MAX_GOF_SIZE>* framePatches;
     std::array<std::vector<uint8_t>, MAX_GOF_SIZE>* frameOccupancyMaps;
+    std::array<std::vector<uint8_t>, MAX_GOF_SIZE>* frameOccupancyMapsColor;
     std::array<std::vector<uint8_t>, MAX_GOF_SIZE>* frameOccupancyMapsDS;
     std::array<std::vector<uint8_t>, MAX_GOF_SIZE>* frameGeometryMapsL1;
     std::array<std::vector<uint8_t>, MAX_GOF_SIZE>* frameGeometryMapsL2;

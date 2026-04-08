@@ -601,6 +601,29 @@ void exportImageOccupancy(const std::shared_ptr<FrameContext>& frame) {
         }
         exportImage(outputPath, occupancyMapRecolored);
     }
+
+    {
+        // Export the recolored occupancy map for human viewing (RGB, PNG lossless)
+        const size_t imageSize = frame->occupancyMap->size();
+        const std::string outputPath = p_->intermediateFilesDir + "/06-occupancyRecoloredPatches/OCCUPANCY-RECOLORED-PATCHES_f" +
+                                       uvgutils::zeroPad(frame->frameNumber, 3) + "_RGB444_" + std::to_string(p_->mapWidth) + "x" +
+                                       std::to_string(frame->mapHeight) + ".rgb";
+        std::vector<uint8_t> occupancyMapRecoloredPatches(imageSize * 3);
+        for (size_t i = 0; i < imageSize; ++i) {
+            const uint8_t patchNumber = (*frame->occupancyMapColored)[i];
+            if(patchNumber == 0) {
+                occupancyMapRecoloredPatches[i * 3] = 168;
+                occupancyMapRecoloredPatches[i * 3 + 1] = 168;
+                occupancyMapRecoloredPatches[i * 3 + 2] = 168;
+            } else {
+                occupancyMapRecoloredPatches[i * 3] = patchNumber * 3;
+                occupancyMapRecoloredPatches[i * 3 + 1] = 128 + (1 - 2*(patchNumber % 2))*patchNumber * 3 ; 
+                occupancyMapRecoloredPatches[i * 3 + 2] = 255 - patchNumber * 3;
+            }
+        }
+        exportImage(outputPath, occupancyMapRecoloredPatches);
+    }
+
 }
 
 void exportImageOccupancyDS(const std::shared_ptr<FrameContext>& frame) {

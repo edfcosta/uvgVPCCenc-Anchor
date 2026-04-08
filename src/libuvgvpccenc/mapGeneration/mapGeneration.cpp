@@ -211,6 +211,12 @@ void allocateMaps(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const
         frame->occupancyMap->resize(imageSize, 0);
     }
 
+    if(p_->exportIntermediateFiles){
+        if (frame->occupancyMapColored->size() != imageSize) {
+            frame->occupancyMapColored->resize(imageSize, 0);
+        }
+    }
+
     if (p_->exportIntermediateFiles) {
         FileExport::exportImageOccupancy(frame);
     }

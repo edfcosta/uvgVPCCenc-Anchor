@@ -312,6 +312,9 @@ inline void setPatchL1(Patch& patch, const int& minD, const std::vector<typeGeom
             }
 
             patch.patchOccupancyMap_[pos] = 1;
+            if(p_->exportIntermediateFiles) {
+                patch.patchOccupancyMapColor_[pos] = patch.patchIndex_;
+            }
             if constexpr (ProjectionMode) {
                 patch.depthL1_[pos] = static_cast<int16_t>((static_cast<int16_t>(minD) - patch.depthL1_[pos]));
             } else {
@@ -436,6 +439,11 @@ inline void createPatch(Patch& patch, const ConnectedComponent& cc, const std::s
 
     const size_t patchSize = patch.widthInPixel_ * patch.heightInPixel_;
     patch.patchOccupancyMap_.assign(patchSize, 0);
+
+    if(p_->exportIntermediateFiles) {
+        patch.patchOccupancyMapColor_.assign(patchSize, 0);
+    }
+    
     patch.area_ = patchSize;
 
     assert(patch.widthInOccBlk_ == patch.widthInPixel_ / dsRes && patch.heightInOccBlk_ == patch.heightInPixel_ / dsRes);

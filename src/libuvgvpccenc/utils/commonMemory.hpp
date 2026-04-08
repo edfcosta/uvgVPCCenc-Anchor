@@ -49,6 +49,7 @@ class CommonMemory {
     robin_hood::unordered_map<size_t,std::unique_ptr<std::array<std::vector<Patch>, MAX_GOF_SIZE>>> mapFramePatches;
     
     robin_hood::unordered_map<size_t,std::unique_ptr<std::array<std::vector<uint8_t>, MAX_GOF_SIZE>>> mapFrameOccupancyMaps;
+    robin_hood::unordered_map<size_t,std::unique_ptr<std::array<std::vector<uint8_t>, MAX_GOF_SIZE>>> mapFrameOccupancyMapsColor;
     robin_hood::unordered_map<size_t,std::unique_ptr<std::array<std::vector<uint8_t>, MAX_GOF_SIZE>>> mapFrameOccupancyMapsDS;
     robin_hood::unordered_map<size_t,std::unique_ptr<std::array<std::vector<uint8_t>, MAX_GOF_SIZE>>> mapFrameGeometryMapsL1;
     robin_hood::unordered_map<size_t,std::unique_ptr<std::array<std::vector<uint8_t>, MAX_GOF_SIZE>>> mapFrameGeometryMapsL2;
@@ -56,13 +57,14 @@ class CommonMemory {
     robin_hood::unordered_map<size_t,std::unique_ptr<std::array<std::vector<uint8_t>, MAX_GOF_SIZE>>> mapFrameAttributeMapsL2;
 
 
-    std::array<std::vector<Patch>,    MAX_GOF_SIZE>* getOrCreateFramePatches        (size_t gofId) { return getOrCreate(mapFramePatches,          gofId); }
-    std::array<std::vector<uint8_t>,  MAX_GOF_SIZE>* getOrCreateFrameOccupancyMaps  (size_t gofId) { return getOrCreate(mapFrameOccupancyMaps,     gofId); }
-    std::array<std::vector<uint8_t>,  MAX_GOF_SIZE>* getOrCreateFrameOccupancyMapsDS(size_t gofId) { return getOrCreate(mapFrameOccupancyMapsDS,   gofId); }
-    std::array<std::vector<uint8_t>,  MAX_GOF_SIZE>* getOrCreateFrameGeometryMapsL1 (size_t gofId) { return getOrCreate(mapFrameGeometryMapsL1,    gofId); }
-    std::array<std::vector<uint8_t>,  MAX_GOF_SIZE>* getOrCreateFrameGeometryMapsL2 (size_t gofId) { return getOrCreate(mapFrameGeometryMapsL2,    gofId); }
-    std::array<std::vector<uint8_t>,  MAX_GOF_SIZE>* getOrCreateFrameAttributeMapsL1(size_t gofId) { return getOrCreate(mapFrameAttributeMapsL1,   gofId); }
-    std::array<std::vector<uint8_t>,  MAX_GOF_SIZE>* getOrCreateFrameAttributeMapsL2(size_t gofId) { return getOrCreate(mapFrameAttributeMapsL2,   gofId); }
+    std::array<std::vector<Patch>,    MAX_GOF_SIZE>* getOrCreateFramePatches            (size_t gofId) { return getOrCreate(mapFramePatches,           gofId); }
+    std::array<std::vector<uint8_t>,  MAX_GOF_SIZE>* getOrCreateFrameOccupancyMaps      (size_t gofId) { return getOrCreate(mapFrameOccupancyMaps,     gofId); }
+    std::array<std::vector<uint8_t>,  MAX_GOF_SIZE>* getOrCreateFrameOccupancyMapsColor (size_t gofId) { return getOrCreate(mapFrameOccupancyMapsColor,gofId); }
+    std::array<std::vector<uint8_t>,  MAX_GOF_SIZE>* getOrCreateFrameOccupancyMapsDS    (size_t gofId) { return getOrCreate(mapFrameOccupancyMapsDS,   gofId); }
+    std::array<std::vector<uint8_t>,  MAX_GOF_SIZE>* getOrCreateFrameGeometryMapsL1     (size_t gofId) { return getOrCreate(mapFrameGeometryMapsL1,    gofId); }
+    std::array<std::vector<uint8_t>,  MAX_GOF_SIZE>* getOrCreateFrameGeometryMapsL2     (size_t gofId) { return getOrCreate(mapFrameGeometryMapsL2,    gofId); }
+    std::array<std::vector<uint8_t>,  MAX_GOF_SIZE>* getOrCreateFrameAttributeMapsL1    (size_t gofId) { return getOrCreate(mapFrameAttributeMapsL1,   gofId); }
+    std::array<std::vector<uint8_t>,  MAX_GOF_SIZE>* getOrCreateFrameAttributeMapsL2    (size_t gofId) { return getOrCreate(mapFrameAttributeMapsL2,   gofId); }
 
     void clearGofMaps(const size_t& gofId);
 

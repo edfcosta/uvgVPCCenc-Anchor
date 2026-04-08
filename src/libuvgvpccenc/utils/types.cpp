@@ -47,13 +47,14 @@ void FrameContext::printInfo() const {
 
 GOF::GOF(const size_t& id) : gofId(id) {
     auto& cm = CommonMemory::get();
-    framePatches         = cm.getOrCreateFramePatches        (gofId);
-    frameOccupancyMaps   = cm.getOrCreateFrameOccupancyMaps  (gofId);
-    frameOccupancyMapsDS = cm.getOrCreateFrameOccupancyMapsDS(gofId);
-    frameGeometryMapsL1  = cm.getOrCreateFrameGeometryMapsL1 (gofId);
-    frameGeometryMapsL2  = cm.getOrCreateFrameGeometryMapsL2 (gofId);
-    frameAttributeMapsL1 = cm.getOrCreateFrameAttributeMapsL1(gofId);
-    frameAttributeMapsL2 = cm.getOrCreateFrameAttributeMapsL2(gofId);
+    framePatches            = cm.getOrCreateFramePatches           (gofId);
+    frameOccupancyMaps      = cm.getOrCreateFrameOccupancyMaps     (gofId);
+    frameOccupancyMapsColor = cm.getOrCreateFrameOccupancyMapsColor(gofId);
+    frameOccupancyMapsDS    = cm.getOrCreateFrameOccupancyMapsDS   (gofId);
+    frameGeometryMapsL1     = cm.getOrCreateFrameGeometryMapsL1    (gofId);
+    frameGeometryMapsL2     = cm.getOrCreateFrameGeometryMapsL2    (gofId);
+    frameAttributeMapsL1    = cm.getOrCreateFrameAttributeMapsL1   (gofId);
+    frameAttributeMapsL2    = cm.getOrCreateFrameAttributeMapsL2   (gofId);
 }
 
 void GOF::setFrameMemoryPtrs(std::shared_ptr<FrameContext>& frame) {
@@ -61,7 +62,9 @@ void GOF::setFrameMemoryPtrs(std::shared_ptr<FrameContext>& frame) {
     frame->patchList = &(*framePatches)[framePos];
 
     frame->occupancyMap = &(*frameOccupancyMaps)[framePos];
-    frame->occupancyMap = &(*frameOccupancyMaps)[framePos];
+    if(p_->exportIntermediateFiles){
+        frame->occupancyMapColored = &(*frameOccupancyMapsColor)[framePos];
+    }
     frame->occupancyMapDS = &(*frameOccupancyMapsDS)[framePos];
     frame->geometryMapL1 = &(*frameGeometryMapsL1)[framePos];
     frame->geometryMapL2 = &(*frameGeometryMapsL2)[framePos];
