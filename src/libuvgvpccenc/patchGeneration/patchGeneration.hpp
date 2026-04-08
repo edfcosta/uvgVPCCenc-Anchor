@@ -39,44 +39,46 @@
 
 class PatchGeneration {
    public:
+
+   PatchGeneration(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frameInput);
+
    // Main function called by the job
-   static void generateFramePatches(std::shared_ptr<uvgvpcc_enc::FrameContext> frame);
+   static void generateFramePatches(std::shared_ptr<uvgvpcc_enc::FrameContext> frameInput);
    
    private:
    // Normal-based 
-   static void computeNormals(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<uvgutils::VectorN<double, 3>>& normals,
+   void computeNormals(std::vector<uvgutils::VectorN<double, 3>>& normals,
                     const std::vector<uvgutils::VectorN<uvgvpcc_enc::typeGeometryInput, 3>>& pointsGeometry,
                     const std::vector<std::vector<size_t>>& pointsNNList);
 
-   static void orientNormals(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<uvgutils::VectorN<double, 3>>& normals,
+   void orientNormals(std::vector<uvgutils::VectorN<double, 3>>& normals,
                    const std::vector<uvgutils::VectorN<uvgvpcc_enc::typeGeometryInput, 3>>& pointsGeometry,
                    const std::vector<std::vector<size_t>>& pointsNNList);
 
 
    // PPI Segmentation 
       // Normal-Based
-   static void initialSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,std::vector<size_t>& pointsPPIs, const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals, 
+   void initialSegmentation(std::vector<size_t>& pointsPPIs, const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals, 
                              const std::vector<uvgutils::VectorN<uvgvpcc_enc::typeGeometryInput, 3>>& pointsGeometry,const size_t& frameId);
     
    template<typename keyType>
-   static void refineSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,std::vector<size_t>& pointsPPIs, const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals, 
+   void refineSegmentation(std::vector<size_t>& pointsPPIs, const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals, 
                             const std::vector<uvgutils::VectorN<uvgvpcc_enc::typeGeometryInput, 3>>& pointsGeometry, const size_t& frameId);
 
 
       // Slice-Based
    template<typename indexType>
-   static void ppiAssignationSlicing(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,
-                           const std::vector<uvgutils::VectorN<uvgvpcc_enc::typeGeometryInput, 3>>& pointsGeometry, std::vector<size_t>& pointPPIs);
+   void ppiAssignationSlicing(const std::vector<uvgutils::VectorN<uvgvpcc_enc::typeGeometryInput, 3>>& pointsGeometry, std::vector<size_t>& pointPPIs);
    
    template<typename keyType>
-   static void refineSegmentation_NewRS(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+   void refineSegmentation_NewRS(std::vector<size_t>& pointsPPIs,
                                       const std::vector<bool>& normalExists,
                                       const std::vector<uvgutils::VectorN<uvgvpcc_enc::typeGeometryInput, 3>>& pointsGeometry,
                                       const size_t& frameId);
 
    // Patch segmentation
    template<typename keyType>
-   static void patchSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const std::vector<size_t>& pointsPPIs);
+   void patchSegmentation(const std::vector<size_t>& pointsPPIs);
 
-   
+   const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame_;
 };

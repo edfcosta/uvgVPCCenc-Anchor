@@ -379,7 +379,7 @@ void fillNeighborAndAdjacentLists_NewRS(std::vector<keyType>& filledVoxels, std:
 
 // TODO(lf): check if the initial segmentation can be done inside the precomputation of the refineSegmentation
 // TODO(lf): use auto& : ... everywhere instead of for loop (and try avoiding using pointCount or size())
-void PatchGeneration::initialSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+void PatchGeneration::initialSegmentation(std::vector<size_t>& pointsPPIs,
                                        const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals,
                                        const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                        const size_t& frameId) {
@@ -400,7 +400,7 @@ void PatchGeneration::initialSegmentation(const std::shared_ptr<uvgvpcc_enc::Fra
     }
 
     if (p_->exportIntermediateFiles) {
-        FileExport::exportPointCloudInitialSegmentation(frame, pointsGeometry, pointsPPIs);
+        FileExport::exportPointCloudInitialSegmentation(frame_, pointsGeometry, pointsPPIs);
     }
 }
 
@@ -437,7 +437,7 @@ in a voxel. The former is usually isolated points, and the latter indicates the 
 // TODO(lf): use two flags, compute one time the flag for S or M instead of checking it like the other classification
 // TODO(lf): the refine segmentation voxelization (voxel dim etc..) should depend on geometry bit, not on the max range
 template<typename keyType>
-void PatchGeneration::refineSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+void PatchGeneration::refineSegmentation(std::vector<size_t>& pointsPPIs,
                                       const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals, 
                                       const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                       const size_t& frameId) {
@@ -460,7 +460,7 @@ void PatchGeneration::refineSegmentation(const std::shared_ptr<uvgvpcc_enc::Fram
     const size_t voxelCount = filledVoxels.size();
 
     if(p_->exportStatistics){
-        stats.collectData(frame->frameId, DataId::NumberOfVoxelsRS, voxelCount);
+        stats.collectData(frame_->frameId, DataId::NumberOfVoxelsRS, voxelCount);
     }
 
     // The 1st classification is made here (+ score computation)
@@ -501,7 +501,7 @@ void PatchGeneration::refineSegmentation(const std::shared_ptr<uvgvpcc_enc::Fram
             const VoxClass& voxClass = voxAttributeList[voxelIndex].voxClass_;
             if (voxClass == VoxClass::NO_EDGE) {
                 if(p_->exportStatistics){
-                    stats.collectData(frame->frameId, DataId::SkippedVoxels, iter);
+                    stats.collectData(frame_->frameId, DataId::SkippedVoxels, iter);
                 }
                 continue;  // This voxel has been marked as NE-V before the current iteration //
             }
@@ -520,7 +520,7 @@ void PatchGeneration::refineSegmentation(const std::shared_ptr<uvgvpcc_enc::Fram
                 voxAttributeList[voxelIndex].updateFlag_ = true;
                 for(size_t i = 0 ; i < pointsPPIs.size() ; ++i){
                     if(previousPointsPPI[i] != pointsPPIs[i]){
-                        stats.collectData(frame->frameId, DataId::PpiChange, iter);
+                        stats.collectData(frame_->frameId, DataId::PpiChange, iter);
                     }
                 }
             }
@@ -531,13 +531,13 @@ void PatchGeneration::refineSegmentation(const std::shared_ptr<uvgvpcc_enc::Fram
             
             if(p_->exportStatistics){
                 for(size_t i = 0 ; i < pointListInVoxels[voxelIndex].size() ; ++i){
-                    stats.collectData(frame->frameId, DataId::ScoreComputations, iter);
+                    stats.collectData(frame_->frameId, DataId::ScoreComputations, iter);
                 }
                 switch (voxAttributeList[voxelIndex].voxClass_){
-                    case VoxClass::NO_EDGE:       stats.collectData(frame->frameId, DataId::NoEdge_R,       iter); break;
-                    case VoxClass::INDIRECT_EDGE: stats.collectData(frame->frameId, DataId::IndirectEdge_R, iter); break;
-                    case VoxClass::S_DIRECT_EDGE: stats.collectData(frame->frameId, DataId::SingleEdge_R,   iter); break;
-                    case VoxClass::M_DIRECT_EDGE: stats.collectData(frame->frameId, DataId::MultiEdge_R,    iter); break;
+                    case VoxClass::NO_EDGE:       stats.collectData(frame_->frameId, DataId::NoEdge_R,       iter); break;
+                    case VoxClass::INDIRECT_EDGE: stats.collectData(frame_->frameId, DataId::IndirectEdge_R, iter); break;
+                    case VoxClass::S_DIRECT_EDGE: stats.collectData(frame_->frameId, DataId::SingleEdge_R,   iter); break;
+                    case VoxClass::M_DIRECT_EDGE: stats.collectData(frame_->frameId, DataId::MultiEdge_R,    iter); break;
                 }
             }
         }
@@ -558,32 +558,32 @@ void PatchGeneration::refineSegmentation(const std::shared_ptr<uvgvpcc_enc::Fram
             for(auto& voxel : voxAttributeList){
                 VoxClass VC = voxel.voxClass_;
                 switch (VC) {
-                    case VoxClass::NO_EDGE:       stats.collectData(frame->frameId, DataId::NoEdge,       iter); break;
-                    case VoxClass::INDIRECT_EDGE: stats.collectData(frame->frameId, DataId::IndirectEdge, iter); break;
-                    case VoxClass::S_DIRECT_EDGE: stats.collectData(frame->frameId, DataId::SingleEdge,   iter); break;
-                    case VoxClass::M_DIRECT_EDGE: stats.collectData(frame->frameId, DataId::MultiEdge,    iter); break;
+                    case VoxClass::NO_EDGE:       stats.collectData(frame_->frameId, DataId::NoEdge,       iter); break;
+                    case VoxClass::INDIRECT_EDGE: stats.collectData(frame_->frameId, DataId::IndirectEdge, iter); break;
+                    case VoxClass::S_DIRECT_EDGE: stats.collectData(frame_->frameId, DataId::SingleEdge,   iter); break;
+                    case VoxClass::M_DIRECT_EDGE: stats.collectData(frame_->frameId, DataId::MultiEdge,    iter); break;
                 }
             }
         }
     }
 
     if (p_->exportIntermediateFiles) {
-        FileExport::exportPointCloudRefineSegmentation(frame, pointsGeometry, pointsPPIs);
+        FileExport::exportPointCloudRefineSegmentation(frame_, pointsGeometry, pointsPPIs);
     }
 }
 
 
-template void PatchGeneration::refineSegmentation<uint16_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+template void PatchGeneration::refineSegmentation<uint16_t>(std::vector<size_t>& pointsPPIs,
                                       const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals,
                                       const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                       const size_t& frameId);
 
-template void PatchGeneration::refineSegmentation<uint32_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+template void PatchGeneration::refineSegmentation<uint32_t>(std::vector<size_t>& pointsPPIs,
                                       const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals,
                                       const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                       const size_t& frameId);
 
-template void PatchGeneration::refineSegmentation<uint64_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+template void PatchGeneration::refineSegmentation<uint64_t>(std::vector<size_t>& pointsPPIs,
                                       const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals,
                                       const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                       const size_t& frameId); 
@@ -594,7 +594,7 @@ template void PatchGeneration::refineSegmentation<uint64_t>(const std::shared_pt
 ///////////////////////////////////////////
 
 template<typename keyType>
-void PatchGeneration::refineSegmentation_NewRS(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+void PatchGeneration::refineSegmentation_NewRS(std::vector<size_t>& pointsPPIs,
                                       const std::vector<bool>& normalExists,
                                       const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                       const size_t& frameId) {
@@ -617,7 +617,7 @@ void PatchGeneration::refineSegmentation_NewRS(const std::shared_ptr<uvgvpcc_enc
     const size_t voxelCount = filledVoxels.size();
 
     if(p_->exportStatistics){
-        stats.collectData(frame->frameId, DataId::NumberOfVoxelsRS, voxelCount);
+        stats.collectData(frame_->frameId, DataId::NumberOfVoxelsRS, voxelCount);
     }
 
     // The 1st classification is made here (+ score computation)
@@ -658,7 +658,7 @@ void PatchGeneration::refineSegmentation_NewRS(const std::shared_ptr<uvgvpcc_enc
             const VoxClass& voxClass = voxAttributeList[voxelIndex].voxClass_;
             if (voxClass == VoxClass::NO_EDGE) {
                 if(p_->exportStatistics){
-                    stats.collectData(frame->frameId, DataId::SkippedVoxels, iter);
+                    stats.collectData(frame_->frameId, DataId::SkippedVoxels, iter);
                 }
                 continue;  // This voxel has been marked as NE-V before the current iteration //
             }
@@ -677,7 +677,7 @@ void PatchGeneration::refineSegmentation_NewRS(const std::shared_ptr<uvgvpcc_enc
                 voxAttributeList[voxelIndex].updateFlag_ = true;
                 for(size_t i = 0 ; i < pointsPPIs.size() ; ++i){
                     if(previousPointsPPI[i] != pointsPPIs[i]){
-                        stats.collectData(frame->frameId, DataId::PpiChange, iter);
+                        stats.collectData(frame_->frameId, DataId::PpiChange, iter);
                     }
                 }
             }
@@ -688,13 +688,13 @@ void PatchGeneration::refineSegmentation_NewRS(const std::shared_ptr<uvgvpcc_enc
             
             if(p_->exportStatistics){
                 for(size_t i = 0 ; i < pointListInVoxels[voxelIndex].size() ; ++i){
-                    stats.collectData(frame->frameId, DataId::ScoreComputations, iter);
+                    stats.collectData(frame_->frameId, DataId::ScoreComputations, iter);
                 }
                 switch (voxAttributeList[voxelIndex].voxClass_){
-                    case VoxClass::NO_EDGE:       stats.collectData(frame->frameId, DataId::NoEdge_R,       iter); break;
-                    case VoxClass::INDIRECT_EDGE: stats.collectData(frame->frameId, DataId::IndirectEdge_R, iter); break;
-                    case VoxClass::S_DIRECT_EDGE: stats.collectData(frame->frameId, DataId::SingleEdge_R,   iter); break;
-                    case VoxClass::M_DIRECT_EDGE: stats.collectData(frame->frameId, DataId::MultiEdge_R,    iter); break;
+                    case VoxClass::NO_EDGE:       stats.collectData(frame_->frameId, DataId::NoEdge_R,       iter); break;
+                    case VoxClass::INDIRECT_EDGE: stats.collectData(frame_->frameId, DataId::IndirectEdge_R, iter); break;
+                    case VoxClass::S_DIRECT_EDGE: stats.collectData(frame_->frameId, DataId::SingleEdge_R,   iter); break;
+                    case VoxClass::M_DIRECT_EDGE: stats.collectData(frame_->frameId, DataId::MultiEdge_R,    iter); break;
                 }
             }
         }
@@ -715,31 +715,31 @@ void PatchGeneration::refineSegmentation_NewRS(const std::shared_ptr<uvgvpcc_enc
             for(auto& voxel : voxAttributeList){
                 VoxClass VC = voxel.voxClass_;
                 switch (VC) {
-                    case VoxClass::NO_EDGE:       stats.collectData(frame->frameId, DataId::NoEdge,       iter); break;
-                    case VoxClass::INDIRECT_EDGE: stats.collectData(frame->frameId, DataId::IndirectEdge, iter); break;
-                    case VoxClass::S_DIRECT_EDGE: stats.collectData(frame->frameId, DataId::SingleEdge,   iter); break;
-                    case VoxClass::M_DIRECT_EDGE: stats.collectData(frame->frameId, DataId::MultiEdge,    iter); break;
+                    case VoxClass::NO_EDGE:       stats.collectData(frame_->frameId, DataId::NoEdge,       iter); break;
+                    case VoxClass::INDIRECT_EDGE: stats.collectData(frame_->frameId, DataId::IndirectEdge, iter); break;
+                    case VoxClass::S_DIRECT_EDGE: stats.collectData(frame_->frameId, DataId::SingleEdge,   iter); break;
+                    case VoxClass::M_DIRECT_EDGE: stats.collectData(frame_->frameId, DataId::MultiEdge,    iter); break;
                 }
             }
         }
     }
 
     if (p_->exportIntermediateFiles) {
-        FileExport::exportPointCloudRefineSegmentation(frame, pointsGeometry, pointsPPIs);
+        FileExport::exportPointCloudRefineSegmentation(frame_, pointsGeometry, pointsPPIs);
     }
 }
 
-template void PatchGeneration::refineSegmentation_NewRS<uint16_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+template void PatchGeneration::refineSegmentation_NewRS<uint16_t>(std::vector<size_t>& pointsPPIs,
                                       const std::vector<bool>& normalExists,
                                       const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                       const size_t& frameId);
 
-template void PatchGeneration::refineSegmentation_NewRS<uint32_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+template void PatchGeneration::refineSegmentation_NewRS<uint32_t>(std::vector<size_t>& pointsPPIs,
                                       const std::vector<bool>& normalExists,
                                       const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                       const size_t& frameId);
 
-template void PatchGeneration::refineSegmentation_NewRS<uint64_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+template void PatchGeneration::refineSegmentation_NewRS<uint64_t>(std::vector<size_t>& pointsPPIs,
                                       const std::vector<bool>& normalExists,
                                       const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                       const size_t& frameId);

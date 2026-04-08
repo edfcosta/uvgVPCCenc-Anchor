@@ -443,7 +443,7 @@ inline void createPatch(Patch& patch, const ConnectedComponent& cc, const std::s
     if(p_->exportIntermediateFiles) {
         patch.patchOccupancyMapColor_.assign(patchSize, 0);
     }
-    
+
     patch.area_ = patchSize;
 
     assert(patch.widthInOccBlk_ == patch.widthInPixel_ / dsRes && patch.heightInOccBlk_ == patch.heightInPixel_ / dsRes);
@@ -502,15 +502,15 @@ inline void createConnectedComponents(std::vector<bool>& pointIsInAPatch, std::v
 }  // Anonymous namespace
 
 template<typename keyType>
-void PatchGeneration::patchSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const std::vector<size_t>& pointsPPIs) {
+void PatchGeneration::patchSegmentation(const std::vector<size_t>& pointsPPIs) {
     uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("PATCH GENERATION",
-                                                     "Patch segmentation of frame " + std::to_string(frame->frameId) + "\n");
+                                                     "Patch segmentation of frame " + std::to_string(frame_->frameId) + "\n");
 
-    const size_t pointCount = frame->pointsGeometry.size();
+    const size_t pointCount = frame_->pointsGeometry.size();
     
-    auto gofPtr = frame->gof.lock();
+    auto gofPtr = frame_->gof.lock();
     assert(gofPtr);
-    const size_t framePos = frame->frameId % p_->sizeGOF;
+    const size_t framePos = frame_->frameId % p_->sizeGOF;
     
     std::vector<bool> pointIsInAPatch(pointCount, false);
     std::vector<bool> pointCanBeASeed(pointCount, true);
@@ -522,7 +522,7 @@ void PatchGeneration::patchSegmentation(const std::shared_ptr<uvgvpcc_enc::Frame
     const size_t gbd = p_->geoBitDepthInput;
     const size_t gbd2 = p_->geoBitDepthInput * 2;    
     for (size_t ptIndex = 0; ptIndex < pointCount; ++ptIndex) {
-        const keyType pointLocation1D = location1DFromPoint<keyType>(frame->pointsGeometry[ptIndex],gbd,gbd2);
+        const keyType pointLocation1D = location1DFromPoint<keyType>(frame_->pointsGeometry[ptIndex],gbd,gbd2);
         assert(pointsPPIs[ptIndex] < 6);
         mapList[pointsPPIs[ptIndex]].emplace(pointLocation1D, ptIndex);
     }
@@ -539,11 +539,11 @@ void PatchGeneration::patchSegmentation(const std::shared_ptr<uvgvpcc_enc::Frame
     sharedPeakPerBlock.reserve(16384); 
     
     // Connected components creation (first iteration)
-    createConnectedComponents<keyType,true>(pointIsInAPatch, pointCanBeASeed, frame, resamplePointSetLocation1D, pointsPPIs, mapList,
+    createConnectedComponents<keyType,true>(pointIsInAPatch, pointCanBeASeed, frame_, resamplePointSetLocation1D, pointsPPIs, mapList,
         connectedComponents, sharedFifo);
         
     
-    auto& patchList = *frame->patchList;
+    auto& patchList = *frame_->patchList;
     patchList.reserve(256);
     
     while (!connectedComponents.empty()) {
@@ -556,22 +556,22 @@ void PatchGeneration::patchSegmentation(const std::shared_ptr<uvgvpcc_enc::Frame
 
             switch (cc.ppi) {
                 case 0:
-                    createPatch<keyType,0>(patch, cc, frame, pointIsInAPatch, mapList[0], resamplePointSetLocation1D, sharedPeakPerBlock);
+                    createPatch<keyType,0>(patch, cc, frame_, pointIsInAPatch, mapList[0], resamplePointSetLocation1D, sharedPeakPerBlock);
                     break;
                 case 1:
-                    createPatch<keyType,1>(patch, cc, frame, pointIsInAPatch, mapList[1], resamplePointSetLocation1D, sharedPeakPerBlock);
+                    createPatch<keyType,1>(patch, cc, frame_, pointIsInAPatch, mapList[1], resamplePointSetLocation1D, sharedPeakPerBlock);
                     break;
                 case 2:
-                    createPatch<keyType,2>(patch, cc, frame, pointIsInAPatch, mapList[2], resamplePointSetLocation1D, sharedPeakPerBlock);
+                    createPatch<keyType,2>(patch, cc, frame_, pointIsInAPatch, mapList[2], resamplePointSetLocation1D, sharedPeakPerBlock);
                     break;
                 case 3:
-                    createPatch<keyType,3>(patch, cc, frame, pointIsInAPatch, mapList[3], resamplePointSetLocation1D, sharedPeakPerBlock);
+                    createPatch<keyType,3>(patch, cc, frame_, pointIsInAPatch, mapList[3], resamplePointSetLocation1D, sharedPeakPerBlock);
                     break;
                 case 4:
-                    createPatch<keyType,4>(patch, cc, frame, pointIsInAPatch, mapList[4], resamplePointSetLocation1D, sharedPeakPerBlock);
+                    createPatch<keyType,4>(patch, cc, frame_, pointIsInAPatch, mapList[4], resamplePointSetLocation1D, sharedPeakPerBlock);
                     break;
                 case 5:
-                    createPatch<keyType,5>(patch, cc, frame, pointIsInAPatch, mapList[5], resamplePointSetLocation1D, sharedPeakPerBlock);
+                    createPatch<keyType,5>(patch, cc, frame_, pointIsInAPatch, mapList[5], resamplePointSetLocation1D, sharedPeakPerBlock);
                     break;
                 default:
                     assert(false);
@@ -581,14 +581,14 @@ void PatchGeneration::patchSegmentation(const std::shared_ptr<uvgvpcc_enc::Frame
 
         // Connected components creation
         connectedComponents.clear();
-        createConnectedComponents<keyType,false>(pointIsInAPatch, pointCanBeASeed, frame, resamplePointSetLocation1D, pointsPPIs,
+        createConnectedComponents<keyType,false>(pointIsInAPatch, pointCanBeASeed, frame_, resamplePointSetLocation1D, pointsPPIs,
                                          mapList, connectedComponents, sharedFifo);
     }
 
     if(p_->exportStatistics){
         size_t numberOfLostPointPS = 0;
-        std::vector<uvgutils::VectorN<uint8_t, 3>> attributes(frame->pointsGeometry.size());
-        std::vector<bool> pointColored(frame->pointsGeometry.size(), false);
+        std::vector<uvgutils::VectorN<uint8_t, 3>> attributes(frame_->pointsGeometry.size());
+        std::vector<bool> pointColored(frame_->pointsGeometry.size(), false);
         for (const auto& patch : patchList) {
             const auto color = patchColors[patch.patchIndex_ % patchColors.size()];
             for (size_t v = 0; v < patch.heightInPixel_; ++v) {
@@ -613,36 +613,33 @@ void PatchGeneration::patchSegmentation(const std::shared_ptr<uvgvpcc_enc::Frame
                 }
             }
         }
-        for (int i = 0; i < frame->pointsGeometry.size(); ++i) {
+        for (int i = 0; i < frame_->pointsGeometry.size(); ++i) {
             if (pointColored[i]) continue;
             // Points that are not within a patch are colored in red
             numberOfLostPointPS++;
         }
         // stats.setNumberOfLostPoints(frame->frameId, numberOfLostPointPS);
-        stats.collectData(frame->frameId, DataId::NumberOfLostPoints, numberOfLostPointPS);
+        stats.collectData(frame_->frameId, DataId::NumberOfLostPoints, numberOfLostPointPS);
     }
 
 
     if (p_->exportIntermediateFiles) {
-        FileExport::exportPointCloudPatchSegmentationColor(frame);
-        FileExport::exportPointCloudPatchSegmentationBorder(frame);
-        FileExport::exportPointCloudPatchSegmentationBorderBlank(frame);
+        FileExport::exportPointCloudPatchSegmentationColor(frame_);
+        FileExport::exportPointCloudPatchSegmentationBorder(frame_);
+        FileExport::exportPointCloudPatchSegmentationBorderBlank(frame_);
     }
 
 }
 
 template void PatchGeneration::patchSegmentation<uint64_t>(
-    const std::shared_ptr<uvgvpcc_enc::FrameContext>&,
     const std::vector<size_t>&
 );
 
 
 template void PatchGeneration::patchSegmentation<uint32_t>(
-    const std::shared_ptr<uvgvpcc_enc::FrameContext>&,
     const std::vector<size_t>&
 );
 
 template void PatchGeneration::patchSegmentation<uint16_t>(
-    const std::shared_ptr<uvgvpcc_enc::FrameContext>&,
     const std::vector<size_t>&
 );

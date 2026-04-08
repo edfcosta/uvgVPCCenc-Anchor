@@ -220,10 +220,10 @@ void computeNormal(uvgutils::VectorN<double, 3>& normal, const std::vector<uvgut
 
 }  // Anonymous namespace
 
-void PatchGeneration::computeNormals(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<uvgutils::VectorN<double, 3>>& normals,
+void PatchGeneration::computeNormals(std::vector<uvgutils::VectorN<double, 3>>& normals,
                     const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                     const std::vector<std::vector<size_t>>& pointsNNList) {
-    uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("PATCH GENERATION", "Compute normals of frame " + std::to_string(frame->frameId) + "\n");
+    uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("PATCH GENERATION", "Compute normals of frame " + std::to_string(frame_->frameId) + "\n");
     assert(p_->normalComputationKnnCount <= pointsGeometry.size());
 
     for (size_t pointIdx = 0; pointIdx < pointsGeometry.size(); ++pointIdx) {
@@ -231,6 +231,6 @@ void PatchGeneration::computeNormals(const std::shared_ptr<uvgvpcc_enc::FrameCon
     }
 
     if (p_->exportIntermediateFiles) {
-        FileExport::exportPointCloudNormalComputation(frame, pointsGeometry, normals);
+        FileExport::exportPointCloudNormalComputation(frame_, pointsGeometry, normals);
     }
 }

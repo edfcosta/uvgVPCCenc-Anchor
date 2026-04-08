@@ -83,11 +83,15 @@ inline void applyVoxelsDataToPoints(const std::vector<size_t>& voxelsPPIs, std::
 }
 }  // anonymous namespace
 
+PatchGeneration::PatchGeneration(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frameInput) : frame_(frameInput) {}
+
 // NOLINTNEXTLINE(performance-unnecessary-value-param) : lf Need copy for shared pointer
 void PatchGeneration::generateFramePatches(std::shared_ptr<uvgvpcc_enc::FrameContext> frame) {
     uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("PATCH GENERATION",
                                                      "Generate patches for frame " + std::to_string(frame->frameId) + ".\n");
-    
+
+    PatchGeneration patchGenerator(frame);
+
     // todo(mf): add the condition for export intermediates files
     if(p_->exportStatistics){
         // First occurence of the StatCollector for each frame
@@ -116,11 +120,11 @@ void PatchGeneration::generateFramePatches(std::shared_ptr<uvgvpcc_enc::FrameCon
     if (p_->activateSlicing) {
         const size_t pointCount = voxelizedPointsGeometry.size();
         if(pointCount <= std::numeric_limits<std::uint16_t>::max()) {
-            PatchGeneration::ppiAssignationSlicing<uint16_t>(frame, voxelizedPointsGeometry, voxelsPPIs);
+            patchGenerator.ppiAssignationSlicing<uint16_t>(voxelizedPointsGeometry, voxelsPPIs);
         } else if (pointCount <= std::numeric_limits<std::uint32_t>::max()) {
-            PatchGeneration::ppiAssignationSlicing<uint32_t>(frame, voxelizedPointsGeometry, voxelsPPIs);
+            patchGenerator.ppiAssignationSlicing<uint32_t>(voxelizedPointsGeometry, voxelsPPIs);
         } else if (pointCount <= std::numeric_limits<std::uint64_t>::max()) {
-            PatchGeneration::ppiAssignationSlicing<uint64_t>(frame, voxelizedPointsGeometry, voxelsPPIs);
+            patchGenerator.ppiAssignationSlicing<uint64_t>(voxelizedPointsGeometry, voxelsPPIs);
         } else {
             assert(false);
         }
@@ -131,18 +135,18 @@ void PatchGeneration::generateFramePatches(std::shared_ptr<uvgvpcc_enc::FrameCon
 
         // Normal computation & orientation //
         std::vector<uvgutils::VectorN<double, 3>> pointsNormal(voxelizedPointsGeometry.size());
-        PatchGeneration::computeNormals(frame, pointsNormal, voxelizedPointsGeometry, pointsNNList);
-        PatchGeneration::orientNormals(frame, pointsNormal, voxelizedPointsGeometry, pointsNNList);
+        patchGenerator.computeNormals(pointsNormal, voxelizedPointsGeometry, pointsNNList);
+        patchGenerator.orientNormals(pointsNormal, voxelizedPointsGeometry, pointsNNList);
 
         // Projection Plane Index Segmentation //
-        PatchGeneration::initialSegmentation(frame, voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
+        patchGenerator.initialSegmentation(voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
         const size_t gbdrs = p_->geoBitDepthRefineSegmentation;
         if(3*gbdrs <= 16) {
-            PatchGeneration::refineSegmentation<uint16_t>(frame, voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
+            patchGenerator.refineSegmentation<uint16_t>(voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
         } else if (3*gbdrs <= 32) {
-            PatchGeneration::refineSegmentation<uint32_t>(frame, voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
+            patchGenerator.refineSegmentation<uint32_t>(voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
         } else if (3*gbdrs <= 64) {
-            PatchGeneration::refineSegmentation<uint64_t>(frame, voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
+            patchGenerator.refineSegmentation<uint64_t>(voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
         } else {
             assert(false);
         }
@@ -160,11 +164,11 @@ void PatchGeneration::generateFramePatches(std::shared_ptr<uvgvpcc_enc::FrameCon
     // keyType is for location1D, which concatenate X, Y and Z coordinates in one number.
     const size_t gbd3 = 3*p_->geoBitDepthInput;
     if(gbd3 <= 16) {
-        PatchGeneration::patchSegmentation<uint16_t>(frame, pointsPPIs);
+        patchGenerator.patchSegmentation<uint16_t>(pointsPPIs);
     } else if (gbd3 <= 32) {
-        PatchGeneration::patchSegmentation<uint32_t>(frame, pointsPPIs);
+        patchGenerator.patchSegmentation<uint32_t>(pointsPPIs);
     } else if (gbd3 <= 64) {
-        PatchGeneration::patchSegmentation<uint64_t>(frame, pointsPPIs);
+        patchGenerator.patchSegmentation<uint64_t>(pointsPPIs);
     } else {
         assert(false);
     }

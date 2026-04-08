@@ -98,11 +98,11 @@ void addNeighbors(const std::vector<uvgutils::VectorN<double, 3>>& normals, cons
 }
 }  // anonymous namespace
 
-void PatchGeneration::orientNormals(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<uvgutils::VectorN<double, 3>>& normals,
+void PatchGeneration::orientNormals(std::vector<uvgutils::VectorN<double, 3>>& normals,
                    const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                    const std::vector<std::vector<size_t>>& pointsNNList) {
     uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("PATCH GENERATION",
-                                                     "Normal orientation of frame " + std::to_string(frame->frameId) + "\n");
+                                                     "Normal orientation of frame " + std::to_string(frame_->frameId) + "\n");
 
     std::vector<bool> visited(pointsGeometry.size());
     std::fill(visited.begin(), visited.end(), false);
@@ -144,6 +144,6 @@ void PatchGeneration::orientNormals(const std::shared_ptr<uvgvpcc_enc::FrameCont
     }
 
     if (p_->exportIntermediateFiles) {
-        FileExport::exportPointCloudNormalOrientation(frame, pointsGeometry, normals);
+        FileExport::exportPointCloudNormalOrientation(frame_, pointsGeometry, normals);
     }
 }
