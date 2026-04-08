@@ -287,6 +287,21 @@ void verifyConfig() {
                             std::to_string(adjacentPointsSearchFlatOffsets.size()) + ")."); 
     }    
 
+    
+    if (p_->geoBitDepthInput < p_->geoBitDepthVoxelized) {
+        throw std::runtime_error("The geoBitDepthInput (" +
+            std::to_string(p_->geoBitDepthInput) +
+            ") is smaller than the geoBitDepthVoxelized (" +
+            std::to_string(p_->geoBitDepthVoxelized) + ")."); 
+    }    
+        
+    if (p_->geoBitDepthVoxelized < p_->geoBitDepthRefineSegmentation) {
+        throw std::runtime_error("The geoBitDepthVoxelized (" +
+            std::to_string(p_->geoBitDepthVoxelized) +
+            ") is smaller than the geoBitDepthRefineSegmentation (" +
+            std::to_string(p_->geoBitDepthRefineSegmentation) + ")."); 
+    }
+     
 }
 
 void setInputGeoPrecision() {
