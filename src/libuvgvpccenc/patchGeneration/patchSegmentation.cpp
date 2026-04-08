@@ -32,7 +32,7 @@
 
 /// \file Entry point for the patch segmentation process which create the frame patch list.
 
-#include "patchSegmentation.hpp"
+#include "patchGeneration.hpp"
 
 #include <algorithm>
 #include <array>
@@ -494,7 +494,7 @@ inline void createConnectedComponents(std::vector<bool>& pointIsInAPatch, std::v
 }  // Anonymous namespace
 
 template<typename keyType>
-void PatchSegmentation::patchSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const std::vector<size_t>& pointsPPIs) {
+void PatchGeneration::patchSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const std::vector<size_t>& pointsPPIs) {
     uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("PATCH GENERATION",
                                                      "Patch segmentation of frame " + std::to_string(frame->frameId) + "\n");
 
@@ -623,18 +623,18 @@ void PatchSegmentation::patchSegmentation(const std::shared_ptr<uvgvpcc_enc::Fra
 
 }
 
-template void PatchSegmentation::patchSegmentation<uint64_t>(
+template void PatchGeneration::patchSegmentation<uint64_t>(
     const std::shared_ptr<uvgvpcc_enc::FrameContext>&,
     const std::vector<size_t>&
 );
 
 
-template void PatchSegmentation::patchSegmentation<uint32_t>(
+template void PatchGeneration::patchSegmentation<uint32_t>(
     const std::shared_ptr<uvgvpcc_enc::FrameContext>&,
     const std::vector<size_t>&
 );
 
-template void PatchSegmentation::patchSegmentation<uint16_t>(
+template void PatchGeneration::patchSegmentation<uint16_t>(
     const std::shared_ptr<uvgvpcc_enc::FrameContext>&,
     const std::vector<size_t>&
 );

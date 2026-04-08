@@ -43,12 +43,7 @@
 #include <string>
 #include <vector>
 
-#include "normalComputation.hpp"
-#include "normalOrientation.hpp"
 #include "patchGeneration/kdTree.hpp"
-#include "patchSegmentation.hpp"
-#include "ppiSegmentation.hpp"
-#include "slicingComputation.hpp"
 #include "utils/constants.hpp"
 #include "utils/parameters.hpp"
 #include "utilsPatchGeneration.hpp"
@@ -59,8 +54,12 @@
 
 using namespace uvgvpcc_enc;
 
+// lf : This applyVoxelsDataToPoints function is done in the other direction in TMC2 -> Iterating over the input points, computing the related
+// voxel coords and finding the voxel PPI through a map(voxelCoord, voxelPPI)
+namespace {
+
 // TODO(lf): nearestNeighborCount should be static
-void PatchGeneration::computePointsNNList(std::vector<std::vector<size_t>>& pointsNNList,
+void computePointsNNList(std::vector<std::vector<size_t>>& pointsNNList,
                                           const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry, const size_t& nnCount) {
     uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("PATCH GENERATION", "computePointsNNList.\n");
 
@@ -75,9 +74,6 @@ void PatchGeneration::computePointsNNList(std::vector<std::vector<size_t>>& poin
     }
 }
 
-// lf : This applyVoxelsDataToPoints function is done in the other direction in TMC2 -> Iterating over the input points, computing the related
-// voxel coords and finding the voxel PPI through a map(voxelCoord, voxelPPI)
-namespace {
 inline void applyVoxelsDataToPoints(const std::vector<size_t>& voxelsPPIs, std::vector<size_t>& pointsPPIs,
                                     const std::vector<size_t>& pointsIdToVoxelId) {
     uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("PATCH GENERATION", "Apply voxel data to points.\n");    
@@ -91,7 +87,6 @@ inline void applyVoxelsDataToPoints(const std::vector<size_t>& voxelsPPIs, std::
 void PatchGeneration::generateFramePatches(std::shared_ptr<uvgvpcc_enc::FrameContext> frame) {
     uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("PATCH GENERATION",
                                                      "Generate patches for frame " + std::to_string(frame->frameId) + ".\n");
-
     
     // todo(mf): add the condition for export intermediates files
     if(p_->exportStatistics){
@@ -121,11 +116,11 @@ void PatchGeneration::generateFramePatches(std::shared_ptr<uvgvpcc_enc::FrameCon
     if (p_->activateSlicing) {
         const size_t pointCount = voxelizedPointsGeometry.size();
         if(pointCount <= std::numeric_limits<std::uint16_t>::max()) {
-            slicingComputation::ppiAssignationSlicing<uint16_t>(frame, voxelizedPointsGeometry, voxelsPPIs);
+            PatchGeneration::ppiAssignationSlicing<uint16_t>(frame, voxelizedPointsGeometry, voxelsPPIs);
         } else if (pointCount <= std::numeric_limits<std::uint32_t>::max()) {
-            slicingComputation::ppiAssignationSlicing<uint32_t>(frame, voxelizedPointsGeometry, voxelsPPIs);
+            PatchGeneration::ppiAssignationSlicing<uint32_t>(frame, voxelizedPointsGeometry, voxelsPPIs);
         } else if (pointCount <= std::numeric_limits<std::uint64_t>::max()) {
-            slicingComputation::ppiAssignationSlicing<uint64_t>(frame, voxelizedPointsGeometry, voxelsPPIs);
+            PatchGeneration::ppiAssignationSlicing<uint64_t>(frame, voxelizedPointsGeometry, voxelsPPIs);
         } else {
             assert(false);
         }
@@ -136,18 +131,18 @@ void PatchGeneration::generateFramePatches(std::shared_ptr<uvgvpcc_enc::FrameCon
 
         // Normal computation & orientation //
         std::vector<uvgutils::VectorN<double, 3>> pointsNormal(voxelizedPointsGeometry.size());
-        NormalComputation::computeNormals(frame, pointsNormal, voxelizedPointsGeometry, pointsNNList);
-        NormalOrientation::orientNormals(frame, pointsNormal, voxelizedPointsGeometry, pointsNNList);
+        PatchGeneration::computeNormals(frame, pointsNormal, voxelizedPointsGeometry, pointsNNList);
+        PatchGeneration::orientNormals(frame, pointsNormal, voxelizedPointsGeometry, pointsNNList);
 
         // Projection Plane Index Segmentation //
-        PPISegmentation::initialSegmentation(frame, voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
+        PatchGeneration::initialSegmentation(frame, voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
         const size_t gbdrs = p_->geoBitDepthRefineSegmentation;
         if(3*gbdrs <= 16) {
-            PPISegmentation::refineSegmentation<uint16_t>(frame, voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
+            PatchGeneration::refineSegmentation<uint16_t>(frame, voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
         } else if (3*gbdrs <= 32) {
-            PPISegmentation::refineSegmentation<uint32_t>(frame, voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
+            PatchGeneration::refineSegmentation<uint32_t>(frame, voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
         } else if (3*gbdrs <= 64) {
-            PPISegmentation::refineSegmentation<uint64_t>(frame, voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
+            PatchGeneration::refineSegmentation<uint64_t>(frame, voxelsPPIs, pointsNormal, voxelizedPointsGeometry, frame->frameId);
         } else {
             assert(false);
         }
@@ -165,11 +160,11 @@ void PatchGeneration::generateFramePatches(std::shared_ptr<uvgvpcc_enc::FrameCon
     // keyType is for location1D, which concatenate X, Y and Z coordinates in one number.
     const size_t gbd3 = 3*p_->geoBitDepthInput;
     if(gbd3 <= 16) {
-        PatchSegmentation::patchSegmentation<uint16_t>(frame, pointsPPIs);
+        PatchGeneration::patchSegmentation<uint16_t>(frame, pointsPPIs);
     } else if (gbd3 <= 32) {
-        PatchSegmentation::patchSegmentation<uint32_t>(frame, pointsPPIs);
+        PatchGeneration::patchSegmentation<uint32_t>(frame, pointsPPIs);
     } else if (gbd3 <= 64) {
-        PatchSegmentation::patchSegmentation<uint64_t>(frame, pointsPPIs);
+        PatchGeneration::patchSegmentation<uint64_t>(frame, pointsPPIs);
     } else {
         assert(false);
     }

@@ -32,8 +32,6 @@
 
 /// \file Entry point for orienting the normals of a point cloud frame.
 
-#include "normalOrientation.hpp"
-
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -48,10 +46,9 @@
 #include "uvgutils/log.hpp"
 #include "uvgutils/utils.hpp"
 #include "utils/types.hpp"
+#include "patchGeneration.hpp"
 
 using namespace uvgvpcc_enc;
-
-namespace NormalOrientation {
 
 struct WeightedEdge {
     double weight_;
@@ -101,7 +98,7 @@ void addNeighbors(const std::vector<uvgutils::VectorN<double, 3>>& normals, cons
 }
 }  // anonymous namespace
 
-void orientNormals(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<uvgutils::VectorN<double, 3>>& normals,
+void PatchGeneration::orientNormals(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<uvgutils::VectorN<double, 3>>& normals,
                    const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                    const std::vector<std::vector<size_t>>& pointsNNList) {
     uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("PATCH GENERATION",
@@ -150,5 +147,3 @@ void orientNormals(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std:
         FileExport::exportPointCloudNormalOrientation(frame, pointsGeometry, normals);
     }
 }
-
-}  // namespace NormalOrientation

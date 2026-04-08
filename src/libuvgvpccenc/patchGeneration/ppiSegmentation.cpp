@@ -32,8 +32,6 @@
 
 /// \file This file combine both the initial segmentation and the refine segmentation. Assign a PPI (projection plan index) to each point.
 
-#include "ppiSegmentation.hpp"
-
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -51,6 +49,7 @@
 #include "uvgutils/log.hpp"
 #include "utils/types.hpp"
 #include "utils/statsCollector.hpp"
+#include "patchGeneration.hpp"
 
 using namespace uvgvpcc_enc;
 
@@ -380,7 +379,7 @@ void fillNeighborAndAdjacentLists_NewRS(std::vector<keyType>& filledVoxels, std:
 
 // TODO(lf): check if the initial segmentation can be done inside the precomputation of the refineSegmentation
 // TODO(lf): use auto& : ... everywhere instead of for loop (and try avoiding using pointCount or size())
-void PPISegmentation::initialSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+void PatchGeneration::initialSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
                                        const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals,
                                        const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                        const size_t& frameId) {
@@ -438,7 +437,7 @@ in a voxel. The former is usually isolated points, and the latter indicates the 
 // TODO(lf): use two flags, compute one time the flag for S or M instead of checking it like the other classification
 // TODO(lf): the refine segmentation voxelization (voxel dim etc..) should depend on geometry bit, not on the max range
 template<typename keyType>
-void PPISegmentation::refineSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+void PatchGeneration::refineSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
                                       const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals, 
                                       const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                       const size_t& frameId) {
@@ -574,17 +573,17 @@ void PPISegmentation::refineSegmentation(const std::shared_ptr<uvgvpcc_enc::Fram
 }
 
 
-template void PPISegmentation::refineSegmentation<uint16_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+template void PatchGeneration::refineSegmentation<uint16_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
                                       const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals,
                                       const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                       const size_t& frameId);
 
-template void PPISegmentation::refineSegmentation<uint32_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+template void PatchGeneration::refineSegmentation<uint32_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
                                       const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals,
                                       const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                       const size_t& frameId);
 
-template void PPISegmentation::refineSegmentation<uint64_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+template void PatchGeneration::refineSegmentation<uint64_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
                                       const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals,
                                       const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                       const size_t& frameId); 
@@ -595,7 +594,7 @@ template void PPISegmentation::refineSegmentation<uint64_t>(const std::shared_pt
 ///////////////////////////////////////////
 
 template<typename keyType>
-void PPISegmentation::refineSegmentation_NewRS(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+void PatchGeneration::refineSegmentation_NewRS(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
                                       const std::vector<bool>& normalExists,
                                       const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                       const size_t& frameId) {
@@ -730,17 +729,18 @@ void PPISegmentation::refineSegmentation_NewRS(const std::shared_ptr<uvgvpcc_enc
     }
 }
 
-template void PPISegmentation::refineSegmentation_NewRS<uint16_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+template void PatchGeneration::refineSegmentation_NewRS<uint16_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
                                       const std::vector<bool>& normalExists,
                                       const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                       const size_t& frameId);
 
-template void PPISegmentation::refineSegmentation_NewRS<uint32_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+template void PatchGeneration::refineSegmentation_NewRS<uint32_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
                                       const std::vector<bool>& normalExists,
                                       const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                       const size_t& frameId);
 
-template void PPISegmentation::refineSegmentation_NewRS<uint64_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+template void PatchGeneration::refineSegmentation_NewRS<uint64_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
                                       const std::vector<bool>& normalExists,
                                       const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry,
                                       const size_t& frameId);
+

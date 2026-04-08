@@ -39,10 +39,44 @@
 
 class PatchGeneration {
    public:
-    static void generateFramePatches(std::shared_ptr<uvgvpcc_enc::FrameContext> frame);
-
+   // Main function called by the job
+   static void generateFramePatches(std::shared_ptr<uvgvpcc_enc::FrameContext> frame);
+   
    private:
+   // Normal-based 
+   static void computeNormals(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<uvgutils::VectorN<double, 3>>& normals,
+                    const std::vector<uvgutils::VectorN<uvgvpcc_enc::typeGeometryInput, 3>>& pointsGeometry,
+                    const std::vector<std::vector<size_t>>& pointsNNList);
+
+   static void orientNormals(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<uvgutils::VectorN<double, 3>>& normals,
+                   const std::vector<uvgutils::VectorN<uvgvpcc_enc::typeGeometryInput, 3>>& pointsGeometry,
+                   const std::vector<std::vector<size_t>>& pointsNNList);
+
+
+   // PPI Segmentation 
+      // Normal-Based
+   static void initialSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,std::vector<size_t>& pointsPPIs, const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals, 
+                             const std::vector<uvgutils::VectorN<uvgvpcc_enc::typeGeometryInput, 3>>& pointsGeometry,const size_t& frameId);
     
-    static void computePointsNNList(std::vector<std::vector<size_t>>& pointsNNList,
-                                    const std::vector<uvgutils::VectorN<uvgvpcc_enc::typeGeometryInput, 3>>& pointsGeometry, const size_t& nnCount);
+   template<typename keyType>
+   static void refineSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,std::vector<size_t>& pointsPPIs, const std::vector<uvgutils::VectorN<double, 3>>& pointsNormals, 
+                            const std::vector<uvgutils::VectorN<uvgvpcc_enc::typeGeometryInput, 3>>& pointsGeometry, const size_t& frameId);
+
+
+      // Slice-Based
+   template<typename indexType>
+   static void ppiAssignationSlicing(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,
+                           const std::vector<uvgutils::VectorN<uvgvpcc_enc::typeGeometryInput, 3>>& pointsGeometry, std::vector<size_t>& pointPPIs);
+   
+   template<typename keyType>
+   static void refineSegmentation_NewRS(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, std::vector<size_t>& pointsPPIs,
+                                      const std::vector<bool>& normalExists,
+                                      const std::vector<uvgutils::VectorN<uvgvpcc_enc::typeGeometryInput, 3>>& pointsGeometry,
+                                      const size_t& frameId);
+
+   // Patch segmentation
+   template<typename keyType>
+   static void patchSegmentation(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const std::vector<size_t>& pointsPPIs);
+
+   
 };

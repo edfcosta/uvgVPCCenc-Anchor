@@ -32,8 +32,6 @@
 
 // slicingComputation.cpp - Implements PPI assignment for uvgVPCCenc using slicing
 
-#include "slicingComputation.hpp"
-
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -50,18 +48,16 @@
 #include <string>
 #include <vector>
 
-#include "ppiSegmentation.hpp"
 #include "uvgutils/robin_hood.h"
 #include "utils/fileExport.hpp"
 #include "utils/parameters.hpp"
 #include "utils/constants.hpp"
 #include "uvgutils/utils.hpp"
 #include "utils/types.hpp"
+#include "patchGeneration.hpp"
 
 using namespace uvgvpcc_enc;
 using namespace std;
-
-namespace slicingComputation {
 
 enum class Axis : uint8_t { X, Y, Z };
 
@@ -868,7 +864,11 @@ void finalPPIAttributionFastPreset(const std::shared_ptr<uvgvpcc_enc::FrameConte
                                    const std::vector<PPI>& pointPPIsX, const std::vector<PPI>& pointPPIsY, const std::vector<PPI>& pointPPIsZ,
                                    const robin_hood::unordered_map<indexType, size_t>& childToParentX,
                                    const robin_hood::unordered_map<indexType, size_t>& childToParentY,
-                                   const robin_hood::unordered_map<indexType, size_t>& childToParentZ, std::vector<size_t>& pointPPIs) {
+                                   const robin_hood::unordered_map<indexType, size_t>& childToParentZ, std::vector<size_t>& pointPPIs,
+                                   std::vector<size_t>& parentPointsPPIs,
+                                   std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& parentPointsGeometry,
+                                   std::vector<bool>& normalBool,
+                                   std::vector<size_t>& parentPointsIndexInPG) {
     const size_t nbPoints = pointsGeometry.size();
 
     // A parent point is a point with at least one temporary PPI
@@ -884,10 +884,11 @@ void finalPPIAttributionFastPreset(const std::shared_ptr<uvgvpcc_enc::FrameConte
     // 1) Only parent points are refined (need for temporary data structure).
     // 2) After refinement, children inherit PPI from their parents.
 
-    std::vector<size_t> parentPointsPPIs(nbPoints);
-    std::vector<uvgutils::VectorN<typeGeometryInput, 3>> parentPointsGeometry(nbPoints);
-    std::vector<bool> normalBool(nbPoints, false);
-    std::vector<size_t> parentPointsIndexInPG(nbPoints);
+    // std::vector<size_t> parentPointsPPIs(nbPoints);
+    // std::vector<uvgutils::VectorN<typeGeometryInput, 3>> parentPointsGeometry(nbPoints);
+    // std::vector<bool> normalBool(nbPoints, false);
+    // std::vector<size_t> parentPointsIndexInPG(nbPoints);
+
     bool hasNormal = false;
 
     size_t sizeParentSublist = 0;  // For refine segmentation parent sublist data structure creation
@@ -949,29 +950,29 @@ void finalPPIAttributionFastPreset(const std::shared_ptr<uvgvpcc_enc::FrameConte
     normalBool.resize(sizeParentSublist);
     parentPointsPPIs.resize(sizeParentSublist);
     
-    const size_t gbdrs = p_->geoBitDepthRefineSegmentation;
-    if(3*gbdrs <= 16) {
-        PPISegmentation::refineSegmentation_NewRS<uint16_t>(frame, parentPointsPPIs, normalBool, parentPointsGeometry, frame->frameId);
-    } else if (3*gbdrs <= 32) {
-        PPISegmentation::refineSegmentation_NewRS<uint32_t>(frame, parentPointsPPIs, normalBool, parentPointsGeometry, frame->frameId);
-    } else if (3*gbdrs <= 64) {
-        PPISegmentation::refineSegmentation_NewRS<uint64_t>(frame, parentPointsPPIs, normalBool, parentPointsGeometry, frame->frameId);
-    } else {
-        assert(false);
-    }
+    // const size_t gbdrs = p_->geoBitDepthRefineSegmentation;
+    // if(3*gbdrs <= 16) {
+    //     PatchGeneration::refineSegmentation_NewRS<uint16_t>(frame, parentPointsPPIs, normalBool, parentPointsGeometry, frame->frameId);
+    // } else if (3*gbdrs <= 32) {
+    //     PatchGeneration::refineSegmentation_NewRS<uint32_t>(frame, parentPointsPPIs, normalBool, parentPointsGeometry, frame->frameId);
+    // } else if (3*gbdrs <= 64) {
+    //     PatchGeneration::refineSegmentation_NewRS<uint64_t>(frame, parentPointsPPIs, normalBool, parentPointsGeometry, frame->frameId);
+    // } else {
+    //     assert(false);
+    // }
 
-    // Copy refined PPI values back to the full list of points.
-    for (size_t ptIndexSublist = 0; ptIndexSublist < sizeParentSublist; ++ptIndexSublist) {
-        const size_t parentPointIndexPG = parentPointsIndexInPG[ptIndexSublist];
-        pointPPIs[parentPointIndexPG] = parentPointsPPIs[ptIndexSublist];
-    }
+    // // Copy refined PPI values back to the full list of points.
+    // for (size_t ptIndexSublist = 0; ptIndexSublist < sizeParentSublist; ++ptIndexSublist) { // sizeParentSublist = parentPointsGeometry.size for example
+    //     const size_t parentPointIndexPG = parentPointsIndexInPG[ptIndexSublist];
+    //     pointPPIs[parentPointIndexPG] = parentPointsPPIs[ptIndexSublist];
+    // }
 
-    if (p_->exportIntermediateFiles) {
-        FileExport::exportPointCloudRefineSegmentation(frame, parentPointsGeometry, parentPointsPPIs);
-    }
+    // if (p_->exportIntermediateFiles) {
+    //     FileExport::exportPointCloudRefineSegmentation(frame, parentPointsGeometry, parentPointsPPIs); // Parent Geom + Parent PPI
+    // }
 
-    // Finally, propagate PPI from refined parents to their children.
-    childPPIAttribution<indexType>(childToParentX, childToParentY, childToParentZ, pointPPIs);
+    // // Finally, propagate PPI from refined parents to their children.
+    // childPPIAttribution<indexType>(childToParentX, childToParentY, childToParentZ, pointPPIs); // OK
 }
 
 template<typename indexType>
@@ -980,7 +981,8 @@ void finalPPIAttributionSlowPreset(const std::shared_ptr<uvgvpcc_enc::FrameConte
                                    const std::vector<PPI>& pointPPIsX, const std::vector<PPI>& pointPPIsY, const std::vector<PPI>& pointPPIsZ,
                                    const robin_hood::unordered_map<indexType, size_t>& childToParentX,
                                    const robin_hood::unordered_map<indexType, size_t>& childToParentY,
-                                   const robin_hood::unordered_map<indexType, size_t>& childToParentZ, std::vector<size_t>& pointPPIs) {
+                                   const robin_hood::unordered_map<indexType, size_t>& childToParentZ, std::vector<size_t>& pointPPIs,
+                                   std::vector<bool>& normalBool) {
     const size_t nbPoints = pointsGeometry.size();
 
     // A parent point is a point with at least one temporary PPI
@@ -993,7 +995,7 @@ void finalPPIAttributionSlowPreset(const std::shared_ptr<uvgvpcc_enc::FrameConte
     // Child points always have normal (0,0,0).
 
     std::vector<uvgutils::VectorN<double, 3>> pointsNormal(nbPoints);
-    std::vector<bool> normalBool(nbPoints, false);
+    // std::vector<bool> normalBool(nbPoints, false);
     bool hasNormal = {};
     for (int ptIndexPG = 0; ptIndexPG < nbPoints; ++ptIndexPG) {
         hasNormal = false;
@@ -1034,27 +1036,27 @@ void finalPPIAttributionSlowPreset(const std::shared_ptr<uvgvpcc_enc::FrameConte
     childPPIAttribution<indexType>(childToParentX, childToParentY, childToParentZ, pointPPIs);
 
     // keyType is for location1D, which concatenate X, Y and Z coordinates in one number.
-    const size_t gbdrs3 = 3*p_->geoBitDepthRefineSegmentation;
-    if(gbdrs3 <= 16) {
-        PPISegmentation::refineSegmentation_NewRS<uint16_t>(frame, pointPPIs, normalBool, pointsGeometry, frame->frameId);
-    } else if (gbdrs3 <= 32) {
-        PPISegmentation::refineSegmentation_NewRS<uint32_t>(frame, pointPPIs, normalBool, pointsGeometry, frame->frameId);
-    } else if (gbdrs3 <= 64) {
-        PPISegmentation::refineSegmentation_NewRS<uint64_t>(frame, pointPPIs, normalBool, pointsGeometry, frame->frameId);
-    } else {
-        assert(false);
-    }
+    // const size_t gbdrs3 = 3*p_->geoBitDepthRefineSegmentation;
+    // if(gbdrs3 <= 16) {
+    //     PatchGeneration::refineSegmentation_NewRS<uint16_t>(frame, pointPPIs, normalBool, pointsGeometry, frame->frameId);
+    // } else if (gbdrs3 <= 32) {
+    //     PatchGeneration::refineSegmentation_NewRS<uint32_t>(frame, pointPPIs, normalBool, pointsGeometry, frame->frameId);
+    // } else if (gbdrs3 <= 64) {
+    //     PatchGeneration::refineSegmentation_NewRS<uint64_t>(frame, pointPPIs, normalBool, pointsGeometry, frame->frameId);
+    // } else {
+    //     assert(false);
+    // }
 
-    if (p_->exportIntermediateFiles) {
-        FileExport::exportPointCloudRefineSegmentation(frame, pointsGeometry, pointPPIs);
-    }
+    // if (p_->exportIntermediateFiles) {
+    //     FileExport::exportPointCloudRefineSegmentation(frame, pointsGeometry, pointPPIs);
+    // }
 }
 
 
 }  // anonymous namespace
 
 template<typename indexType>
-void ppiAssignationSlicing(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,
+void PatchGeneration::ppiAssignationSlicing(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame,
                            const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry, std::vector<size_t>& pointPPIs) {
     // Create the 2D slices for each axis.
     const size_t nbMaxSlices = (1U << p_->geoBitDepthVoxelized);
@@ -1087,18 +1089,60 @@ void ppiAssignationSlicing(const std::shared_ptr<uvgvpcc_enc::FrameContext>& fra
     // Final PPI attribution
     // TODO(lf): use an enum for presetName
     if (p_->presetName == "fast") {
+        std::vector<size_t> parentPointsPPIs(nbPoints);
+        std::vector<uvgutils::VectorN<typeGeometryInput, 3>> parentPointsGeometry(nbPoints);
+        std::vector<bool> normalBool(nbPoints, false);
+        std::vector<size_t> parentPointsIndexInPG(nbPoints);
         finalPPIAttributionFastPreset<indexType>(frame, pointsGeometry, pointPPIsX, pointPPIsY, pointPPIsZ, childToParentX, childToParentY,
-                                      childToParentZ, pointPPIs);
+                                      childToParentZ, pointPPIs, parentPointsPPIs, parentPointsGeometry, normalBool, parentPointsIndexInPG);
+        const size_t gbdrs = p_->geoBitDepthRefineSegmentation;
+        if(3*gbdrs <= 16) {
+            PatchGeneration::refineSegmentation_NewRS<uint16_t>(frame, parentPointsPPIs, normalBool, parentPointsGeometry, frame->frameId);
+        } else if (3*gbdrs <= 32) {
+            PatchGeneration::refineSegmentation_NewRS<uint32_t>(frame, parentPointsPPIs, normalBool, parentPointsGeometry, frame->frameId);
+        } else if (3*gbdrs <= 64) {
+            PatchGeneration::refineSegmentation_NewRS<uint64_t>(frame, parentPointsPPIs, normalBool, parentPointsGeometry, frame->frameId);
+        } else {
+            assert(false);
+        }
+        // Copy refined PPI values back to the full list of points.
+        for (size_t ptIndexSublist = 0; ptIndexSublist < normalBool.size() ; ++ptIndexSublist) { // sizeParentSublist = parentPointsGeometry.size for example
+            const size_t parentPointIndexPG = parentPointsIndexInPG[ptIndexSublist];
+            pointPPIs[parentPointIndexPG] = parentPointsPPIs[ptIndexSublist];
+        }
+
+        if (p_->exportIntermediateFiles) {
+            FileExport::exportPointCloudRefineSegmentation(frame, parentPointsGeometry, parentPointsPPIs); // Parent Geom + Parent PPI
+        }
+
+        // Finally, propagate PPI from refined parents to their children.
+        childPPIAttribution<indexType>(childToParentX, childToParentY, childToParentZ, pointPPIs); // OK
+        
     } else if (p_->presetName == "slow") {
+        std::vector<bool> normalBool(nbPoints, false);
         finalPPIAttributionSlowPreset<indexType>(frame, pointsGeometry, pointPPIsX, pointPPIsY, pointPPIsZ, childToParentX, childToParentY,
-                                      childToParentZ, pointPPIs);
+                                      childToParentZ, pointPPIs, normalBool);
+        // keyType is for location1D, which concatenate X, Y and Z coordinates in one number.
+        const size_t gbdrs3 = 3*p_->geoBitDepthRefineSegmentation;
+        if(gbdrs3 <= 16) {
+            PatchGeneration::refineSegmentation_NewRS<uint16_t>(frame, pointPPIs, normalBool, pointsGeometry, frame->frameId);
+        } else if (gbdrs3 <= 32) {
+            PatchGeneration::refineSegmentation_NewRS<uint32_t>(frame, pointPPIs, normalBool, pointsGeometry, frame->frameId);
+        } else if (gbdrs3 <= 64) {
+            PatchGeneration::refineSegmentation_NewRS<uint64_t>(frame, pointPPIs, normalBool, pointsGeometry, frame->frameId);
+        } else {
+            assert(false);
+        }
+
+        if (p_->exportIntermediateFiles) {
+            FileExport::exportPointCloudRefineSegmentation(frame, pointsGeometry, pointPPIs);
+        }
+        
     } else {
         assert(false);
     }
 }
 
-template void ppiAssignationSlicing<uint16_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry, std::vector<size_t>& pointPPIs);
-template void ppiAssignationSlicing<uint32_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry, std::vector<size_t>& pointPPIs);
-template void ppiAssignationSlicing<uint64_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry, std::vector<size_t>& pointPPIs);
-
-}  // namespace slicingComputation
+template void PatchGeneration::ppiAssignationSlicing<uint16_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry, std::vector<size_t>& pointPPIs);
+template void PatchGeneration::ppiAssignationSlicing<uint32_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry, std::vector<size_t>& pointPPIs);
+template void PatchGeneration::ppiAssignationSlicing<uint64_t>(const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, const std::vector<uvgutils::VectorN<typeGeometryInput, 3>>& pointsGeometry, std::vector<size_t>& pointPPIs);
