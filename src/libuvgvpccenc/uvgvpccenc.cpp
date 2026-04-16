@@ -153,7 +153,7 @@ void verifyConfig() {
     }    
 
     if (p_->maxConcurrentFrames < 10) {
-        uvgutils::Logger::log<uvgutils::LogLevel::WARNING>("VERIFY CONFIG", "The parameter 'maxConcurrentFrames' (" + std::to_string(p_->sizeGOF) + ") is low. The encoder may not exploit all available CPU ressources and achieve low encoding speed.\n");
+        uvgutils::Logger::log<uvgutils::LogLevel::WARNING>("VERIFY CONFIG", "The parameter 'maxConcurrentFrames' (" + std::to_string(p_->maxConcurrentFrames) + ") is low. The encoder may not exploit all available CPU ressources and achieve low encoding speed.\n");
     } 
 
 
@@ -498,9 +498,9 @@ void parseUvgvpccParameters() {
     if (p_->maxConcurrentFrames == 0) {
         uvgutils::Logger::log<uvgutils::LogLevel::INFO>("API",
                                                         "'maxConcurrentFrames' is set to 0. The maximum number of frame processed in "
-                                                        "parallel by uvgVPCCenc is then four times the GOF size: " +
-                                                            std::to_string(4 * p_->sizeGOF) + "\n");
-        setParameterValue("maxConcurrentFrames", std::to_string(4 * p_->sizeGOF), false);
+                                                        "parallel by uvgVPCCenc is then the maximum between four times the GOF size ("+ std::to_string(p_->sizeGOF) +") and two times the thread number ("+ std::to_string(p_->nbThreadPCPart) +"): " +
+                                                            std::to_string(std::max(4 * p_->sizeGOF, 2 * p_->nbThreadPCPart)) + "\n");
+        setParameterValue("maxConcurrentFrames", std::to_string(std::max(4 * p_->sizeGOF, 2 * p_->nbThreadPCPart)), false);
     }
     if (p_->occupancyEncodingNbThread == 0) {
         uvgutils::Logger::log<uvgutils::LogLevel::DEBUG>("API",
