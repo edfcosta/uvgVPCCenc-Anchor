@@ -110,6 +110,7 @@ void initializeParameterMap(Parameters& param) {
         {"slicingRefineSegmentationMaxNNVoxelDistanceLUT", {UINT, "", &param.slicingRefineSegmentationMaxNNVoxelDistanceLUT}},
         {"slicingRefineSegmentationLambda", {DOUBLE, "", &param.slicingRefineSegmentationLambda}},
         {"slicingRefineSegmentationIterationCount", {UINT, "", &param.slicingRefineSegmentationIterationCount}},
+        {"slicingRefineSegmentationIDEVDist", {UINT, "", &param.slicingRefineSegmentationIDEVDist}},
 
         // ___ Patch generation ___ //   (patch segmentation)
         {"maxAllowedDist2RawPointsDetection", {UINT, "", &param.maxAllowedDist2RawPointsDetection}},

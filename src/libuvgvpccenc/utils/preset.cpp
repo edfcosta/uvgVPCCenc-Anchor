@@ -60,11 +60,13 @@ Preset preset_vox9_fast = {
 
     // ___ PPI smoothing  ___  //    (fast grid-based refine segmentation)
     {"geoBitDepthRefineSegmentation", "7"},
+    {"refineSegmentationIDEVDist", "3"},
     {"refineSegmentationMaxNNVoxelDistanceLUT", "2"},  // old : 2
     {"refineSegmentationLambda", "3.5"},               // old : 3.5
     {"refineSegmentationIterationCount", "3"},         // old : 3
 
     // ___ PPI smoothing for Slicing Algorithm ___ //
+    {"slicingRefineSegmentationIDEVDist", "3"},
     {"slicingRefineSegmentationMaxNNVoxelDistanceLUT", "2"},
     {"slicingRefineSegmentationLambda", "3.5"},
     {"slicingRefineSegmentationIterationCount", "3"},
@@ -100,11 +102,13 @@ Preset preset_vox9_slow = {
 
     // ___ PPI smoothing  ___  //    (fast grid-based refine segmentation)
     {"geoBitDepthRefineSegmentation", "8"},             // TODO(lf)-PRESET: fixed
+    {"refineSegmentationIDEVDist", "3"},
     {"refineSegmentationMaxNNVoxelDistanceLUT", "9"},   // TODO(lf)-PRESET: fixed
     {"refineSegmentationLambda", "3"},                  // TODO(lf)-PRESET : should be tested with iterations
     {"refineSegmentationIterationCount", "15"},         // old : 15 // TODO(lf)-PRESET : should be tested with lambda
 
     // ___ PPI smoothing for Slicing Algorithm ___ //
+    {"slicingRefineSegmentationIDEVDist", "3"},
     {"slicingRefineSegmentationMaxNNVoxelDistanceLUT", "4"},
     {"slicingRefineSegmentationLambda", "5"},
     {"slicingRefineSegmentationIterationCount", "10"},
@@ -140,11 +144,13 @@ Preset preset_vox10_fast = {
 
     // ___ PPI smoothing  ___  //    (fast grid-based refine segmentation)
     {"geoBitDepthRefineSegmentation", "8"},  // fixed
+    {"refineSegmentationIDEVDist", "3"},
     {"refineSegmentationMaxNNVoxelDistanceLUT", "2"},
     {"refineSegmentationLambda", "3.5"},
     {"refineSegmentationIterationCount", "3"},  // old : 3
 
     // ___ PPI smoothing for Slicing Algorithm ___ //
+    {"slicingRefineSegmentationIDEVDist", "1"},
     {"slicingRefineSegmentationMaxNNVoxelDistanceLUT", "2"},
     {"slicingRefineSegmentationLambda", "3.5"},
     {"slicingRefineSegmentationIterationCount", "3"},
@@ -179,11 +185,13 @@ Preset preset_vox10_slow = {
 
     // ___ PPI smoothing  ___  //    (fast grid-based refine segmentation)
     {"geoBitDepthRefineSegmentation", "9"},  // fixed
+    {"refineSegmentationIDEVDist", "3"},
     {"refineSegmentationMaxNNVoxelDistanceLUT", "9"},
     {"refineSegmentationLambda", "3.0"},
     {"refineSegmentationIterationCount", "15"},  // old : 15
 
     // ___ PPI smoothing for Slicing Algorithm ___ //
+    {"slicingRefineSegmentationIDEVDist", "1"},
     {"slicingRefineSegmentationMaxNNVoxelDistanceLUT", "6"},
     {"slicingRefineSegmentationLambda", "5"},
     {"slicingRefineSegmentationIterationCount", "10"},
@@ -218,11 +226,13 @@ Preset preset_vox11_fast = {
 
     // ___ PPI smoothing  ___  //    (fast grid-based refine segmentation)
     {"geoBitDepthRefineSegmentation", "6"},
+    {"refineSegmentationIDEVDist", "3"},
     {"refineSegmentationMaxNNVoxelDistanceLUT", "5"},
     {"refineSegmentationLambda", "3.5"},
     {"refineSegmentationIterationCount", "9"},
 
     // ___ PPI smoothing for Slicing Algorithm ___ //
+    {"slicingRefineSegmentationIDEVDist", "3"},
     {"slicingRefineSegmentationMaxNNVoxelDistanceLUT", "5"},
     {"slicingRefineSegmentationLambda", "3.5"},
     {"slicingRefineSegmentationIterationCount", "9"},
@@ -257,11 +267,13 @@ Preset preset_vox11_slow = {
 
     // ___ PPI smoothing  ___  //    (fast grid-based refine segmentation)
     {"geoBitDepthRefineSegmentation", "10"},
+    {"refineSegmentationIDEVDist", "3"},
     {"refineSegmentationMaxNNVoxelDistanceLUT", "9"},
     {"refineSegmentationLambda", "3.5"},
     {"refineSegmentationIterationCount", "19"},
 
     // ___ PPI smoothing for Slicing Algorithm ___ //
+    {"slicingRefineSegmentationIDEVDist", "3"},
     {"slicingRefineSegmentationMaxNNVoxelDistanceLUT", "9"},
     {"slicingRefineSegmentationLambda", "3.5"},
     {"slicingRefineSegmentationIterationCount", "19"},
