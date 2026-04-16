@@ -373,6 +373,67 @@ void fillNeighborAndAdjacentLists_NewRS(std::vector<keyType>& filledVoxels, std:
         nnPointCountList[v_idx] = num_nn_points;
     }
 }
+
+template<typename keyType>
+void computeExtendedScoreOnTheGo_NewRS(std::vector<uint8_t>& hasBeenComputed, const size_t voxelIndex, std::array<size_t,6>& voxExtendedScore, const std::vector<VoxelAttribute>& voxAttributeList,
+                                                           std::vector<std::vector<size_t>>& ADJ_List, const std::vector<keyType>& filledVoxels, const std::vector<bool>& occFlagArray, std::vector<std::vector<size_t>>& IDEV_List,
+                                                           const size_t bitMask, const size_t gridMaxAxisValue, const robin_hood::unordered_map<keyType,size_t>& voxelIdxMap, const std::vector<std::vector<size_t>>& pointListInVoxels, 
+                                                           std::vector<size_t>& nnPointCountList) {
+    if(hasBeenComputed[voxelIndex] == 1){
+        computeExtendedScore(voxExtendedScore, ADJ_List[voxelIndex], voxAttributeList);
+    } else {
+        hasBeenComputed[voxelIndex] = 1;
+    
+        size_t num_nn_points = 0;
+        size_t cur_pos_1D = filledVoxels[voxelIndex];
+        const typeGeometryInput z = cur_pos_1D >> (p_->geoBitDepthRefineSegmentation * 2);
+        const typeGeometryInput y = (cur_pos_1D >> p_->geoBitDepthRefineSegmentation) & bitMask;
+        const typeGeometryInput x = cur_pos_1D & bitMask;
+    
+        const uvgutils::VectorN<typeGeometryInput, 3> currentPoint = {x, y, z};
+    
+        for (size_t dist = 0; dist < p_->refineSegmentationMaxNNVoxelDistanceLUT ; ++dist) {  // dist is squared distance
+            for (const auto& shift : adjacentPointsSearch[dist]) {
+                uvgutils::VectorN<typeGeometryInput, 3> pointAdj;
+                // TODO(lf): to discuss and verify : pointAdj need to be in signed type as the shift can generate negative values.
+                // However, such negative values, in usigned type, will be higher than the max treshold (the max boundary of the
+                // grid). By using this bit overflow, we divide by two the number of check (we don't check if the shifted point is
+                // higher than 0)
+                pointAdj[0] = currentPoint[0] + shift[0];
+                pointAdj[1] = currentPoint[1] + shift[1];
+                pointAdj[2] = currentPoint[2] + shift[2];
+    
+                // check if valid 3D coordinate (not outside the grid) //
+                if (pointAdj[0] > gridMaxAxisValue || pointAdj[1] > gridMaxAxisValue || pointAdj[2] > gridMaxAxisValue) {
+                    continue;
+                }
+    
+                const size_t pointAdjLocation1D = pointAdj[0] + (pointAdj[1] << p_->geoBitDepthRefineSegmentation) +
+                                                    (pointAdj[2] << (p_->geoBitDepthRefineSegmentation * 2));
+    
+                if (occFlagArray[pointAdjLocation1D]) {
+                    const size_t neighbor_v_idx = voxelIdxMap.at(pointAdjLocation1D);
+                    // TODO(lf): do a big check everywhere because here adjacent and neighbor are inverted
+                    ADJ_List[voxelIndex].push_back(neighbor_v_idx);
+    
+                    // Extended score computation
+                    for (size_t k = 0; k < p_->projectionPlaneCount; ++k) {
+                        voxExtendedScore[k] += voxAttributeList[neighbor_v_idx].voxScore_[k];
+                    }
+    
+                    const size_t IDEV_range = p_->refineSegmentationIDEVDist; //old:3 // TODO(lf)justifiy this value, and make it dependent on the geobitdepth
+                    if (dist <= IDEV_range) {
+                        IDEV_List[voxelIndex].push_back(neighbor_v_idx);
+                    }
+    
+                    num_nn_points += pointListInVoxels[neighbor_v_idx].size();
+                }
+            }
+        }
+        nnPointCountList[voxelIndex] = num_nn_points;
+    }
+}
+
 ///// End of Slice-based functions
 
 } // end anonymous namespace
@@ -650,8 +711,6 @@ void PatchGeneration::refineSegmentation_NewRS(std::vector<size_t>& pointsPPIs,
     const size_t bitMask = (1U << gbdrs) - 1;
     const size_t distanceSearch = p_->refineSegmentationMaxNNVoxelDistanceLUT;
 
-    fillNeighborAndAdjacentLists_NewRS<keyType>(filledVoxels, occFlagArray, voxelIdxMap, ADJ_List, IDEV_List, pointListInVoxels, nnPointCountList);
-
     for (size_t iter = 0; iter < p_->refineSegmentationIterationCount; ++iter) {
         for (size_t voxelIndex = 0; voxelIndex < voxelCount; ++voxelIndex) {
             // TODO(lf): should we use a stack of voxel index instead of a for loop with a lot of if(true) ?
@@ -664,7 +723,10 @@ void PatchGeneration::refineSegmentation_NewRS(std::vector<size_t>& pointsPPIs,
             }
             
             voxExtendedScore.fill(0);
-            computeExtendedScore(voxExtendedScore, ADJ_List[voxelIndex], voxAttributeList);
+            computeExtendedScoreOnTheGo_NewRS(hasBeenComputed, voxelIndex, voxExtendedScore, voxAttributeList,
+                                              ADJ_List, filledVoxels, occFlagArray, IDEV_List, bitMask, gridSize,
+                                              voxelIdxMap, pointListInVoxels, nnPointCountList);
+
             updateAdjacentVoxelsClass(voxAttributeList, voxExtendedScore, IDEV_List[voxelIndex]);
             if (checkNEV(voxClass, voxAttributeList[voxelIndex].voxPPI_, voxExtendedScore)) {
                 continue;  // The current iteration found that this voxel is NE-V //
