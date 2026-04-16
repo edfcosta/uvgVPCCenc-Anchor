@@ -140,6 +140,24 @@ void verifyConfig() {
                                  "greater or equal to 'sizeGOF'.");
     }
 
+    if (p_->sizeGOF == 0) {
+        throw std::runtime_error("The parameter 'sizeGOF' (" + std::to_string(p_->sizeGOF) + ") cannot be equal to 0.");
+    }
+
+    if (p_->sizeGOF == 1 && p_->maxConcurrentFrames == 1) {
+        throw std::runtime_error("The parameter 'sizeGOF' (" + std::to_string(p_->sizeGOF) + ")  and the parameter 'maxConcurrentFrames' (" + std::to_string(p_->maxConcurrentFrames) + ") are both equal to 1. It will lead to a dealock. This is not a valid configuration. Consider setting 'maxConcurrentFrames' to a greater value.");
+    }
+
+    if (p_->sizeGOF != p_->sizeGOP2DEncoding) {
+        uvgutils::Logger::log<uvgutils::LogLevel::WARNING>("VERIFY CONFIG", "The parameter 'sizeGOF' (" + std::to_string(p_->sizeGOF) + ") has a different value than the parameter 'sizeGOP2DEncoding' (" + std::to_string(p_->sizeGOP2DEncoding) + "). It means that under Random Access condition, the 2D encoder may have more difficulty exploiting the temporal correlations offer by the matched patchs packing.\n");
+    }    
+
+    if (p_->maxConcurrentFrames < 10) {
+        uvgutils::Logger::log<uvgutils::LogLevel::WARNING>("VERIFY CONFIG", "The parameter 'maxConcurrentFrames' (" + std::to_string(p_->sizeGOF) + ") is low. The encoder may not exploit all available CPU ressources and achieve low encoding speed.\n");
+    } 
+
+
+
     if (p_->gpaTresholdIoU < 0 || p_->gpaTresholdIoU > 1) {
         throw std::runtime_error("The parameter 'gpaTresholdIoU' has been set to " + std::to_string(p_->gpaTresholdIoU) +
                                  ". This is not a valid value. The treshold should be a float between 0 and 1.");
@@ -162,7 +180,7 @@ void verifyConfig() {
                                  std::to_string(static_cast<int>(p_->sizeGOP2DEncoding)) +
                                  " which is not a valid. Currently, this parameter is only link to Kvazaar. This encoder accept "
                                  "only a GOP size of 8 or 16. The GOP size is here link to the size of the inter coding pyramid. Lots of "
-                                 "other configurations are possible but they are not yet configurable through the uvgVPCC interface, but "
+                                 "other configurations are possible but they are not yet configurable through the uvgVPCCenc interface, but "
                                  "within the encoderKvazaar.cpp file directly.");
     }
 
@@ -406,7 +424,7 @@ void setMode() {
         if (modeValue != "RA" && modeValue != "AI") {
             throw std::invalid_argument(
                 "The value assigned to the parameter 'mode' does not have a correct format. Here is the given value: '" + modeValue +
-                "'. The expected values are: [RA,AI].\n");
+                "'. The expected values are: [AI,RA].\n");
         }
 
         try {

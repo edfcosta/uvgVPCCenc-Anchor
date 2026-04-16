@@ -62,7 +62,7 @@ void initializeParameterMap(Parameters& param) {
         {"presetName", {STRING, "fast,slow", &param.presetName}},
         {"intermediateFilesDir", {STRING, "", &param.intermediateFilesDir}},
         {"statisticsDir", {STRING, "", &param.statisticsDir}},
-        {"sizeGOF", {UINT, "8,16", &param.sizeGOF}},  // TODO(lf)merge both gof size param ?
+        {"sizeGOF", {UINT, "", &param.sizeGOF}},  // TODO(lf)merge both gof size param ?
         {"nbThreadPCPart", {UINT, "", &param.nbThreadPCPart}},
         {"maxConcurrentFrames", {UINT, "", &param.maxConcurrentFrames}},
         {"doubleLayer", {BOOL, "", &param.doubleLayer}},
