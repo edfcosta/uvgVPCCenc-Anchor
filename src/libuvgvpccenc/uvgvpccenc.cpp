@@ -319,6 +319,15 @@ void verifyConfig() {
             ") is smaller than the geoBitDepthRefineSegmentation (" +
             std::to_string(p_->geoBitDepthRefineSegmentation) + ")."); 
     }
+
+    if (p_->geoBitDepthVoxelized == p_->geoBitDepthRefineSegmentation) {
+        uvgutils::Logger::log<uvgutils::LogLevel::WARNING>("VERIFY CONFIG",
+                                                           "The geoBitDepthVoxelized (" +
+            std::to_string(p_->geoBitDepthVoxelized) +
+            ") is equal to the geoBitDepthRefineSegmentation (" +
+            std::to_string(p_->geoBitDepthRefineSegmentation) + "). The refine segmentation is supposed to work on a lower voxelization level. Expect lower coding efficiency.\n");            
+    }
+
      
 }
 
