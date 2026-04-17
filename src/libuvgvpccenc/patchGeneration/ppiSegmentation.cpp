@@ -421,7 +421,8 @@ void fillNeighborAndAdjacentLists_NewRS(std::vector<keyType>& filledVoxels, std:
                     ADJ_List[v_idx].push_back(
                         neighbor_v_idx);  // TODO(lf): do a big check everywhere because here adjacent and neighbor are inverted
 
-                    const size_t IDEV_range = p_->refineSegmentationIDEVDist;  // TODO(lf)justifiy thise value, and make it dependent on the geobitdepth
+                    // const size_t IDEV_range = p_->refineSegmentationIDEVDist;  // TODO(lf)justifiy thise value, and make it dependent on the geobitdepth
+                    const size_t IDEV_range = 1;  // TODO(lf)justifiy thise value, and make it dependent on the geobitdepth
                     if (dist <= IDEV_range) {
                         IDEV_List[v_idx].push_back(neighbor_v_idx);
                     }
@@ -434,7 +435,7 @@ void fillNeighborAndAdjacentLists_NewRS(std::vector<keyType>& filledVoxels, std:
     }
 }
 
-template<typename keyType>
+template<typename keyType, bool idevIsAdj>
 void computeExtendedScoreOnTheGo_NewRS(std::vector<uint8_t>& hasBeenComputed, const size_t voxelIndex, std::array<size_t,6>& voxExtendedScore, const std::vector<VoxelAttribute>& voxAttributeList,
                                                            std::vector<std::vector<size_t>>& ADJ_List, const std::vector<keyType>& filledVoxels, const std::vector<bool>& occFlagArray, std::vector<std::vector<size_t>>& IDEV_List,
                                                            const size_t bitMask, const size_t gridMaxAxisValue, const robin_hood::unordered_map<keyType,size_t>& voxelIdxMap, const std::vector<std::vector<size_t>>& pointListInVoxels, 
@@ -481,11 +482,13 @@ void computeExtendedScoreOnTheGo_NewRS(std::vector<uint8_t>& hasBeenComputed, co
                         voxExtendedScore[k] += voxAttributeList[neighbor_v_idx].voxScore_[k];
                     }
     
-                    const size_t IDEV_range = p_->slicingRefineSegmentationIDEVDist; //old:3 // TODO(lf)justifiy this value, and make it dependent on the geobitdepth
-                    if (dist <= IDEV_range) {
-                        IDEV_List[voxelIndex].push_back(neighbor_v_idx);
+                    // const size_t IDEV_range = p_->slicingRefineSegmentationIDEVDist; //old:3 // TODO(lf)justifiy this value, and make it dependent on the geobitdepth
+                    if constexpr (!idevIsAdj){
+                        const size_t IDEV_range = p_->slicingRefineSegmentationIDEVDist; //old:3 // TODO(lf)justifiy this value, and make it dependent on the geobitdepth
+                        if (dist <= IDEV_range) {
+                            IDEV_List[voxelIndex].push_back(neighbor_v_idx);
+                        }
                     }
-    
                     num_nn_points += pointListInVoxels[neighbor_v_idx].size();
                 }
             }
@@ -626,7 +629,7 @@ void PatchGeneration::refineSegmentation(std::vector<size_t>& pointsPPIs,
             }
             
             voxExtendedScore.fill(0);
-            computeExtendedScoreOnTheGo(hasBeenComputed, voxelIndex, voxExtendedScore, voxAttributeList,
+            computeExtendedScoreOnTheGo<keyType>(hasBeenComputed, voxelIndex, voxExtendedScore, voxAttributeList,
                                               ADJ_List, filledVoxels, occFlagArray, IDEV_List, bitMask, gridSize,
                                               voxelIdxMap, pointListInVoxels, voxWeightList);
             updateAdjacentVoxelsClass(voxAttributeList, voxExtendedScore, IDEV_List[voxelIndex]);
@@ -756,7 +759,12 @@ void PatchGeneration::refineSegmentation_NewRS(std::vector<size_t>& pointsPPIs,
 
     const std::vector<size_t> pointsPPIs_O = pointsPPIs;
     std::vector<std::vector<size_t>> ADJ_List(voxelCount);   // large    // This is voxNeighborsList
-    std::vector<std::vector<size_t>> IDEV_List(voxelCount);  // small    // This is voxAdjacentsList
+    std::vector<std::vector<size_t>> IDEV_List;  // small    // This is voxAdjacentsList
+    if(p_->slicingRefineSegmentationIDEVDist < p_->refineSegmentationMaxNNVoxelDistanceLUT - 1){
+        //std::cout << "Reserved" << std::endl;
+        IDEV_List.resize(voxelCount);
+    }
+
     std::vector<size_t> nnPointCountList(voxelCount);
 
     // TODO(lf): find a way to break the refine segmentation iteration before reaching the number of iteration parameter (if number of updated
@@ -783,11 +791,19 @@ void PatchGeneration::refineSegmentation_NewRS(std::vector<size_t>& pointsPPIs,
             }
             
             voxExtendedScore.fill(0);
-            computeExtendedScoreOnTheGo_NewRS(hasBeenComputed, voxelIndex, voxExtendedScore, voxAttributeList,
+            if(p_->slicingRefineSegmentationIDEVDist >= p_->refineSegmentationMaxNNVoxelDistanceLUT - 1) {
+                computeExtendedScoreOnTheGo_NewRS<keyType, true>(hasBeenComputed, voxelIndex, voxExtendedScore, voxAttributeList,
                                               ADJ_List, filledVoxels, occFlagArray, IDEV_List, bitMask, gridSize,
                                               voxelIdxMap, pointListInVoxels, nnPointCountList);
 
-            updateAdjacentVoxelsClass(voxAttributeList, voxExtendedScore, IDEV_List[voxelIndex]);
+                updateAdjacentVoxelsClass(voxAttributeList, voxExtendedScore, ADJ_List[voxelIndex]);
+            } else {
+                computeExtendedScoreOnTheGo_NewRS<keyType, false>(hasBeenComputed, voxelIndex, voxExtendedScore, voxAttributeList,
+                                                  ADJ_List, filledVoxels, occFlagArray, IDEV_List, bitMask, gridSize,
+                                                  voxelIdxMap, pointListInVoxels, nnPointCountList);
+    
+                updateAdjacentVoxelsClass(voxAttributeList, voxExtendedScore, IDEV_List[voxelIndex]);
+            }
             if (checkNEV(voxClass, voxAttributeList[voxelIndex].voxPPI_, voxExtendedScore)) {
                 continue;  // The current iteration found that this voxel is NE-V //
             }
