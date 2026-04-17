@@ -66,7 +66,7 @@ Preset preset_vox9_fast = {
     {"refineSegmentationIterationCount", "3"},         // old : 3
 
     // ___ PPI smoothing for Slicing Algorithm ___ //
-    {"slicingRefineSegmentationIDEVDist", "3"},
+    {"slicingRefineSegmentationIDEVDist", "1"},
     {"slicingRefineSegmentationMaxNNVoxelDistanceLUT", "2"},
     {"slicingRefineSegmentationLambda", "3.5"},
     {"slicingRefineSegmentationIterationCount", "3"},
@@ -108,7 +108,7 @@ Preset preset_vox9_slow = {
     {"refineSegmentationIterationCount", "15"},         // old : 15 // TODO(lf)-PRESET : should be tested with lambda
 
     // ___ PPI smoothing for Slicing Algorithm ___ //
-    {"slicingRefineSegmentationIDEVDist", "3"},
+    {"slicingRefineSegmentationIDEVDist", "1"},
     {"slicingRefineSegmentationMaxNNVoxelDistanceLUT", "4"},
     {"slicingRefineSegmentationLambda", "5"},
     {"slicingRefineSegmentationIterationCount", "10"},
