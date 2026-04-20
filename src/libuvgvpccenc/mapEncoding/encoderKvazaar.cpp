@@ -197,6 +197,20 @@ void setKvazaarConfig(kvz_api* api, kvz_config* config, const size_t& width, con
                 throw std::runtime_error("EncoderKvazaar: This geometry map encoding mode is unknown : " + p_->geometryEncodingMode +
                                          ". Only AI and RA are currently available.");
             }
+
+            // lf : advice from Joose (lossless relevant if at least rd 2) //TODO(lf) test it for occupancy map
+            if (p_->geometryEncodingIsLossless && (
+                    p_->geometryEncodingPreset == "ultrafast" ||
+                    p_->geometryEncodingPreset == "superfast" ||
+                    p_->geometryEncodingPreset == "veryfast" ||
+                    p_->geometryEncodingPreset == "faster" ||
+                    p_->geometryEncodingPreset == "fast" ||
+                    p_->geometryEncodingPreset == "medium" ||
+                    p_->geometryEncodingPreset == "slow"
+                )) {
+                api->config_parse(config, "rd", "2");
+            }
+
             break;
 
         case ATTRIBUTE:
@@ -236,6 +250,20 @@ void setKvazaarConfig(kvz_api* api, kvz_config* config, const size_t& width, con
                 api->config_parse(config, "full-intra-search", "1");
                 api->config_parse(config, "intra-chroma-search", "1");
             }
+            
+            // lf : advice from Joose (lossless relevant if at least rd 2) //TODO(lf) test it for occupancy map
+            if (p_->attributeEncodingIsLossless && (
+                    p_->attributeEncodingPreset == "ultrafast" ||
+                    p_->attributeEncodingPreset == "superfast" ||
+                    p_->attributeEncodingPreset == "veryfast" ||
+                    p_->attributeEncodingPreset == "faster" ||
+                    p_->attributeEncodingPreset == "fast" ||
+                    p_->attributeEncodingPreset == "medium" ||
+                    p_->attributeEncodingPreset == "slow"
+                )) {
+                api->config_parse(config, "rd", "2");
+            }
+
             break;
 
         default:
