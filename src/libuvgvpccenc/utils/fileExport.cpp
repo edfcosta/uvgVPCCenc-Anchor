@@ -55,6 +55,7 @@
 #include "uvgutils/log.hpp"
 #include "uvgutils/utils.hpp"
 #include "utils/types.hpp"
+#include "utils/constants.hpp"
 
 using namespace uvgvpcc_enc;
 
@@ -368,7 +369,12 @@ void exportPointCloudPPIAttributionSlicing(const std::shared_ptr<FrameContext>& 
 
     std::vector<uvgutils::VectorN<uint8_t, 3>> attributes(pointsGeometry.size());
     for (size_t pointIndex = 0; pointIndex < pointsGeometry.size(); ++pointIndex) {
-        attributes[pointIndex] = ppiColors[pointsPPIs[pointIndex]];
+        assert(pointsPPIs[pointIndex] < ppiColors.size() || pointsPPIs[pointIndex] == PPI_NON_ASSIGNED);
+        if(pointsPPIs[pointIndex] == PPI_NON_ASSIGNED) {
+            attributes[pointIndex] = ppiColors[6];
+        } else {
+            attributes[pointIndex] = ppiColors[pointsPPIs[pointIndex]];
+        }
     }
     exportPointCloud(outputPath, pointsGeometry, attributes);
 }

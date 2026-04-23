@@ -221,6 +221,7 @@ struct FrameContext {
         , mapHeightDS(p_->minimumMapHeight / p_->occupancyMapDSResolution)
         , patchList(nullptr)
         , occupancyMap(nullptr)
+        , occupancyMapColored(nullptr)
         , occupancyMapDS(nullptr)
         , geometryMapL1(nullptr)
         , geometryMapL2(nullptr)

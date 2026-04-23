@@ -323,7 +323,6 @@ void PatchPacking::frameInterPatchPacking(const std::vector<uvgvpcc_enc::Patch>&
                         (*frame->occupancyMapColored)[patch.omDSPosX_ * p_->occupancyMapDSResolution + patchX +
                                             (patchY + patch.omDSPosY_ * p_->occupancyMapDSResolution) * p_->mapWidth] =
                             patch.patchOccupancyMapColor_[patchX + patchY * patch.widthInPixel_];
-                            std::cout << +patch.patchOccupancyMapColor_[patchX + patchY * patch.widthInPixel_] << std::endl;
                     }
 
                 }
@@ -342,7 +341,6 @@ void PatchPacking::frameInterPatchPacking(const std::vector<uvgvpcc_enc::Patch>&
                         (*frame->occupancyMapColored)[patch.omDSPosX_ * p_->occupancyMapDSResolution + patchY +
                                         (patchX + patch.omDSPosY_ * p_->occupancyMapDSResolution) * p_->mapWidth] =
                         patch.patchOccupancyMapColor_[patchX + patchY * patch.widthInPixel_];
-                        std::cout << +patch.patchOccupancyMapColor_[patchX + patchY * patch.widthInPixel_] << std::endl;
                     }
                 }
             }
@@ -482,6 +480,9 @@ void PatchPacking::gofPatchPacking(const std::shared_ptr<uvgvpcc_enc::GOF>& gof)
 
         // Fill the patch occupancy map of the union patch //
         unionPatch.patchOccupancyMap_.resize(unionPatch.widthInPixel_ * unionPatch.heightInPixel_, 1);
+        if(p_->exportIntermediateFiles) {
+            unionPatch.patchOccupancyMapColor_.resize(unionPatch.widthInPixel_ * unionPatch.heightInPixel_, 1);
+        }
     }
 
     size_t nbUnionPatch = unionPatches.size();

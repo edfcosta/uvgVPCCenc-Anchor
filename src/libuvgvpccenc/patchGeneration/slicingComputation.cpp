@@ -734,15 +734,12 @@ void createTempPointCloudForSlicingExportation(const std::shared_ptr<FrameContex
         attributes[subslice[1]] = FileExport::ppiColors[1];
         for (size_t indexSubslice = 2; indexSubslice < subslice.size() - 1; ++indexSubslice) {
             const size_t ptIndexPG = subslice[indexSubslice];
-            const uint8_t r = static_cast<uint8_t>((1.0 + static_cast<float>(countSubslicePerSlice) / 3.0) *
-                                                   static_cast<float>(FileExport::ppiColors[3][0])) %
-                              255;
-            const uint8_t g = static_cast<uint8_t>((1.0 + static_cast<float>(countSubslicePerSlice) / 3.0) *
-                                                   static_cast<float>(FileExport::ppiColors[3][1])) %
-                              255;
-            const uint8_t b = static_cast<uint8_t>((1.0 + static_cast<float>(countSubslicePerSlice) / 3.0) *
-                                                   static_cast<float>(FileExport::ppiColors[3][2])) %
-                              255;
+            const uint8_t r = static_cast<uint8_t>(static_cast<size_t>((1.0 + static_cast<float>(countSubslicePerSlice) / 3.0) *
+                                                   static_cast<float>(FileExport::ppiColors[3][0])) % 255);
+            const uint8_t g = static_cast<uint8_t>(static_cast<size_t>((1.0 + static_cast<float>(countSubslicePerSlice) / 3.0) *
+                                                   static_cast<float>(FileExport::ppiColors[3][1])) % 255);
+            const uint8_t b = static_cast<uint8_t>(static_cast<size_t>((1.0 + static_cast<float>(countSubslicePerSlice) / 3.0) *
+                                                   static_cast<float>(FileExport::ppiColors[3][2])) % 255);
             attributes[ptIndexPG] = {r, g, b};
         }
         attributes[subslice[subslice.size() - 1]] = FileExport::ppiColors[4];
