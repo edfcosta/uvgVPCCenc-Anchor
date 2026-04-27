@@ -221,7 +221,7 @@ constexpr bool getPatchProjectionMode() {
 
 template <size_t NormalAxis, size_t TangentAxis, size_t BitangentAxis, bool ProjectionMode>
 inline void setInitialPatchL1(Patch& patch, const ConnectedComponent& cc, std::vector<typeGeometryInput>& peakPerBlock,
-                              const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame) {
+                              const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, int& extremum_D) {
     const size_t widthInPixel = patch.widthInPixel_;
     const size_t widthInOccBlk = patch.widthInOccBlk_;
     const size_t occRes = p_->occupancyMapDSResolution;  // TODO(lf) create an associated log parameter for occupancyMapDSResolution
@@ -242,24 +242,30 @@ inline void setInitialPatchL1(Patch& patch, const ConnectedComponent& cc, std::v
         assert(p < patch.depthL1_.size());
         const typeGeometryInput patchD = patch.depthL1_[p];
 
-        if constexpr (ProjectionMode) {
+        if constexpr (!ProjectionMode) { // if 0: positive axis --> max search | if 1: negative axis --> min search
             assert(pom < peakPerBlock.size());
             peakPerBlock[pom] = std::max(peakPerBlock[pom], d);
+            extremum_D = std::min(static_cast<int>(d), extremum_D); // Minimum value because decoder --> d - extremum_D
             if (patchD >= d && patchD != g_infiniteDepth) continue;
         } else {
             peakPerBlock[pom] = std::min(peakPerBlock[pom], d);
+            extremum_D = std::max(static_cast<int>(d), extremum_D); // Maximum value because decoder --> extremum_D - d
             if (patchD <= d) continue;
         }
 
-        // valid point for L1
-        // lf : if 0, then L1 hold the smallest values
-        // lf : if 1, then L1 hold the highest values
+        //                                              extrD  --------------------> x axis
+        // valid point for L1                             V                     v
+        // lf : if 0, then L1 hold the highest  values    |       XX--X--------XX       highest  values
+        // lf : if 1, then L1 hold the smallest values            XX--X--------XX   |   smallest values
+        //                                                        ^                 ^
+        //                                                                        extrD                 
 
         patch.depthL1_[p] = d;
         patch.depthPCidxL1_[p] = pointIndex;
     }
 }
 
+// Not used anymore
 template <bool ProjectionMode>
 inline int getMinD(const std::vector<typeGeometryInput>& peakPerBlock) {
     const size_t minLevel = p_->minLevel;
@@ -275,7 +281,7 @@ inline int getMinD(const std::vector<typeGeometryInput>& peakPerBlock) {
 }
 
 template <bool ProjectionMode>
-inline void setPatchL1(Patch& patch, const int& minD, const std::vector<typeGeometryInput>& peakPerBlock) {
+inline void setPatchL1(Patch& patch, const int& extremum_D, const std::vector<typeGeometryInput>& peakPerBlock) {
     const size_t valueOverflowCheck =
         (1U << 8U) - 1 - p_->surfaceThickness;  // lf: In TMC2, 8 corresponds to geometryNominal2dBitdepth, which probably refers to the
                                                 // geometry ouput (geometry maps use uint8)
@@ -288,7 +294,7 @@ inline void setPatchL1(Patch& patch, const int& minD, const std::vector<typeGeom
             }
 
             // check if the current depth value is small enough to be stored in the geometry map (uint8)
-            const bool overflow = ProjectionMode ? minD > valueOverflowCheck + depth : depth > valueOverflowCheck + minD;
+            const bool overflow = ProjectionMode ? extremum_D > valueOverflowCheck + depth : depth > valueOverflowCheck + extremum_D;
             if (overflow) {
                 patch.depthL1_[pos] = g_infiniteDepth;
                 patch.depthPCidxL1_[pos] = g_infinitenumber;
@@ -315,10 +321,17 @@ inline void setPatchL1(Patch& patch, const int& minD, const std::vector<typeGeom
             if(p_->exportIntermediateFiles) {
                 patch.patchOccupancyMapColor_[pos] = patch.patchIndex_;
             }
+
             if constexpr (ProjectionMode) {
-                patch.depthL1_[pos] = static_cast<int16_t>((static_cast<int16_t>(minD) - patch.depthL1_[pos]));
+                patch.depthL1_[pos] = static_cast<int16_t>((static_cast<int16_t>(extremum_D) - patch.depthL1_[pos])); // Turn into relative position
+                //                                    axis --------------->     extrD 
+                //                                          XX-X-------XX         |
+                //                                      d = ^~~~~~~~~~~~~~~~~~~~~~^ 
             } else {
-                patch.depthL1_[pos] = static_cast<int16_t>(patch.depthL1_[pos] - static_cast<int16_t>(minD));
+                patch.depthL1_[pos] = static_cast<int16_t>(patch.depthL1_[pos] - static_cast<int16_t>(extremum_D)); // Turn into relative position
+                //                                 extrD   ---------------> axis     
+                //                                   |      XX-X-------XX         
+                //                               d = ^~~~~~~~~~~~~~~~~~~^ 
             }
         }
     }
@@ -327,7 +340,7 @@ inline void setPatchL1(Patch& patch, const int& minD, const std::vector<typeGeom
 template <typename keyType, size_t Ppi, bool DoubleLayer>
 inline void finalizePatch(const ConnectedComponent& cc, const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, Patch& patch,
                           robin_hood::unordered_map<keyType, size_t>& mapLocation1D, std::vector<bool>& pointIsInAPatch,
-                          const typeGeometryInput& minD, robin_hood::unordered_set<keyType>& resamplePointSetLocation1D) {
+                          const typeGeometryInput& extremum_D, robin_hood::unordered_set<keyType>& resamplePointSetLocation1D) {
     constexpr size_t normalAxis = getPatchNormalAxis<Ppi>();
     constexpr size_t tangentAxis = getPatchTangentAxis<Ppi>();
     constexpr size_t bitangentAxis = getPatchBitangentAxis<Ppi>();
@@ -361,7 +374,12 @@ inline void finalizePatch(const ConnectedComponent& cc, const std::shared_ptr<uv
 
         patch.sizeD_ = std::max<size_t>(patch.sizeD_, static_cast<size_t>(patchDL1));
 
-        const typeGeometryInput d = projectionMode ? (minD - point[normalAxis]) : (point[normalAxis] - minD);
+        const typeGeometryInput d = projectionMode ? (extremum_D - point[normalAxis]) : (point[normalAxis] - extremum_D);
+        //        ---------------------> axis
+        // If 0:   |   XX-X-------XX           " | " is extremum_D
+        //     d = ^~~~~~~~~~~~~~~~^    = pt - extremum_D
+        // If 1:       XX-X-------XX  |
+        //        d =  ^~~~~~~~~~~~~~~^ = extremum_D - pt              
 
         if (patchDL1 == d) {
             // lf: this point is part of L1
@@ -371,36 +389,56 @@ inline void finalizePatch(const ConnectedComponent& cc, const std::shared_ptr<uv
         }
 
         if constexpr (DoubleLayer) {
-            assert(d > patchDL1);
+            assert(d < patchDL1);
             assert(d != patch.depthL2_[p]);
-            const typeGeometryInput deltaD = d - patchDL1;
-            if (d < patch.depthL2_[p]) {
+            const typeGeometryInput deltaD = patchDL1 - d;      
+                if (d > patch.depthL2_[p]) {
                 // This point is between the two layers, it is discarded.
+                //          ------------------> axis
+                //                        L2  L1
+                //                        v   v
+                // If 0:   |   XX-X-------XX--X 
+                //                         ^
+                //  d_L1 = a / d_L2 = a-2 
+                //  d = a-1 --> d > d_L2  
+                //         
+                //             L1 L2
+                //             v  v
+                // If 1:       XX-X-------XX--X  | 
+                //              ^
+                //  d_L1 = a / d_L2 = a-2 
+                //  d = a-1 --> d > d_L2  
+                //  
                 continue;
             }
-
-            if (deltaD <= p_->surfaceThickness) {
-                if (patch.depthL2_[p] != g_infiniteDepth && patch.depthL2_[p] != patchDL1) {
+            // [1]
+            if (deltaD <= p_->surfaceThickness) { // If the point is inside the surface thickness
+                if (patch.depthL2_[p] != g_infiniteDepth && patch.depthL2_[p] != patchDL1) { // if the point is not part of the L1 [2]
                     const auto overwrittenIdx = patch.depthPCidxL2_[p];
                     const auto& overwrittenPt = frame->pointsGeometry[overwrittenIdx];
                     const keyType overwrittenLoc1D = location1DFromPoint<keyType>(overwrittenPt,gbd,gbd2);
                     resamplePointSetLocation1D.erase(overwrittenLoc1D);
                     // The overwritten point is between the two layers, it is discarded.
+                    //        L1  L2   |       L1  L2    |       L1    L2
+                    //  [1]:  v   v    |  [2]: v - v *   |  [3]: v     v
+                    //        X - X    |       X - X X   |       X - - X
                 }
-                patch.depthL2_[p] = d;
-                patch.depthPCidxL2_[p] = pointIndex;
+                patch.depthL2_[p] = d; // [3]
+                patch.depthPCidxL2_[p] = pointIndex; // [3]
                 resamplePointSetLocation1D.emplace(loc1D);
                 patch.sizeD_ = std::max<size_t>(patch.sizeD_, static_cast<size_t>(patch.depthL2_[p]));
                 continue;
             }
             if (deltaD <= p_->maxAllowedDist2RawPointsDetection) {
+                // Out of range: 32
+                // Spiral case: inside a Connected Component, there is an overlapping
                 continue;
             }
             pointIsInAPatch[pointIndex] = false;
             mapLocation1D.emplace(loc1D, pointIndex);
         } else {
-            assert(d > patchDL1);
-            const typeGeometryInput deltaD = d - patchDL1;
+            assert(d < patchDL1);
+            const typeGeometryInput deltaD = patchDL1 - d;
             if (deltaD < p_->surfaceThickness) {
                 continue;
             }
@@ -451,19 +489,30 @@ inline void createPatch(Patch& patch, const ConnectedComponent& cc, const std::s
     patch.depthL1_.assign(patchSize, g_infiniteDepth);
     patch.depthPCidxL1_.assign(patchSize, g_infinitenumber);
 
-    sharedPeakPerBlock.assign(patch.widthInOccBlk_ * patch.heightInOccBlk_, !projectionMode ? g_infiniteDepth : 0);
+    sharedPeakPerBlock.assign(patch.widthInOccBlk_ * patch.heightInOccBlk_, projectionMode ? g_infiniteDepth : 0);
+        // If projectionMode 0: positive axis --> find max --> init to 0
+        //                       ------------------> axis
+        //                    min               
+        //                     |    XX-X-------XX
+        //                     ---------------->^
+        // If projectionMode 1: negative axis --> find min --> init to infinite
+        //                       ------------------> axis
+        //                                           max
+        //                          XX-X-------XX     |
+        //                          ^<-----------------
 
-    setInitialPatchL1<normalAxis, tangentAxis, bitangentAxis, projectionMode>(patch, cc, sharedPeakPerBlock, frame);
+    int extremum_D = projectionMode ? 0 : g_infiniteDepth; // Was minD but can be a max. So name is now "extremum_D"
+    setInitialPatchL1<normalAxis, tangentAxis, bitangentAxis, projectionMode>(patch, cc, sharedPeakPerBlock, frame, extremum_D);
 
-    const int minD = getMinD<projectionMode>(sharedPeakPerBlock);
-    patch.posD_ = static_cast<size_t>(minD);
+    extremum_D = projectionMode ? static_cast<int>(uvgutils::roundUp(extremum_D, p_->minLevel)) :  static_cast<int>((extremum_D/p_->minLevel)*p_->minLevel);
+    patch.posD_ = static_cast<size_t>(extremum_D);
 
-    setPatchL1<projectionMode>(patch, minD, sharedPeakPerBlock);
+    setPatchL1<projectionMode>(patch, extremum_D, sharedPeakPerBlock);
 
     if (p_->doubleLayer) {
-        finalizePatch<keyType, Ppi, true>(cc, frame, patch, mapLocation1D, pointIsInAPatch, minD, resamplePointSetLocation1D);
+        finalizePatch<keyType, Ppi, true>(cc, frame, patch, mapLocation1D, pointIsInAPatch, extremum_D, resamplePointSetLocation1D);
     } else {
-        finalizePatch<keyType, Ppi, false>(cc, frame, patch, mapLocation1D, pointIsInAPatch, minD, resamplePointSetLocation1D);
+        finalizePatch<keyType, Ppi, false>(cc, frame, patch, mapLocation1D, pointIsInAPatch, extremum_D, resamplePointSetLocation1D);
     }
 }
 
