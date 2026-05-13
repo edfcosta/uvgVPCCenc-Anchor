@@ -41,7 +41,7 @@
 #include <string>
 #include <utility>
 
-#include "uvgutils/robin_hood.h"
+#include <robin_hood.h>
 
 #include "uvgutils/log.hpp"
 #include "uvgutils/threadqueue.hpp"

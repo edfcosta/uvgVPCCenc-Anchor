@@ -7,6 +7,8 @@ add_library(kdLibrary STATIC
 target_link_libraries(kdLibrary
     PUBLIC
         uvgutils
+        nanoflann::nanoflann
+        nanoflann_examples
 )
 
 set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_DEFAULT}")
@@ -24,6 +26,8 @@ add_library(patchGenerationLibrary STATIC
 target_link_libraries(patchGenerationLibrary
     PUBLIC
         uvgutils
+    PRIVATE
+        kdLibrary
 )
 
 # Include directories for headers

@@ -6,12 +6,6 @@ if(UVG_LOG_LEVEL_PRESET)
   add_compile_definitions(UVG_LOG_LEVEL=LogLevel::${UVG_LOG_LEVEL_PRESET})
 endif()
 
-add_library(miniplyLibrary STATIC
-    io/miniply.cpp
-)
-
-target_compile_options(miniplyLibrary PRIVATE -fPIC)
-
 set(LIB_SOURCES
     uvgformat.cpp
     io/plyLoader.cpp

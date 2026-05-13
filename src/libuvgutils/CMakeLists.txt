@@ -23,7 +23,8 @@ else()
 endif()
 
 target_link_libraries(uvgutils
-
+    PUBLIC
+        robin_hood::robin_hood
 )
 
 # Include directories for headers

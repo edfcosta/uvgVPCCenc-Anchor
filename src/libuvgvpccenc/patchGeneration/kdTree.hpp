@@ -36,6 +36,7 @@
 #pragma once
 
 #include "nanoflann.hpp"
+#include "KDTreeVectorOfVectorsAdaptor.h"
 #include "utils/constants.hpp"
 #include "uvgutils/utils.hpp"
 

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.25)
 
 # Include CMake modules
 include(ExternalProject)
+include(FetchContent)
 
 set(uvgVPCCenc_VER 1.1.0)
 set(uvgVPCCenc_DESCR "uvgVPCCenc is an open-source real-time V-PCC encoder library written in C++ from scratch.")
@@ -9,6 +10,15 @@ set(uvgVPCCenc_URL "https://github.com/ultravideo/uvgVPCCenc")
 
 set(KVAZAAR_REPO_URL "https://github.com/ultravideo/kvazaar.git")
 set(KVAZAAR_REPO_TAGS "32fb3462eb97fdf07aeb41fbf0b311678419d659")
+
+# Third-party header-only / lightweight dependencies
+# miniply has no versioned tags; pin to a specific commit for reproducibility.
+set(MINIPLY_REPO_URL  "https://github.com/vilya/miniply.git")
+set(MINIPLY_REPO_TAG  "1a235c7")
+set(NANOFLANN_REPO_URL "https://github.com/jlblancoc/nanoflann.git")
+set(NANOFLANN_REPO_TAG "v1.5.1")
+set(ROBINHOOD_REPO_URL "https://github.com/martinus/robin-hood-hashing.git")
+set(ROBINHOOD_REPO_TAG "3.11.5")
 
 set(KVAZAAR_EP_UPDATE_DISCONNECTED ON)
 set(PCCSUM_EP_UPDATE_DISCONNECTED ON)

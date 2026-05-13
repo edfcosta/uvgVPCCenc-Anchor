@@ -36,7 +36,7 @@
 #pragma once
 
 #include <cassert>
-#include "uvgutils/robin_hood.h"
+#include <robin_hood.h>
 #include "utils/types.hpp"
 #include "constants.hpp"
 

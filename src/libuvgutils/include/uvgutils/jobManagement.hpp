@@ -37,7 +37,7 @@
 #include <optional>
 
 #include "threadqueue.hpp"
-#include "uvgutils/robin_hood.h"
+#include <robin_hood.h>
 #include "uvgutils/log.hpp"
 
 #define JOBF(gofId, frameId, priority, func, ...) \

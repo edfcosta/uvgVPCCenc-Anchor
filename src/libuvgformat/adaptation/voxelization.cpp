@@ -37,7 +37,7 @@
 #include <cmath>
 #include <cstdint>
 #include <string>
-#include "uvgutils/robin_hood.h"
+#include <robin_hood.h>
 
 #include "uvgutils/log.hpp"
 #include "utils/parameters.hpp"

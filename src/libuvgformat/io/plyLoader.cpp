@@ -45,7 +45,7 @@
 #include <vector>
 
 #include "adaptation/voxelization.hpp"
-#include "io/miniply.h"
+#include "miniply.h"
 #include "uvgformat/uvgFramePayload.hpp"
 #include "uvgformat/uvgFrame.hpp"
 #include "uvgutils/log.hpp"
