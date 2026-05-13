@@ -12,10 +12,7 @@ FetchContent_Declare(
     GIT_TAG        ${MINIPLY_REPO_TAG}
     GIT_SHALLOW    TRUE
 )
-FetchContent_GetProperties(miniply)
-if(NOT miniply_POPULATED)
-    FetchContent_Populate(miniply)
-endif()
+FetchContent_MakeAvailable(miniply)
 
 add_library(miniplyLibrary STATIC ${miniply_SOURCE_DIR}/miniply.cpp)
 target_include_directories(miniplyLibrary PUBLIC ${miniply_SOURCE_DIR})
@@ -36,7 +33,10 @@ FetchContent_Declare(
     GIT_TAG        ${NANOFLANN_REPO_TAG}
     GIT_SHALLOW    TRUE
 )
+# nanoflann v1.5.1 declares cmake_minimum_required < 3.5, which modern CMake rejects.
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 FetchContent_MakeAvailable(nanoflann)
+unset(CMAKE_POLICY_VERSION_MINIMUM)
 
 # KDTreeVectorOfVectorsAdaptor.h lives in examples/ — expose it as a named target
 add_library(nanoflann_examples INTERFACE)
