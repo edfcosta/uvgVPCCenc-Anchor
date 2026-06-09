@@ -3,7 +3,7 @@ uvgVPCCenc
 
 uvgVPCCenc is an academic, open-source volumetric video encoder for the state-of-the-art Video-based Point Cloud Compression (V-PCC) standard. It serves as a research platform for new coding tool development and a practical V-PCC encoder for public use.
 
-uvgVPCCenc is being developed in C++ under the permissive BSD-3-Clause license. It accepts point cloud frames as input (with geometry being positive integers), supports all voxel sizes, and runs on Linux. uvgVPCCenc 1.0 implements a functional encoding pipeline using only essential coding tools and algorithms inspired by the TMC2 reference software. It prioritizes practical encoding by omitting tools, like geometry reconstruction and lossless tools.
+uvgVPCCenc is being developed in C++ under the permissive BSD-3-Clause-Clear license. It accepts point cloud frames as input (with geometry being positive integers), supports all voxel sizes, and runs on Linux. uvgVPCCenc 1.0 implements a functional encoding pipeline using only essential coding tools and algorithms inspired by the TMC2 reference software. It prioritizes practical encoding by omitting tools, like geometry reconstruction and lossless tools.
 
 uvgVPCCenc is still under development. Speed and RD-quality will continue to improve.
 
