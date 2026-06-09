@@ -11,6 +11,7 @@ FetchContent_Declare(
     GIT_REPOSITORY ${MINIPLY_REPO_URL}
     GIT_TAG        ${MINIPLY_REPO_TAG}
     GIT_SHALLOW    TRUE
+    EXCLUDE_FROM_ALL  # miniply's CMakeLists.txt builds miniply-perf/info with no opt-out; exclude them from the default build
 )
 FetchContent_MakeAvailable(miniply)
 
@@ -37,6 +38,10 @@ FetchContent_Declare(
 set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 FetchContent_MakeAvailable(nanoflann)
 unset(CMAKE_POLICY_VERSION_MINIMUM)
+
+# nanoflann v1.5.1 sets EXECUTABLE_OUTPUT_PATH as a CACHE variable, which would
+# redirect every executable in the project to its build dir. Clear it immediately.
+set(EXECUTABLE_OUTPUT_PATH "" CACHE PATH "" FORCE)
 
 # KDTreeVectorOfVectorsAdaptor.h lives in examples/ — expose it as a named target
 add_library(nanoflann_examples INTERFACE)
