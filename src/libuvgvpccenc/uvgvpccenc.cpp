@@ -108,6 +108,10 @@ void initializeStaticFunctionPointers() {
     MapEncoding::initializeEncoderPointers();
 }
 
+inline bool isPowerOfTwo(size_t x) {
+    return x && ((x & (x - 1)) == 0);
+}
+
 void verifyConfig() {
     uvgutils::Logger::log<uvgutils::LogLevel::TRACE>("VERIFY CONFIG", "Verify the parameter configuration.\n");
     if (p_->timerLog && uvgutils::Logger::getLogLevel() < uvgutils::LogLevel::PROFILING) {
@@ -329,7 +333,34 @@ void verifyConfig() {
             std::to_string(p_->geoBitDepthRefineSegmentation) + "). The refine segmentation is supposed to work on a lower voxelization level. Expect lower coding efficiency.\n");            
     }
 
-     
+
+    if (!isPowerOfTwo(p_->occupancyMapDSResolution)) {
+        throw std::runtime_error("The occupancyMapDSResolution (" + std::to_string(p_->occupancyMapDSResolution) + ") must be a power of 2.\n");         
+    }
+    if (p_->patchPackingBlockSize == 1) {
+        throw std::runtime_error("The patchPackingBlockSize (" + std::to_string(p_->patchPackingBlockSize) + ") can't be 1.\n");         
+    }   
+    if (!isPowerOfTwo(p_->patchPackingBlockSize)) {
+        throw std::runtime_error("The patchPackingBlockSize (" + std::to_string(p_->patchPackingBlockSize) + ") must be a power of 2.\n");         
+    }          
+    if (!isPowerOfTwo(p_->peakPerBlockBlockSize)) {
+        throw std::runtime_error("The peakPerBlockBlockSize (" + std::to_string(p_->peakPerBlockBlockSize) + ") must be a power of 2.\n");         
+    }
+
+    if (p_->peakPerBlockBlockSize == 1) {
+        uvgutils::Logger::log<uvgutils::LogLevel::WARNING>("VERIFY CONFIG",
+                                                    "The peakPerBlockBlockSize (" +
+        std::to_string(p_->peakPerBlockBlockSize) +
+        ") is equal to 1. This basically deactivate the peak per block filtering process.\n");            
+    }
+
+    if (p_->peakPerBlockBlockSize > p_->occupancyMapDSResolution) {
+        throw std::runtime_error("The peakPerBlockBlockSize (" +
+            std::to_string(p_->peakPerBlockBlockSize) +
+            ") is greater than the occupancyMapDSResolution (" +
+            std::to_string(p_->occupancyMapDSResolution) + "). The peak per block filtering works on blocks smaller or equal to the occupancy map downscaling blocks.");            
+    }
+
 }
 
 void setInputGeoPrecision() {
@@ -552,7 +583,7 @@ void parseUvgvpccParameters() {
         }
 
         setParameterValue("intermediateFilesDir", dir + oss.str(), false);
-    }
+    }    
 }
 
 static void initializeContext() {
@@ -580,6 +611,7 @@ void API::initializeEncoder() {
     initializeStaticFunctionPointers();
     initializeContext();
     if (p_->exportIntermediateFiles && !p_->intermediateFilesDirTimeStamp) FileExport::cleanIntermediateFiles();
+    
     initializationDone = true;
 }
 

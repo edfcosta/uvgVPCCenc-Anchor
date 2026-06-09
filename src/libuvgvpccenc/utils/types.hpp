@@ -79,13 +79,11 @@ struct Patch {
     size_t widthInPixel_ = 0;   // size for U  // width of the patch occupancy map (in pixels)
     size_t heightInPixel_ = 0;  // size for V  // height of the patch occupancy map (in pixels)
 
-    size_t widthInOccBlk_;  // sizeU0_     // width of the patch occupancy map within the down-scaled frame occupancy map (in DS occupancy map
-                            // blocks).
-    size_t heightInOccBlk_;  // sizeV0_     // height of the patch occupancy map within the down-scaled frame occupancy map (in DS occupancy
-                             // map blocks).
-
-    size_t omDSPosX_;  // u0_         // location in down-scaled occupancy map  // lf  posBlkU
-    size_t omDSPosY_;  // v0_         // location in down-scaled occupancy map
+    size_t widthInPPBlk_;  // sizeU0_   Width in term of patch packing block (not related to the occupancy map downscaling factor)
+    size_t heightInPPBlk_;  // sizeV0_  Height in term of patch packing block (not related to the occupancy map downscaling factor)
+                           
+    size_t omPPPosX_;  // u0_ 2dPosX Position in the occupancy map in term of patch packing block (not related to the occupancy map downscaling factor)
+    size_t omPPPosY_;  // v0_ 2dPosY
 
     bool axisSwap_;  // patch orientation    // in canvas atlas  (false default, true axis swap)
 
@@ -162,10 +160,10 @@ struct Patch {
         str << ", sizeD=" << sizeD_;
         str << ", sizeU=" << widthInPixel_;
         str << ", sizeV=" << heightInPixel_;
-        str << ", sizeUom=" << widthInOccBlk_;
-        str << ", sizeVom=" << heightInOccBlk_;
-        str << ", omDSPosX_=" << omDSPosX_;
-        str << ", omDSPosY_=" << omDSPosY_;
+        str << ", sizeUom=" << widthInPPBlk_;
+        str << ", sizeVom=" << heightInPPBlk_;
+        str << ", omPPPosX_=" << omPPPosX_;
+        str << ", omPPPosY_=" << omPPPosY_;
         str << ", axisSwap=" << axisSwap_;
         return str.str();
     }

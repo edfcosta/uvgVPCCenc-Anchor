@@ -193,6 +193,8 @@ void bgFillGeometry(const std::vector<uint8_t>& occupancyMapDS,
         bgFillGeometryPatchExtension<2>(occupancyMapDS, gofMapsHeight, geometryMap, mapWidth, backgroundValue);
     } else if (blockSize == 4) {
         bgFillGeometryPatchExtension<4>(occupancyMapDS, gofMapsHeight, geometryMap, mapWidth, backgroundValue);
+    } else if (blockSize == 1) {
+        bgFillGeometryPatchExtension<1>(occupancyMapDS, gofMapsHeight, geometryMap, mapWidth, backgroundValue);
     } else {
         throw std::invalid_argument("Unsupported blockSize");
     }

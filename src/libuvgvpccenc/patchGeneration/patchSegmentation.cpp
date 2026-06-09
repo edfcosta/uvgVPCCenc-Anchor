@@ -224,8 +224,9 @@ template <size_t NormalAxis, size_t TangentAxis, size_t BitangentAxis, bool Proj
 inline void setInitialPatchL1(Patch& patch, const ConnectedComponent& cc, std::vector<typeGeometryInput>& peakPerBlock,
                               const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame, int& extremum_D) {
     const size_t widthInPixel = patch.widthInPixel_;
-    const size_t widthInOccBlk = patch.widthInOccBlk_;
     const size_t occRes = p_->occupancyMapDSResolution;  // TODO(lf) create an associated log parameter for occupancyMapDSResolution
+    const size_t ppbRes = occRes == 1 ? 2 : occRes; // peak per block filter block size in pixel (resolution)
+    const size_t widthInPpBlk = widthInPixel / ppbRes; // TODO(lf): should be ppblock
 
     for (const size_t pointIndex : cc.points) {
         const auto& point = frame->pointsGeometry[pointIndex];
@@ -234,22 +235,23 @@ inline void setInitialPatchL1(Patch& patch, const ConnectedComponent& cc, std::v
         const size_t u = static_cast<size_t>(point[TangentAxis] - patch.posU_);
         const size_t v = static_cast<size_t>(point[BitangentAxis] - patch.posV_);
         const size_t p = v * widthInPixel + u;
-
-        const size_t uom = u / occRes;
-        const size_t vom = v / occRes;
-        const size_t pom = vom * widthInOccBlk + uom;
+        
+        const size_t uPpBlk = u / ppbRes;
+        const size_t vPpBlk = v / ppbRes;        
+        const size_t pPpBlk = vPpBlk * widthInPpBlk + uPpBlk;
 
         assert(u < widthInPixel);
         assert(p < patch.depthL1_.size());
         const typeGeometryInput patchD = patch.depthL1_[p];
 
         if constexpr (!ProjectionMode) { // if 0: positive axis --> max search | if 1: negative axis --> min search
-            assert(pom < peakPerBlock.size());
-            peakPerBlock[pom] = std::max(peakPerBlock[pom], d);
+            assert(pPpBlk < peakPerBlock.size());
+            peakPerBlock[pPpBlk] = std::max(peakPerBlock[pPpBlk], d);
             extremum_D = std::min(static_cast<int>(d), extremum_D); // Minimum value because decoder --> d - extremum_D
             if (patchD >= d && patchD != g_infiniteDepth) continue;
         } else {
-            peakPerBlock[pom] = std::min(peakPerBlock[pom], d);
+            assert(pPpBlk < peakPerBlock.size());
+            peakPerBlock[pPpBlk] = std::min(peakPerBlock[pPpBlk], d);
             extremum_D = std::max(static_cast<int>(d), extremum_D); // Maximum value because decoder --> extremum_D - d
             if (patchD <= d) continue;
         }
@@ -286,6 +288,10 @@ inline void setPatchL1(Patch& patch, const int& extremum_D, const std::vector<ty
     const size_t valueOverflowCheck =
         (1U << 8U) - 1 - p_->surfaceThickness;  // lf: In TMC2, 8 corresponds to geometryNominal2dBitdepth, which probably refers to the
                                                 // geometry ouput (geometry maps use uint8)
+    const size_t occRes = p_->occupancyMapDSResolution;
+    const size_t ppbRes = occRes == 1 ? 2 : occRes; // peak per block filter block size in pixel (resolution)
+    const size_t widthInPpBlk = patch.widthInPixel_ / ppbRes;
+
     for (size_t v = 0; v < patch.heightInPixel_; ++v) {
         for (size_t u = 0; u < patch.widthInPixel_; ++u) {
             const size_t pos = v * patch.widthInPixel_ + u;
@@ -302,10 +308,12 @@ inline void setPatchL1(Patch& patch, const int& extremum_D, const std::vector<ty
                 continue;
             }
 
-            const size_t uom = u / p_->occupancyMapDSResolution;
-            const size_t vom = v / p_->occupancyMapDSResolution;
-            const size_t pom = vom * patch.widthInOccBlk_ + uom;
-            const int tmp_a = std::abs(depth - peakPerBlock[pom]);
+            const size_t uPpBlk = u / ppbRes;
+            const size_t vPpBlk = v / ppbRes;        
+            const size_t pPpBlk = vPpBlk * widthInPpBlk + uPpBlk;
+
+            assert(pPpBlk < peakPerBlock.size());
+            const int tmp_a = std::abs(depth - peakPerBlock[pPpBlk]);
 
             // If there is a hole (a missing point) in a patch, and it happens that this patch is long and overlap itself, then this check
             // allows not to put the isolated point.
@@ -459,11 +467,14 @@ inline void createPatch(Patch& patch, const ConnectedComponent& cc, const std::s
     constexpr size_t tangentAxis = getPatchTangentAxis<Ppi>();
     constexpr size_t bitangentAxis = getPatchBitangentAxis<Ppi>();
     constexpr bool projectionMode = getPatchProjectionMode<Ppi>();
-
-    const size_t dsRes = p_->occupancyMapDSResolution;
+    
+    const size_t dsRes = p_->occupancyMapDSResolution; // TODO(lf) TODO(mf) One day, the peak per block filter will not be linked to occ ds but to something else (maybe constant). Temporary fix for om ds == 1 is to set this filter block size to 2x2.
     const size_t width = cc.maxU - cc.minU;
     const size_t height = cc.maxV - cc.minV;
-
+    
+    // const size_t ppbRes = dsRes == 1 ? 2 : dsRes; // peak per block filter block size in pixel (resolution)
+    const size_t ppbRes = p_->peakPerBlockBlockSize; // peak per block filter block size in pixel (resolution)
+    
     patch.normalAxis_ = normalAxis;
     patch.tangentAxis_ = tangentAxis;
     patch.bitangentAxis_ = bitangentAxis;
@@ -471,26 +482,30 @@ inline void createPatch(Patch& patch, const ConnectedComponent& cc, const std::s
     patch.patchPpi_ = Ppi;
     patch.posU_ = cc.minU;
     patch.posV_ = cc.minV;
-    patch.widthInOccBlk_ = width / dsRes + 1;
-    patch.heightInOccBlk_ = height / dsRes + 1;
-    patch.widthInPixel_ = uvgutils::roundUp(width + 1, dsRes);
-    patch.heightInPixel_ = uvgutils::roundUp(height + 1, dsRes);
+    
 
+    const size_t quantizerPatchSize = std::max(dsRes, std::max(ppbRes,p_->patchPackingBlockSize));
+
+    patch.widthInPixel_ = uvgutils::roundUp(width + 1, quantizerPatchSize); // TODO(lf) do we need the plus 1 ?
+    patch.heightInPixel_ = uvgutils::roundUp(height + 1, quantizerPatchSize);
+
+    patch.widthInPPBlk_ = patch.widthInPixel_ / p_->patchPackingBlockSize; 
+    patch.heightInPPBlk_ = patch.heightInPixel_ / p_->patchPackingBlockSize;
+    
+    const size_t widthPeakPerBlockBlk = patch.widthInPixel_ / ppbRes;
+    const size_t heightPeakPerBlockBlk = patch.heightInPixel_ / ppbRes;
+    
     const size_t patchSize = patch.widthInPixel_ * patch.heightInPixel_;
     patch.patchOccupancyMap_.assign(patchSize, 0);
-
+    
     if(p_->exportIntermediateFiles) {
         patch.patchOccupancyMapColor_.assign(patchSize, 0);
     }
-
-    patch.area_ = patchSize;
-
-    assert(patch.widthInOccBlk_ == patch.widthInPixel_ / dsRes && patch.heightInOccBlk_ == patch.heightInPixel_ / dsRes);
-
+    
+    patch.area_ = patchSize;    
     patch.depthL1_.assign(patchSize, g_infiniteDepth);
     patch.depthPCidxL1_.assign(patchSize, g_infinitenumber);
-
-    sharedPeakPerBlock.assign(patch.widthInOccBlk_ * patch.heightInOccBlk_, projectionMode ? g_infiniteDepth : 0);
+    sharedPeakPerBlock.assign(widthPeakPerBlockBlk * heightPeakPerBlockBlk, projectionMode ? g_infiniteDepth : 0);
         // If projectionMode 0: positive axis --> find max --> init to 0
         //                       ------------------> axis
         //                    min               

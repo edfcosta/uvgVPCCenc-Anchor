@@ -122,8 +122,8 @@ template <bool doubleLayer, bool axisSwap>
 void writePatchT(const uvgvpcc_enc::Patch& patch, const size_t& imageSize, const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame) {
     const size_t patchWidth = patch.widthInPixel_;
     const size_t patchHeight = patch.heightInPixel_;
-    const size_t omX = patch.omDSPosX_ * p_->occupancyMapDSResolution;
-    const size_t omY = patch.omDSPosY_ * p_->occupancyMapDSResolution;
+    const size_t omX = patch.omPPPosX_ * p_->patchPackingBlockSize;
+    const size_t omY = patch.omPPPosY_ * p_->patchPackingBlockSize;
     const size_t mapWidth = p_->mapWidth;
     const size_t imageSize2 = 2 * imageSize;
 
@@ -460,9 +460,13 @@ void MapGeneration::generateFrameMaps(const std::shared_ptr<uvgvpcc_enc::FrameCo
         occupancyMapDownscaling<2>(frame->mapHeight, *frame->occupancyMap, *frame->occupancyMapDS);
     } else if (p_->occupancyMapDSResolution == 4) {
         occupancyMapDownscaling<4>(frame->mapHeight, *frame->occupancyMap, *frame->occupancyMapDS);
+    } else if (p_->occupancyMapDSResolution == 1) {
+        // No downscaling 
+        *frame->occupancyMapDS = *frame->occupancyMap; // deep copy
     } else {
         assert(false && "Unsupported downscaling factor for occupancy map.");
     }
+    
     if (p_->exportIntermediateFiles) {
         FileExport::exportImageOccupancyDS(frame);
     }
@@ -536,7 +540,9 @@ void MapGeneration::initGOFMapGeneration(const std::shared_ptr<uvgvpcc_enc::GOF>
     gof->mapHeightDSGOF = uvgutils::roundUp(gof->mapHeightDSGOF, static_cast<size_t>(8));
     gof->mapHeightGOF = gof->mapHeightDSGOF * p_->occupancyMapDSResolution;
     for (const std::shared_ptr<uvgvpcc_enc::FrameContext>& frame : gof->frames) {
+        frame->mapHeightDS = gof->mapHeightDSGOF;
         frame->mapHeight = gof->mapHeightGOF;
     }
+
     
 }

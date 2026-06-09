@@ -638,7 +638,7 @@ void exportImageOccupancyDS(const std::shared_ptr<FrameContext>& frame) {
         "EXPORT FILE", "Export intermediate downscaled occupancy map for frame " + std::to_string(frame->frameId) + ".\n");
 
     {
-        // Export the pristine occupancy map (YUV420)
+        // Export the pristine downscaled occupancy map (YUV420)
         const std::string outputPath =
             p_->intermediateFilesDir + "/07-occupancyDS/OCCUPANCY-DS_f" + uvgutils::zeroPad(frame->frameNumber, 3) + "_YUV420_" +
             std::to_string(p_->mapWidth / p_->occupancyMapDSResolution) + "x" + std::to_string(frame->mapHeightDS) + ".yuv";

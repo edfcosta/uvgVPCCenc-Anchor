@@ -124,6 +124,7 @@ void initializeParameterMap(Parameters& param) {
         {"quantizerSizeX", {UINT, "", &param.quantizerSizeX}},
         {"quantizerSizeY", {UINT, "", &param.quantizerSizeY}},
         {"surfaceThickness", {UINT, "", &param.surfaceThickness}},
+        {"peakPerBlockBlockSize", {UINT, "", &param.peakPerBlockBlockSize}},
 
         // ___ Patch packing ___ //
         {"mapWidth", {UINT, "", &param.mapWidth}},
@@ -131,6 +132,7 @@ void initializeParameterMap(Parameters& param) {
         {"spacePatchPacking", {UINT, "", &param.spacePatchPacking}},
         {"interPatchPacking", {BOOL, "", &param.interPatchPacking}},
         {"gpaTresholdIoU", {FLOAT, "", &param.gpaTresholdIoU}},
+        {"patchPackingBlockSize", {UINT, "", &param.patchPackingBlockSize}},
 
         // ___ Map generation ___ //
         {"mapGenerationBackgroundValueAttribute", {UINT, "", &param.mapGenerationBackgroundValueAttribute}},
@@ -140,8 +142,6 @@ void initializeParameterMap(Parameters& param) {
         {"useTmc2YuvDownscaling", {BOOL, "", &param.useTmc2YuvDownscaling}},
         {"mapGenerationFillEmptyBlock", {BOOL, "", &param.mapGenerationFillEmptyBlock}},
         {"dynamicMapHeight", {BOOL, "", &param.dynamicMapHeight}},
-
-
 
         // ___ 2D encoding parameters ___ //
         {"sizeGOP2DEncoding", {UINT, "8,16", &param.sizeGOP2DEncoding}},
@@ -158,7 +158,7 @@ void initializeParameterMap(Parameters& param) {
         {"occupancyEncodingMode", {STRING, "AI,RA", &param.occupancyEncodingMode}},
         {"occupancyEncodingFormat", {STRING, "YUV420", &param.occupancyEncodingFormat}},
         {"occupancyEncodingNbThread", {UINT, "", &param.occupancyEncodingNbThread}},
-        {"occupancyMapDSResolution", {UINT, "2,4", &param.occupancyMapDSResolution}},
+        {"occupancyMapDSResolution", {UINT, "1,2,4", &param.occupancyMapDSResolution}},
         {"occupancyEncodingPreset",
          {STRING, "ultrafast,superfast,veryfast,faster,fast,medium,slow,slower,veryslow", &param.occupancyEncodingPreset}},
         {"omRefinementTreshold2", {UINT, "1,2,3,4", &param.omRefinementTreshold2}},

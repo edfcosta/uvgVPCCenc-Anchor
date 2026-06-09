@@ -114,7 +114,7 @@ struct Parameters {
     // lf : for reworked function only. If the value is 4, the euclidian distance is 16.  // TODO(lf): the default value should be 2 I
     // guess // Nop, it should be 1 // TODO(lf): make sure to use <= instead of < in the for loop so to avoid this confusion.
     bool enablePatchSplitting = true;
-    // TODO(lf)there is a mix with occupancyPrecision // TODO(lf)rename it as blocSizeOccupancyMap or something like this
+    // TODO(lf)there is a mix with patchPackingBlockSize // TODO(lf)rename it as blocSizeOccupancyMap or something like this
     size_t minLevel = 64;  // TODO(lf): must be a power of 2 ? So give the power of two and do only shifting, no division // might be
                            // related to the different avaliable position of the projection plan of each path
     size_t log2QuantizerSizeX = 4;
@@ -123,6 +123,8 @@ struct Parameters {
     size_t quantizerSizeY = static_cast<size_t>(1) << log2QuantizerSizeY;
     size_t surfaceThickness = 4;
     size_t distanceFiltering = 32;  // tmp_a in TMC2 // TODO(lf) check impact on quality
+    size_t peakPerBlockBlockSize = 2; // peak per block filtering size
+
 
     // ___ Patch packing ___ //
     size_t mapWidth;  // TODO(lf)check if it is a multipl of occupancy resolution
@@ -131,6 +133,7 @@ struct Parameters {
     size_t spacePatchPacking = 1;
     bool interPatchPacking;
     float gpaTresholdIoU = 0.3;  // global patch allocation threshold for the intersection over union process
+    size_t patchPackingBlockSize = 4;  // link in the bitsream to asps.asps_log2_patch_packing_block_size
 
     // ___ Map generation ___ //
     size_t mapGenerationBackgroundValueAttribute = 128;
@@ -154,7 +157,7 @@ struct Parameters {
     std::string occupancyEncodingFormat = "YUV420";
     size_t occupancyEncodingNbThread =
         0;  // 0 by default means that this variable will have for value during execution the actual number of detected threads
-    size_t occupancyMapDSResolution;  // 'Rate' or 'qp' for the occupancy map
+    size_t occupancyMapDSResolution;  // 'Rate' or 'qp' for the occupancy map (downscalling factor)
     std::string occupancyEncodingPreset;
     size_t omRefinementTreshold2;
     size_t omRefinementTreshold4;

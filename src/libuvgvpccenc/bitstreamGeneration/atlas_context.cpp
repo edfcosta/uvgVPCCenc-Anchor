@@ -73,10 +73,10 @@ atlas_tile_data_unit atlas_context::create_atlas_tile_data_unit(const std::share
         patch_information_data pid;
         pid.patchMode = static_cast<uint8_t>(APM::I_INTRA);
         patch_data_unit& pdu = pid.patch_data_unit_;
-        pdu.pdu_2d_pos_x = patchUVG.omDSPosX_;
-        pdu.pdu_2d_pos_y = patchUVG.omDSPosY_;
-        pdu.pdu_2d_size_x_minus1 = patchUVG.widthInOccBlk_ - 1;
-        pdu.pdu_2d_size_y_minus1 = patchUVG.heightInOccBlk_ - 1;
+        pdu.pdu_2d_pos_x = patchUVG.omPPPosX_;
+        pdu.pdu_2d_pos_y = patchUVG.omPPPosY_;
+        pdu.pdu_2d_size_x_minus1 = patchUVG.widthInPPBlk_ - 1;
+        pdu.pdu_2d_size_y_minus1 = patchUVG.heightInPPBlk_ - 1;
         pdu.pdu_3d_offset_u = patchUVG.posU_;
         pdu.pdu_3d_offset_v = patchUVG.posV_;
         const size_t min_level = static_cast<size_t>(pow(2., ath.ath_pos_min_d_quantizer));
@@ -188,7 +188,8 @@ atlas_sequence_parameter_set atlas_context::create_atlas_sequence_parameter_set(
     asps.asps_normal_axis_limits_quantization_enabled_flag = true;
     asps.asps_normal_axis_max_delta_value_enabled_flag = true;
     asps.asps_patch_precedence_order_flag = false;
-    asps.asps_log2_patch_packing_block_size = static_cast<uint8_t>(std::log2(uvgvpcc_enc::p_->occupancyMapDSResolution));
+    // asps.asps_log2_patch_packing_block_size = static_cast<uint8_t>(std::log2(uvgvpcc_enc::p_->occupancyMapDSResolution));
+    asps.asps_log2_patch_packing_block_size = static_cast<uint8_t>(std::log2(uvgvpcc_enc::p_->patchPackingBlockSize));
     asps.asps_patch_size_quantizer_present_flag = false;
     asps.asps_map_count_minus1 = uvgvpcc_enc::p_->doubleLayer ? 1 : 0;
     asps.asps_pixel_deinterleaving_enabled_flag = false;
