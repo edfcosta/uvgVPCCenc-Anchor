@@ -1,0 +1,13 @@
+<map id="src/libuvgvpccenc/include/uvgvpccenc/uvgvpccenc.hpp" name="src/libuvgvpccenc/include/uvgvpccenc/uvgvpccenc.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="285,5,497,45"/>
+<area shape="rect" id="Node000002" href="$uvgVPCCencAppExample_8cpp.html" title=" " alt="" coords="5,101,269,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="323,52,172,103,170,98,321,47"/>
+<area shape="rect" id="Node000003" href="$bitstreamGeneration_8cpp.html" title=" " alt="" coords="206,181,466,221"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="359,57,345,75,334,94,329,117,328,140,334,181,328,182,323,140,324,116,330,92,341,72,355,54"/>
+<area shape="rect" id="Node000004" href="$bitstreamGeneration_8hpp.html" title=" " alt="" coords="344,93,605,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="421,53,458,91,454,95,417,57"/>
+<area shape="rect" id="Node000005" href="$uvgvpccenc_8cpp.html" title=" " alt="" coords="505,189,751,214"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="511,33,541,41,570,53,597,70,619,92,632,116,637,143,633,189,628,188,631,143,627,118,615,95,593,74,568,58,539,46,509,38"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="434,143,368,184,365,179,431,138"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="522,138,609,186,606,191,519,142"/>
+</map>

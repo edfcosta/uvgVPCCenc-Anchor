@@ -1,0 +1,9 @@
+<map id="PatchGeneration::refineSegmentation_NewRS" name="PatchGeneration::refineSegmentation_NewRS">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,27,271,67"/>
+<area shape="rect" id="Node000002" href="$classStatsCollector.html#ab1a99cc3ba798bf5d01e16156d8afe41" title=" " alt="" coords="325,5,519,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="271,31,311,27,311,32,271,36"/>
+<area shape="rect" id="Node000003" href="$namespaceFileExport.html#aa4a1d8c13b10669d2f50ea4b6b0a6719" title=" " alt="" coords="319,55,525,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="271,58,305,61,305,66,271,63"/>
+<area shape="rect" id="Node000004" href="$namespaceuvgutils.html#a0abc693a4c9342061a1247ee333c53eb" title=" " alt="" coords="573,63,707,88"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="526,73,559,73,559,78,526,78"/>
+</map>

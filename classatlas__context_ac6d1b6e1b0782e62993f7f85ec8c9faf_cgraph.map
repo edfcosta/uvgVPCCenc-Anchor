@@ -1,0 +1,14 @@
+<map id="atlas_context::initialize_atlas_context" name="atlas_context::initialize_atlas_context">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,69,180,109"/>
+<area shape="rect" id="Node000002" href="$namespaceuvgv3cbitstream.html#af66f960dd4e0b6fb93b2f8e6a946509d" title=" " alt="" coords="228,69,419,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,87,214,87,214,92,180,92"/>
+<area shape="rect" id="Node000003" href="$namespaceuvgv3cbitstream.html#a5711fa14274003fda46901c0a21f0ed5" title=" " alt="" coords="467,12,631,52"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="402,67,455,53,457,58,403,72"/>
+<area shape="rect" id="Node000005" href="$namespaceuvgv3cbitstream.html#a27bffd96670419bed2e734bcb66c7097" title=" " alt="" coords="686,69,850,109"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="419,87,672,87,672,92,419,92"/>
+<area shape="rect" id="Node000006" href="$namespaceuvgv3cbitstream.html#a01055710a76d0f8818f8310fc2aad17c" title=" " alt="" coords="467,127,631,167"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="403,107,457,121,455,126,402,112"/>
+<area shape="rect" id="Node000004" href="$namespaceuvgv3cbitstream.html#aece1f9f28c1b9548eb0d5f2ba66c818a" title=" " alt="" coords="679,5,857,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="631,27,665,26,665,31,631,32"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="626,49,679,63,677,68,625,55"/>
+</map>

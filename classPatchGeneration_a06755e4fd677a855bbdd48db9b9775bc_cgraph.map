@@ -1,0 +1,7 @@
+<map id="PatchGeneration::ppiAssignationSlicing" name="PatchGeneration::ppiAssignationSlicing">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,239,45"/>
+<area shape="rect" id="Node000002" href="$namespaceFileExport.html#aa4a1d8c13b10669d2f50ea4b6b0a6719" title=" " alt="" coords="287,5,493,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="239,23,273,23,273,28,239,28"/>
+<area shape="rect" id="Node000003" href="$namespaceuvgutils.html#a0abc693a4c9342061a1247ee333c53eb" title=" " alt="" coords="541,13,675,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="494,23,527,23,527,28,494,28"/>
+</map>

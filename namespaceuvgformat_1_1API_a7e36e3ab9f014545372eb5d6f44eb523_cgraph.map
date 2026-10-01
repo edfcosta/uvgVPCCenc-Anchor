@@ -1,0 +1,5 @@
+<map id="uvgformat::API::loadPly" name="uvgformat::API::loadPly">
+<area shape="rect" id="Node000001" title="Load a point cloud frame from a PLY file." alt="" coords="5,5,180,31"/>
+<area shape="rect" id="Node000002" href="$namespaceuvgformat.html#a78df4f061c4eb9bd62587f219efb6221" title="Voxelize a raw point cloud using the active library parameters (p_)." alt="" coords="228,5,380,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,15,214,15,214,21,180,21"/>
+</map>

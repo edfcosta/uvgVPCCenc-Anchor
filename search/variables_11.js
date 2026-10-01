@@ -1,0 +1,28 @@
+var searchData=
+[
+  ['scorecomputations_0',['scoreComputations',['../structuvgVPCCencStats.html#a945f4d9e8ced0ba9ea00467eb471e0f3',1,'uvgVPCCencStats']]],
+  ['sdpoutdir_1',['sdpOutdir',['../structcli_1_1opts__t.html#ad5e8883cbc33c7b4ea229b44e63f03f1',1,'cli::opts_t']]],
+  ['singleedge_2',['SingleEdge',['../structuvgVPCCencStats.html#a674578738e6e0a20a513d847e2c3ebfd',1,'uvgVPCCencStats']]],
+  ['singleedge_5fr_3',['SingleEdge_R',['../structuvgVPCCencStats.html#a28f2a580d746606a59c513c8b96395bf',1,'uvgVPCCencStats']]],
+  ['size_4',['size',['../structuvgv3cbitstream_1_1nal__info.html#af9396d976445749234c0145797ba7e0b',1,'uvgv3cbitstream::nal_info']]],
+  ['sized_5f_5',['sizeD_',['../structuvgvpcc__enc_1_1Patch.html#a2ae4a3ef6999760ac40ecd166ca65f29',1,'uvgvpcc_enc::Patch']]],
+  ['sizegof_6',['sizeGOF',['../structuvgvpcc__enc_1_1Parameters.html#aaf6f5f9bfb78d3a7e90afb368877d5ed',1,'uvgvpcc_enc::Parameters']]],
+  ['sizegop2dencoding_7',['sizeGOP2DEncoding',['../structuvgvpcc__enc_1_1Parameters.html#a67e73137a28d4272820da5d7c012f8e3',1,'uvgvpcc_enc::Parameters']]],
+  ['skip_5fpatch_5fdata_5funit_5f_8',['skip_patch_data_unit_',['../structuvgv3cbitstream_1_1patch__information__data.html#a3dccd5b6fae5871c9ad102fea979d389',1,'uvgv3cbitstream::patch_information_data']]],
+  ['skippedvoxels_9',['skippedVoxels',['../structuvgVPCCencStats.html#a7fc0c06bcbab4e561d9e92758517757b',1,'uvgVPCCencStats']]],
+  ['slicingrefinesegmentationidevdist_10',['slicingRefineSegmentationIDEVDist',['../structuvgvpcc__enc_1_1Parameters.html#a9fa5ed4cfe980d8a45d3216935b6da19',1,'uvgvpcc_enc::Parameters']]],
+  ['slicingrefinesegmentationiterationcount_11',['slicingRefineSegmentationIterationCount',['../structuvgvpcc__enc_1_1Parameters.html#a46e09f3d49e8b31d4d108105a43b1453',1,'uvgvpcc_enc::Parameters']]],
+  ['slicingrefinesegmentationlambda_12',['slicingRefineSegmentationLambda',['../structuvgvpcc__enc_1_1Parameters.html#a8a37e710581a740d70613a295e775934',1,'uvgvpcc_enc::Parameters']]],
+  ['slicingrefinesegmentationmaxnnvoxeldistancelut_13',['slicingRefineSegmentationMaxNNVoxelDistanceLUT',['../structuvgvpcc__enc_1_1Parameters.html#aa0c4e0b9321383410547aaa53274b766',1,'uvgvpcc_enc::Parameters']]],
+  ['sourcepath_14',['sourcePath',['../structuvgformat_1_1uvgFrame.html#a61b0c832f15627771ec038cd17b7a9b2',1,'uvgformat::uvgFrame']]],
+  ['spacepatchpacking_15',['spacePatchPacking',['../structuvgvpcc__enc_1_1Parameters.html#ab53541c53ab5dc6a230980c5f4a25945',1,'uvgvpcc_enc::Parameters']]],
+  ['st_5fref_5fatlas_5fframe_5fflag_16',['st_ref_atlas_frame_flag',['../structuvgv3cbitstream_1_1ref__list__struct.html#a823ce4a7413a496dded65d5bfb1c6b66',1,'uvgv3cbitstream::ref_list_struct']]],
+  ['start_5f_17',['start_',['../structWeightedEdge.html#ada99b40dd343bfc295a7a60ba5ef0295',1,'WeightedEdge']]],
+  ['startframe_18',['startFrame',['../structcli_1_1opts__t.html#aae1580c59c4c9aaeaffcb3284a562c15',1,'cli::opts_t']]],
+  ['state_5f_19',['state_',['../classuvgutils_1_1Job.html#aa221822880a468a8bfa22e547cc01bc0',1,'uvgutils::Job']]],
+  ['statisticsdir_20',['statisticsDir',['../structuvgvpcc__enc_1_1Parameters.html#a58a2b5482caaa1af7330d7b75edb7d25',1,'uvgvpcc_enc::Parameters']]],
+  ['stats_21',['stats',['../statsCollector_8cpp.html#ac4993c2d35c7be00a7212312a165014a',1,'stats:&#160;statsCollector.cpp'],['../statsCollector_8hpp.html#ac4993c2d35c7be00a7212312a165014a',1,'stats:&#160;statsCollector.cpp']]],
+  ['stats_5f_22',['stats_',['../classStatsCollector.html#aa0c15f4a1bc2c9e8b5a42808a67b9837',1,'StatsCollector']]],
+  ['straf_5fentry_5fsign_5fflag_23',['straf_entry_sign_flag',['../structuvgv3cbitstream_1_1ref__list__struct.html#abb96c381951edd992581a6c67841c46c',1,'uvgv3cbitstream::ref_list_struct']]],
+  ['surfacethickness_24',['surfaceThickness',['../structuvgvpcc__enc_1_1Parameters.html#a3deed94ac0b0069bd65ed79731840fe8',1,'uvgvpcc_enc::Parameters']]]
+];

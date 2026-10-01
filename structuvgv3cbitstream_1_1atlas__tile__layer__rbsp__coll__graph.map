@@ -1,0 +1,9 @@
+<map id="uvgv3cbitstream::atlas_tile_layer_rbsp" name="uvgv3cbitstream::atlas_tile_layer_rbsp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="196,673,360,753"/>
+<area shape="rect" id="Node000002" href="$structuvgv3cbitstream_1_1atlas__tile__header.html" title=" " alt="" coords="5,228,215,611"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="217,604,243,648,249,658,244,661,238,651,213,606"/>
+<area shape="rect" id="Node000003" href="$structuvgv3cbitstream_1_1ref__list__struct.html" title=" " alt="" coords="19,5,201,165"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="113,166,113,212,107,212,107,166"/>
+<area shape="rect" id="Node000004" href="$structuvgv3cbitstream_1_1atlas__tile__data__unit.html" title=" " alt="" coords="239,379,429,459"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="329,460,291,658,286,657,324,459"/>
+</map>

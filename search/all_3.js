@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['b_0',['b',['../voxelization_8cpp.html#a2826644ea978cb49c4ee809b55e128d7',1,'voxelization.cpp']]],
+  ['badarg_1',['BADARG',['../getopt_8c.html#aa66fa298ed3187720cb609e15cd7d22c',1,'getopt.c']]],
+  ['badch_2',['BADCH',['../getopt_8c.html#a1c8c2c090f7416155b04f9d6eb50faa0',1,'getopt.c']]],
+  ['best_20practices_20for_20tuning_20uvgvpccenc_3',['Best practices for tuning uvgVPCCenc',['../index.html#autotoc_md18',1,'']]],
+  ['bestmatchidx_4',['bestMatchIdx',['../structuvgvpcc__enc_1_1Patch.html#a70765fd0c38585cbb5c0c82ca91b2ed0',1,'uvgvpcc_enc::Patch']]],
+  ['bgfillattribute_5',['bgfillattribute',['../bgFillAttribute_8hpp.html#ae4e67009f229dab8ca6901b3f2aa8b39',1,'bgFillAttribute(uvgvpcc_enc::FrameContext &amp;frame, std::vector&lt; uint8_t &gt; &amp;attributeMap):&#160;bgFillAttribute.cpp'],['../bgFillAttribute_8cpp.html#ae4e67009f229dab8ca6901b3f2aa8b39',1,'bgFillAttribute(uvgvpcc_enc::FrameContext &amp;frame, std::vector&lt; uint8_t &gt; &amp;attributeMap):&#160;bgFillAttribute.cpp']]],
+  ['bgfillattribute_2ecpp_6',['bgFillAttribute.cpp',['../bgFillAttribute_8cpp.html',1,'']]],
+  ['bgfillattribute_2ehpp_7',['bgFillAttribute.hpp',['../bgFillAttribute_8hpp.html',1,'']]],
+  ['bgfillgeometry_8',['bgfillgeometry',['../bgFillGeometry_8hpp.html#a1277492db5cb54d9ebc8cae8ea6b3a87',1,'bgFillGeometry(const std::vector&lt; uint8_t &gt; &amp;occupancyMapDS, const size_t gofMapsHeight, std::vector&lt; uint8_t &gt; &amp;geometryMap):&#160;bgFillGeometry.cpp'],['../bgFillGeometry_8cpp.html#a1277492db5cb54d9ebc8cae8ea6b3a87',1,'bgFillGeometry(const std::vector&lt; uint8_t &gt; &amp;occupancyMapDS, const size_t gofMapsHeight, std::vector&lt; uint8_t &gt; &amp;geometryMap):&#160;bgFillGeometry.cpp']]],
+  ['bgfillgeometry_2ecpp_9',['bgFillGeometry.cpp',['../bgFillGeometry_8cpp.html',1,'']]],
+  ['bgfillgeometry_2ehpp_10',['bgFillGeometry.hpp',['../bgFillGeometry_8hpp.html',1,'']]],
+  ['bitangentaxis_5f_11',['bitangentAxis_',['../structuvgvpcc__enc_1_1Patch.html#a72995df7715d6cc51b9c92611b34fc94',1,'uvgvpcc_enc::Patch']]],
+  ['bitrate_12',['bitrate',['../index.html#autotoc_md21',1,'Achieving Low Bitrate'],['../index.html#autotoc_md25',1,'Compression efficiency comparison: Negligible impact on quality and bitrate']]],
+  ['bitstream_5ft_13',['bitstream_t',['../namespaceuvgv3cbitstream.html#a6c13349033cbd61d0f526b32734abc53',1,'uvgv3cbitstream::bitstream_t'],['../structuvgv3cbitstream_1_1bitstream__t.html',1,'uvgv3cbitstream::bitstream_t']]],
+  ['bitstreamattribute_14',['bitstreamAttribute',['../structuvgvpcc__enc_1_1GOF.html#a5e0388700ddb518c94f3f90a31fc9495',1,'uvgvpcc_enc::GOF']]],
+  ['bitstreamgeneration_15',['BitstreamGeneration',['../classBitstreamGeneration.html',1,'']]],
+  ['bitstreamgeneration_2ecpp_16',['bitstreamGeneration.cpp',['../bitstreamGeneration_8cpp.html',1,'']]],
+  ['bitstreamgeneration_2ehpp_17',['bitstreamGeneration.hpp',['../bitstreamGeneration_8hpp.html',1,'']]],
+  ['bitstreamgeometry_18',['bitstreamGeometry',['../structuvgvpcc__enc_1_1GOF.html#a67ddbccc863bed3652bb05e4a08a6698',1,'uvgvpcc_enc::GOF']]],
+  ['bitstreamoccupancy_19',['bitstreamOccupancy',['../structuvgvpcc__enc_1_1GOF.html#ae297c70d34d2fd5d35c94fca23c87312',1,'uvgvpcc_enc::GOF']]],
+  ['blocksizebbpe_20',['blockSizeBBPE',['../structuvgvpcc__enc_1_1Parameters.html#ad92f45e22d278db116b091ab8e3f3a33',1,'uvgvpcc_enc::Parameters']]],
+  ['bool_21',['BOOL',['../namespaceuvgutils.html#a11e6e7c5fdd7b0ef075e430cc3ccc454aed990d985c28502a56c1c799e3fad854',1,'uvgutils']]],
+  ['boosts_20in_20non_20video_20encoding_20tasks_22',['Encoding speed comparison: Major performance boosts in non-video encoding tasks',['../index.html#autotoc_md24',1,'']]],
+  ['bytestreamtosamplestream_23',['bytestreamtosamplestream',['../video__sub__bitstream_8cpp.html#ae8d99b3cf0d33016153819e640104529',1,'byteStreamToSampleStream(std::vector&lt; uint8_t &gt; &amp;input_data, size_t precision, std::vector&lt; nal_info &gt; &amp;nals, bool emulationPreventionBytes):&#160;video_sub_bitstream.cpp'],['../video__sub__bitstream_8hpp.html#ae8d99b3cf0d33016153819e640104529',1,'byteStreamToSampleStream(std::vector&lt; uint8_t &gt; &amp;input_data, size_t precision, std::vector&lt; nal_info &gt; &amp;nals, bool emulationPreventionBytes):&#160;video_sub_bitstream.cpp']]]
+];

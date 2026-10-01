@@ -1,0 +1,23 @@
+var searchData=
+[
+  ['n_5fframes_0',['n_frames',['../structuvgv3cbitstream_1_1V3cGof.html#a4bc585b49fd071f96f94426a6ebf1dff',1,'uvgv3cbitstream::V3cGof']]],
+  ['name_1',['name',['../structoption.html#adc503659d37af8017fb4b86d61c99086',1,'option']]],
+  ['name_5f_2',['name_',['../classuvgutils_1_1Job.html#adab14b707f4d6ddfaa9fafad48abaa76',1,'uvgutils::Job']]],
+  ['nbframes_3',['nbframes',['../structcli_1_1opts__t.html#a4b395be945cbb6b22e695d9947fbd14b',1,'cli::opts_t::nbFrames'],['../structuvgvpcc__enc_1_1GOF.html#a787f0a3c98d0b60040c4992fae3bba6a',1,'uvgvpcc_enc::GOF::nbFrames']]],
+  ['nbloops_4',['nbLoops',['../structcli_1_1opts__t.html#a3d771d32c127d3449db357f5c778f760',1,'cli::opts_t']]],
+  ['nbthreadpcpart_5',['nbThreadPCPart',['../structuvgvpcc__enc_1_1Parameters.html#ad2d892eefb6c56a4783367d0f74f1e34',1,'uvgvpcc_enc::Parameters']]],
+  ['next_6',['next',['../structuvgv3cbitstream_1_1uvg__data__chunk.html#a5dbf0d76244e4f2858fc05cb1d7d5db5',1,'uvgv3cbitstream::uvg_data_chunk']]],
+  ['noedge_7',['NoEdge',['../structuvgVPCCencStats.html#a22066fa81add114d7d18e7f512805688',1,'uvgVPCCencStats']]],
+  ['noedge_5fr_8',['NoEdge_R',['../structuvgVPCCencStats.html#adde120dd68035e9a4474897e3f974c52',1,'uvgVPCCencStats']]],
+  ['normalaxis_5f_9',['normalAxis_',['../structuvgvpcc__enc_1_1Patch.html#a7b684b2dd8f681462d6d5bec505c0fa8',1,'uvgvpcc_enc::Patch']]],
+  ['normalcomputationknncount_10',['normalComputationKnnCount',['../structuvgvpcc__enc_1_1Parameters.html#a999eef62897adaa2d69936c1958f6f0d',1,'uvgvpcc_enc::Parameters']]],
+  ['normalcomputationmaxdiagonalstep_11',['normalComputationMaxDiagonalStep',['../structuvgvpcc__enc_1_1Parameters.html#a21488c083546be1faad7f941fe2ca517',1,'uvgvpcc_enc::Parameters']]],
+  ['normalorientationknncount_12',['normalOrientationKnnCount',['../structuvgvpcc__enc_1_1Parameters.html#ae3cae6490d536e1e26ba158b685349de',1,'uvgvpcc_enc::Parameters']]],
+  ['normals_13',['normals',['../structuvgformat_1_1GeometryRgbNormals.html#af5f05f088f16a40140c0db9eb38cfac7',1,'uvgformat::GeometryRgbNormals']]],
+  ['num_5fref_5fentries_14',['num_ref_entries',['../structuvgv3cbitstream_1_1ref__list__struct.html#ad3114f37dd00feb2eb1cc7f39d51c3eb',1,'uvgv3cbitstream::ref_list_struct']]],
+  ['numberoflostpoints_15',['numberOfLostPoints',['../structuvgVPCCencStats.html#aeb01e2bba6929c3fec27d23dae242c3b',1,'uvgVPCCencStats']]],
+  ['numberofpatches_16',['numberOfPatches',['../structuvgVPCCencStats.html#a96255a0ff89311000a19fbe46a5c0eee',1,'uvgVPCCencStats']]],
+  ['numberofpoints_17',['NumberOfPoints',['../structuvgVPCCencStats.html#a8e8220d0ba7c3044250098a242839e31',1,'uvgVPCCencStats']]],
+  ['numberofvoxels_18',['numberOfVoxels',['../structuvgVPCCencStats.html#a51a1eca56ba1500d2d7c766b1b571b28',1,'uvgVPCCencStats']]],
+  ['numberofvoxelsrs_19',['numberOfVoxelsRS',['../structuvgVPCCencStats.html#a21a6cc069a7a271885956cfad3b007ea',1,'uvgVPCCencStats']]]
+];

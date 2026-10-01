@@ -1,0 +1,29 @@
+<map id="src/libuvgformat" name="src/libuvgformat">
+<area shape="rect" id="node1" href="dir_a622c5bdfd738cd0e4990bbfd2314a8c.html" title="libuvgutils" alt="" coords="184,283,275,308"/>
+<area shape="poly" id="edge2" href="dir_000009_000010.html" alt="" coords="141,159,182,177,202,191,218,208,231,238,234,268,229,269,226,239,214,211,198,195,180,182,139,164"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000009_000010.html" title="10" alt="" coords="231,257,249,272"/>
+<area shape="rect" id="node4" href="dir_f07291b5de2b7ef5844619e665d2312c.html" title="include" alt="" coords="135,209,204,235"/>
+<area shape="poly" id="edge3" href="dir_000009_000004.html" alt="" coords="105,159,148,198,145,202,102,163"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000009_000004.html" title="5" alt="" coords="144,183,153,198"/>
+<area shape="rect" id="node6" href="dir_11896127806c6b08bb4b0e41fe09e3a1.html" title="utils" alt="" coords="60,209,111,235"/>
+<area shape="poly" id="edge1" href="dir_000009_000018.html" alt="" coords="92,162,90,196,85,196,87,161"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000009_000018.html" title="1" alt="" coords="91,184,101,199"/>
+<area shape="rect" id="node3" href="dir_e7a358549668850c2e5b0f42e3664e08.html" title="adaptation" alt="" coords="195,136,287,161"/>
+<area shape="poly" id="edge4" href="dir_000000_000010.html" alt="" coords="244,162,239,246,236,269,230,269,233,245,238,162"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000000_000010.html" title="2" alt="" coords="238,258,247,273"/>
+<area shape="poly" id="edge5" href="dir_000000_000004.html" alt="" coords="231,164,193,202,189,198,228,160"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000000_000004.html" title="1" alt="" coords="195,195,205,210"/>
+<area shape="poly" id="edge6" href="dir_000004_000010.html" alt="" coords="181,233,213,270,209,274,177,237"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000004_000010.html" title="1" alt="" coords="210,256,219,271"/>
+<area shape="rect" id="node5" href="dir_aa7ba3bbea7b8be95b9549ec3198cdcc.html" title="io" alt="" coords="222,63,261,88"/>
+<area shape="poly" id="edge7" href="dir_000008_000010.html" alt="" coords="260,86,283,107,302,135,305,148,303,162,292,194,278,224,248,273,244,270,273,221,287,192,297,161,300,148,298,137,279,110,257,90"/>
+<area shape="rect" id="edge7-headlabel" href="dir_000008_000010.html" title="2" alt="" coords="251,265,260,280"/>
+<area shape="poly" id="edge8" href="dir_000008_000000.html" alt="" coords="244,88,244,122,239,122,239,88"/>
+<area shape="rect" id="edge8-headlabel" href="dir_000008_000000.html" title="1" alt="" coords="245,110,254,125"/>
+<area shape="poly" id="edge9" href="dir_000008_000004.html" alt="" coords="227,90,204,111,185,137,175,167,172,196,167,195,170,166,180,135,200,107,223,86"/>
+<area shape="rect" id="edge9-headlabel" href="dir_000008_000004.html" title="3" alt="" coords="173,184,183,198"/>
+<area shape="poly" id="edge10" href="dir_000018_000010.html" alt="" coords="105,232,124,243,191,275,189,279,121,248,102,237"/>
+<area shape="rect" id="edge10-headlabel" href="dir_000018_000010.html" title="4" alt="" coords="184,260,194,275"/>
+<area shape="rect" id="clust2" href="dir_1cc599e818b2878a4ac243f023169a00.html" alt="" coords="27,52,299,245"/>
+<area shape="rect" id="clust1" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html" title="src" alt="" coords="16,16,325,319"/>
+</map>

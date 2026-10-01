@@ -1,0 +1,5 @@
+<map id="uvgformat::API::initializeFormat" name="uvgformat::API::initializeFormat">
+<area shape="rect" id="Node000001" title="Finalize the parameter map and apply all staged values. Must be called once before loadPly()." alt="" coords="5,5,188,45"/>
+<area shape="rect" id="Node000002" href="$namespaceuvgformat.html#a2568823882ea5703cebc29d7fcbf1f1b" title=" " alt="" coords="236,13,485,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,23,222,23,222,28,188,28"/>
+</map>

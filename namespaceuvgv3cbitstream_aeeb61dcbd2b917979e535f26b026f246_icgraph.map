@@ -1,0 +1,41 @@
+<map id="uvgv3cbitstream::uvg_bitstream_writebyte" name="uvgv3cbitstream::uvg_bitstream_writebyte">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1923,213,2087,253"/>
+<area shape="rect" id="Node000002" href="$namespaceuvgv3cbitstream.html#a7701823b51eb9a986da6fb994fd52ed6" title=" " alt="" coords="1711,213,1875,253"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1909,236,1875,236,1875,231,1909,231"/>
+<area shape="rect" id="Node000003" href="$namespaceuvgv3cbitstream.html#aed00acfc9974f9f3da5905b9667ac525" title=" " alt="" coords="1420,120,1663,160"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1740,209,1662,174,1625,163,1627,158,1664,170,1742,204"/>
+<area shape="rect" id="Node000006" href="$namespaceuvgv3cbitstream.html#a718cdb53b6719407e8af1bbc8b8733d0" title=" " alt="" coords="620,267,817,307"/>
+<area shape="poly" id="edge22_Node000002_Node000006" title=" " alt="" coords="1698,256,1663,261,1546,276,1426,286,1190,296,979,297,818,294,818,288,979,292,1190,291,1426,280,1545,270,1662,256,1697,250"/>
+<area shape="rect" id="Node000011" href="$namespaceuvgv3cbitstream.html#aa0137fbccd3984932c4591b950d2f598" title=" " alt="" coords="620,92,817,132"/>
+<area shape="poly" id="edge23_Node000002_Node000011" title=" " alt="" coords="1769,204,1724,153,1695,129,1662,110,1591,92,1496,81,1384,77,1262,78,1017,89,818,105,817,100,1016,84,1262,72,1384,72,1497,76,1592,87,1664,106,1698,124,1728,149,1773,201"/>
+<area shape="rect" id="Node000012" href="$namespaceuvgv3cbitstream.html#a9c029a0ba63733dbebc58ce247ca29a5" title=" " alt="" coords="1459,184,1623,224"/>
+<area shape="poly" id="edge13_Node000002_Node000012" title=" " alt="" coords="1697,225,1623,216,1624,211,1698,220"/>
+<area shape="rect" id="Node000013" href="$namespaceuvgv3cbitstream.html#a3a80f4e3edfa799af175346986bbff9c" title=" " alt="" coords="865,414,1096,439"/>
+<area shape="poly" id="edge14_Node000002_Node000013" title=" " alt="" coords="1777,267,1758,298,1733,332,1701,364,1664,389,1584,422,1499,444,1413,456,1328,462,1246,461,1170,457,1049,442,1050,437,1171,452,1246,456,1327,456,1412,451,1498,438,1582,417,1661,384,1698,360,1728,328,1754,295,1772,264"/>
+<area shape="rect" id="Node000014" href="$namespaceuvgv3cbitstream.html#ac3001d252dbfa0c2f1beac4d872caf78" title=" " alt="" coords="1144,249,1372,274"/>
+<area shape="poly" id="edge16_Node000002_Node000014" title=" " alt="" coords="1697,241,1372,258,1372,253,1697,236"/>
+<area shape="rect" id="Node000015" href="$namespaceuvgv3cbitstream.html#afc97b268c429b4a991a4630dfcc8959f" title=" " alt="" coords="877,349,1084,389"/>
+<area shape="poly" id="edge18_Node000002_Node000015" title=" " alt="" coords="1765,265,1720,302,1693,320,1664,333,1588,356,1510,373,1430,384,1352,390,1205,392,1084,384,1084,379,1205,386,1352,385,1430,379,1509,368,1587,351,1662,328,1690,315,1717,298,1761,261"/>
+<area shape="rect" id="Node000016" href="$namespaceuvgv3cbitstream.html#a955aa3bc8cc2ef6fbf161bad677ebd53" title=" " alt="" coords="1155,5,1361,45"/>
+<area shape="poly" id="edge20_Node000002_Node000016" title=" " alt="" coords="1774,202,1756,168,1731,130,1699,95,1661,66,1626,49,1588,36,1509,20,1432,15,1362,16,1362,11,1432,9,1510,15,1589,31,1628,44,1664,62,1703,91,1735,127,1761,165,1779,199"/>
+<area shape="rect" id="Node000004" href="$namespaceuvgv3cbitstream.html#a0f95996cbcdaaba2093de9063ba76701" title=" " alt="" coords="1176,120,1340,160"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1406,143,1340,143,1340,137,1406,137"/>
+<area shape="rect" id="Node000005" href="$namespaceuvgv3cbitstream.html#ad7ea0fa4361e2e55f3d256edd9bd6c80" title=" " alt="" coords="882,127,1079,153"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="1162,143,1080,143,1080,137,1162,137"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="946,162,757,269,754,264,943,157"/>
+<area shape="poly" id="edge11_Node000005_Node000011" title=" " alt="" coords="868,131,817,125,818,120,869,125"/>
+<area shape="rect" id="Node000007" href="$classBitstreamGeneration.html#acb1668a86b1682b4043ae04db9fd178f" title=" " alt="" coords="383,207,572,247"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="623,266,558,249,559,244,625,261"/>
+<area shape="rect" id="Node000008" href="$namespaceuvgvpcc__enc_1_1API.html#a75dacaf2d79b4a549ecb2a91ae8a6105" title="This function is called when all frames to be processed have been sent to the encoder...." alt="" coords="108,175,335,215"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="368,216,334,211,335,206,369,210"/>
+<area shape="rect" id="Node000010" href="$namespaceuvgvpcc__enc_1_1API.html#a69b67f40ff544ba840a735dc965ec185" title="Entry point of the uvgVPCCenc library. Take as input a uvgFrame. Create all the jobs for processing t..." alt="" coords="126,239,317,279"/>
+<area shape="poly" id="edge9_Node000007_Node000010" title=" " alt="" coords="369,243,317,249,316,244,368,238"/>
+<area shape="rect" id="Node000009" href="$uvgVPCCencAppExample_8cpp.html#aee608aedd5b0b58f2966c2ff15101925" title="This example application offers a simple approach to working with the uvgVPCCenc library and highligh..." alt="" coords="5,214,60,239"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="95,219,61,225,60,220,94,214"/>
+<area shape="poly" id="edge10_Node000010_Node000009" title=" " alt="" coords="112,243,60,234,61,229,113,238"/>
+<area shape="poly" id="edge12_Node000011_Node000007" title=" " alt="" coords="664,141,522,209,519,204,662,136"/>
+<area shape="poly" id="edge15_Node000013_Node000006" title=" " alt="" coords="886,412,864,404,827,382,792,357,738,309,741,305,795,353,830,378,866,399,888,408"/>
+<area shape="poly" id="edge17_Node000014_Node000006" title=" " alt="" coords="1130,270,818,285,818,279,1130,265"/>
+<area shape="poly" id="edge19_Node000015_Node000006" title=" " alt="" coords="903,348,782,309,784,304,904,343"/>
+<area shape="poly" id="edge21_Node000016_Node000011" title=" " alt="" coords="1141,33,1008,44,866,67,772,95,771,89,865,61,1008,39,1141,27"/>
+</map>

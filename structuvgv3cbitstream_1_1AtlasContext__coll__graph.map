@@ -1,0 +1,9 @@
+<map id="uvgv3cbitstream::AtlasContext" name="uvgv3cbitstream::AtlasContext">
+<area shape="rect" id="Node000001" title=" " alt="" coords="73,955,289,1100"/>
+<area shape="rect" id="Node000002" href="$structuvgv3cbitstream_1_1atlas__sequence__parameter__set.html" title=" " alt="" coords="5,495,200,892"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,892,163,938,158,939,147,893"/>
+<area shape="rect" id="Node000003" href="$structuvgv3cbitstream_1_1atlas__frame__parameter__set.html" title=" " alt="" coords="224,502,448,885"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="250,886,224,941,219,939,245,884"/>
+<area shape="rect" id="Node000004" href="$structuvgv3cbitstream_1_1atlas__frame__tile__information.html" title=" " alt="" coords="247,5,425,432"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="339,432,339,486,333,486,333,432"/>
+</map>
