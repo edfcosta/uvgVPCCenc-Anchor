@@ -3,3 +3,7 @@ _*
 docs
 sdp
 .clangd-trace
+output/
+dataset/
+tools/
+tasks/

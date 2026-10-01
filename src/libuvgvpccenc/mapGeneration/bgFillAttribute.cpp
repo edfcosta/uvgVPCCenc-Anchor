@@ -36,11 +36,14 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cassert>  //TODO(lf): everywhere, choose between assert or static_assert (can we add a rule in clang-format to check if the wrong one is used?)
+#include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <iostream>
 #include <stdexcept>
 #include <vector>
 
@@ -574,12 +577,43 @@ void attributeBgFillBBPE(uvgvpcc_enc::FrameContext& frame, std::vector<uint8_t>&
 
 void bgFillAttribute(uvgvpcc_enc::FrameContext& frame, std::vector<uint8_t>& attributeMap) {
     // TODO(lf): make an enum and use a switch
+
+    // Accumulated times, in milliseconds, over every frame processed so far. Printing the totals only once, at program exit,
+    // avoids the I/O overhead of one stream write per frame. Atomics are required because frames are processed by several worker
+    // threads, each call counting its own elapsed time.
+    struct TotalTimes {
+        std::atomic<uint64_t> patchExtensionMs{0};
+        std::atomic<uint64_t> bbpeMs{0};
+        std::atomic<uint64_t> pushPullMs{0};
+
+        ~TotalTimes() {
+            if (patchExtensionMs.load() > 0) {
+                std::cout << "Patch Extension Total Time: " << patchExtensionMs.load() << " ms\n";
+            }
+            if (bbpeMs.load() > 0) {
+                std::cout << "BBPE Total Time: " << bbpeMs.load() << " ms\n";
+            }
+            if (pushPullMs.load() > 0) {
+                std::cout << "Push Pull Total Time: " << pushPullMs.load() << " ms\n";
+            }
+        }
+    };
+    static TotalTimes totalTimes;
+
+    const auto measure = [](const auto& func) {
+        const auto start = std::chrono::steady_clock::now();
+        func();
+        return static_cast<uint64_t>(
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count());
+    };
+
     if (p_->attributeBgFill == "patchExtension") {
-        bgFillAttributePatchExtension(*frame.occupancyMapDS, frame.mapHeight, attributeMap);
+        totalTimes.patchExtensionMs +=
+            measure([&] { bgFillAttributePatchExtension(*frame.occupancyMapDS, frame.mapHeight, attributeMap); });
     } else if (p_->attributeBgFill == "bbpe") {
-        attributeBgFillBBPE(frame, attributeMap);
+        totalTimes.bbpeMs += measure([&] { attributeBgFillBBPE(frame, attributeMap); });
     } else if (p_->attributeBgFill == "pushPull") {
-        bgFillAttributePushPull(*frame.occupancyMap, frame.mapHeight, attributeMap);
+        totalTimes.pushPullMs += measure([&] { bgFillAttributePushPull(*frame.occupancyMap, frame.mapHeight, attributeMap); });
     } else if (p_->attributeBgFill == "none") {
         // Skip attribute map background filling
     } else {

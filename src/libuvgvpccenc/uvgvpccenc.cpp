@@ -579,7 +579,7 @@ void parseUvgvpccParameters() {
 
         std::string dir = p_->intermediateFilesDir;
         if (!dir.empty() && dir.back() == '/') {
-            dir.pop_back();  // Remove trailing slash
+            //dir.pop_back();  // Remove trailing slash
         }
 
         setParameterValue("intermediateFilesDir", dir + oss.str(), false);
